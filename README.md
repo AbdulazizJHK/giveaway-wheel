@@ -17,7 +17,7 @@ Add two browser sources in OBS (same page, two views):
 
 Then in the dock: enter your channel → **Connect** → set a timer → **Open Entries**. Viewers `!join`; when the timer ends it auto‑spins and reveals the winner.
 
-> **Stuck on an old version?** Add/bump `&v=2` on the URL (e.g. `?view=dock&v=2`) to bypass the cache, or right‑click the source → Refresh.
+> **Stuck on an old version?** Re-copy the **On stream** URL with the **🔗 Copy source URL** button in the dock — it stamps the current version (e.g. `?view=stage&v=1.1`) so the pasted URL bypasses OBS's cache. You can also right‑click the source → Refresh, or manually bump the `&v=` number.
 
 ## Features
 - `!join` chat entries (anonymous read — no login) · weighted odds · sub/VIP/mod‑only gating

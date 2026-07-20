@@ -1061,7 +1061,7 @@
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
     if(el.railSpin) el.railSpin.onclick=requestSpin;
     if(el.copyUrl) el.copyUrl.onclick=()=>{
-      const url=location.origin+location.pathname+"?view=stage";
+      const url=location.origin+location.pathname+"?view=stage&v="+APP_VERSION;   // &v tracks APP_VERSION → auto cache-bust in OBS on every release
       const done=()=>{ toast("Source URL copied — paste into an OBS Browser Source"); el.copyUrl.textContent="✅ Copied!"; setTimeout(()=>{ el.copyUrl.textContent="🔗 Copy source URL (for OBS)"; },1600); };
       const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — URL: "+url); } document.body.removeChild(ta); };
       if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback); else fallback();
