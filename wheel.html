@@ -196,6 +196,8 @@
   /* ---------- Horizontal strip roulette ---------- */
   .stage-dim{position:absolute;inset:0;z-index:1;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .5s ease}
   .stage-dim.on{opacity:1}
+  #stripStage{transition:opacity .4s ease, transform .4s ease}
+  #stripStage.hidden{opacity:0;transform:translateY(16px) scale(.96);pointer-events:none}
   .strip-stage{position:relative;z-index:5;width:min(1180px,94%);height:148px;display:flex;align-items:center;justify-content:center;
     -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
   .strip-canvas{display:block;width:100%;height:100%;position:relative;z-index:1}
@@ -349,6 +351,7 @@
         </div>
         <label class="toggle"><input type="checkbox" id="weighted"/><span class="track"></span>Weighted — each !join adds a chance</label>
         <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
+        <label class="toggle"><input type="checkbox" id="hideUntilSpin"/><span class="track"></span>Hide wheel on stream until it spins</label>
         <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
       </section>
 
@@ -477,7 +480,7 @@
     ws:null, channel:"", connected:false, reconnect:true,
     entriesOpen:false, keyword:"!join",
     wheelMode:"users",           // "users" | "rewards"
-    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:true, beeps:true,
+    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:true, beeps:true, hideUntilSpin:false,
     lastTick:null,                                // last integer second we beeped for
     restrict:{sub:false, vip:false, mod:false},   // entry gating by chat badge (all false = everyone)
     announce:false,                               // post event messages to chat (needs bot token)
@@ -498,7 +501,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","hideUntilSpin","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -542,7 +545,7 @@
       channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
-      entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps
+      entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin
     });
   }
   function applySync(d){
@@ -556,6 +559,7 @@
     state.entryDeadline=d.entryDeadline||null;
     if(d.restrict) state.restrict=d.restrict;
     if(typeof d.beeps==="boolean") state.beeps=d.beeps;
+    if(typeof d.hideUntilSpin==="boolean") state.hideUntilSpin=d.hideUntilSpin;
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
     if(state.spinning){ state.pendingSync=true; return; }
@@ -569,7 +573,7 @@
       channel:state.channel, users:[...state.users.entries()], rewards:state.rewards,
       keyword:state.keyword, wheelMode:state.wheelMode, weighted:state.weighted,
       autoReward:state.autoReward, removeWinner:state.removeWinner, autoSpinEnd:state.autoSpinEnd,
-      restrict:state.restrict, beeps:state.beeps,
+      restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin,
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin
     })); }catch(e){}
@@ -588,6 +592,8 @@
       if(typeof s.autoSpinEnd==="boolean") state.autoSpinEnd=s.autoSpinEnd;
       if(s.restrict) state.restrict={sub:!!s.restrict.sub,vip:!!s.restrict.vip,mod:!!s.restrict.mod};
       if(typeof s.beeps==="boolean") state.beeps=s.beeps;
+      if(typeof s.hideUntilSpin==="boolean") state.hideUntilSpin=s.hideUntilSpin;
+      if(el.hideUntilSpin) el.hideUntilSpin.checked=state.hideUntilSpin;
       if(typeof s.announce==="boolean") state.announce=s.announce;
       if(s.botName) state.bot.name=s.botName;
       if(s.botToken) state.bot.token=s.botToken;
@@ -792,7 +798,7 @@
     const fr=new FileReader(); fr.onload=e=>{ img.src=e.target.result; }; fr.onerror=()=>cb(null); fr.readAsDataURL(file);
   }
   function reflectMode(){ if(!el.modeSeg)return; el.modeSeg.querySelectorAll("button").forEach(b=>{ const on=b.dataset.mode===state.wheelMode; b.classList.toggle("active",on); b.classList.toggle("rw",on&&b.dataset.mode==="rewards"); }); }
-  function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); }
+  function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); updateStripVisibility(); }
 
   /* ---------------- Wheel drawing ---------------- */
   const DPR=Math.min(window.devicePixelRatio||1,2);
@@ -801,6 +807,12 @@
   function updateGlow(){
     const glow=document.getElementById("stripGlow");
     if(glow && !glow.classList.contains("winpulse")) glow.style.setProperty("--gcol", state._centerColor||"#7C5CFF");
+  }
+  function updateStripVisibility(){
+    const wrap=document.getElementById("stripStage");           // stage/full wheel only (dock preview unaffected)
+    if(!wrap) return;
+    const revealing = state.spinning || (el.winner && el.winner.classList.contains("show"));
+    wrap.classList.toggle("hidden", state.hideUntilSpin && !revealing);
   }
   const FONT='"Segoe UI",system-ui,sans-serif';
   function rr(c,x,y,w,h,r){ if(c.roundRect){ c.beginPath(); c.roundRect(x,y,w,h,r); } else { c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); } }
@@ -875,6 +887,7 @@
     state.spinCells=p.cells; state.spinWinCell=p.winCell; state.spinJitter=p.jitter||0; state.spinP=0;
     setSpinUI(true);
     if(el.stageDim) el.stageDim.classList.add("on");    // dim the scene to focus on the scroll
+    updateStripVisibility();                            // reveal the wheel if it was hidden until spin
     const t0=performance.now();
     (function frame(now){
       const x=Math.min(1,(now-t0)/p.dur); state.spinP=1-Math.pow(1-x,5);   // ease-out scroll
@@ -912,10 +925,10 @@
     el.winnerName.textContent=label;
     if(el.winnerImg){ if(img){ el.winnerImg.src=img; el.winnerImg.style.display="block"; } else { el.winnerImg.style.display="none"; el.winnerImg.removeAttribute("src"); } }
     if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
-    el.winner.classList.add("show"); burst();
+    el.winner.classList.add("show"); burst(); updateStripVisibility();
     const glow=document.getElementById("stripGlow"); if(glow){ if(color) glow.style.setProperty("--gcol",color); glow.classList.add("winpulse"); }
   }
-  function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); if(!fromBus) sendCmd("winner-close",{}); }
+  function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
 
   /* confetti */
   const cctx=el.confetti.getContext("2d"); let parts=[],raf=null;
@@ -948,6 +961,7 @@
     el.keyword.addEventListener("change",()=>{ state.keyword=el.keyword.value.trim()||"!join"; el.keyword.value=state.keyword; save(); broadcastSync(); reflectChips(); });
     el.weighted.onchange=()=>{ state.weighted=el.weighted.checked; renderUsers(); renderWheels(); save(); broadcastSync(); };
     el.autoSpinEnd.onchange=()=>{ state.autoSpinEnd=el.autoSpinEnd.checked; save(); };
+    el.hideUntilSpin.onchange=()=>{ state.hideUntilSpin=el.hideUntilSpin.checked; save(); broadcastSync(); updateStripVisibility(); };
     el.beeps.onchange=()=>{ state.beeps=el.beeps.checked; save(); broadcastSync(); if(state.beeps) beep(880,0.13,0.22,"square"); };
     const onReq=()=>{ state.restrict={sub:el.reqSub.checked,vip:el.reqVip.checked,mod:el.reqMod.checked}; save(); broadcastSync(); reflectChips(); };
     el.reqSub.onchange=onReq; el.reqVip.onchange=onReq; el.reqMod.onchange=onReq;
