@@ -294,6 +294,7 @@
       <section class="block dock-only dock-preview">
         <div class="strip-stage dock-strip"><canvas class="strip-canvas" id="dockStrip"></canvas><div class="strip-marker"></div></div>
         <button class="rail-spin" id="railSpin" style="width:100%">Spin</button>
+        <button class="btn small" id="copyUrl" style="width:100%;flex:none">🔗 Copy source URL (for OBS)</button>
       </section>
 
       <!-- Wheel content -->
@@ -486,7 +487,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -920,6 +921,12 @@
     const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push(v); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
     if(el.railSpin) el.railSpin.onclick=requestSpin;
+    if(el.copyUrl) el.copyUrl.onclick=()=>{
+      const url=location.origin+location.pathname+"?view=stage";
+      const done=()=>{ toast("Source URL copied — paste into an OBS Browser Source"); el.copyUrl.textContent="✅ Copied!"; setTimeout(()=>{ el.copyUrl.textContent="🔗 Copy source URL (for OBS)"; },1600); };
+      const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — URL: "+url); } document.body.removeChild(ta); };
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback); else fallback();
+    };
   }
 
   /* Wiring (all) */
