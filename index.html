@@ -309,6 +309,7 @@
         </div>
         <label class="toggle"><input type="checkbox" id="weighted"/><span class="track"></span>Weighted — each !join adds a chance</label>
         <label class="toggle"><input type="checkbox" id="autoSpinEnd"/><span class="track"></span>Auto-spin when timer ends</label>
+        <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
       </section>
 
       <!-- Who can enter -->
@@ -415,7 +416,8 @@
     ws:null, channel:"", connected:false, reconnect:true,
     entriesOpen:false, keyword:"!join",
     wheelMode:"users",           // "users" | "rewards"
-    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:false,
+    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:false, beeps:true,
+    lastTick:null,                                // last integer second we beeped for
     restrict:{sub:false, vip:false, mod:false},   // entry gating by chat badge (all false = everyone)
     users:new Map(),             // login -> {name, weight}
     rewards:[],
@@ -428,7 +430,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -471,7 +473,7 @@
     writeShared({
       channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()], rewards:state.rewards,
-      entryDeadline:state.entryDeadline, restrict:state.restrict
+      entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps
     });
   }
   function applySync(d){
@@ -484,6 +486,7 @@
     state.entriesOpen=!!d.entriesOpen;
     state.entryDeadline=d.entryDeadline||null;
     if(d.restrict) state.restrict=d.restrict;
+    if(typeof d.beeps==="boolean") state.beeps=d.beeps;
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)) state.rewards=d.rewards;
     if(state.spinning){ state.pendingSync=true; return; }
@@ -497,7 +500,7 @@
       channel:state.channel, users:[...state.users.entries()], rewards:state.rewards,
       keyword:state.keyword, wheelMode:state.wheelMode, weighted:state.weighted,
       autoReward:state.autoReward, removeWinner:state.removeWinner, autoSpinEnd:state.autoSpinEnd,
-      restrict:state.restrict
+      restrict:state.restrict, beeps:state.beeps
     })); }catch(e){}
   }
   function load(){
@@ -513,6 +516,8 @@
       if(typeof s.removeWinner==="boolean") state.removeWinner=s.removeWinner;
       if(typeof s.autoSpinEnd==="boolean") state.autoSpinEnd=s.autoSpinEnd;
       if(s.restrict) state.restrict={sub:!!s.restrict.sub,vip:!!s.restrict.vip,mod:!!s.restrict.mod};
+      if(typeof s.beeps==="boolean") state.beeps=s.beeps;
+      if(el.beeps) el.beeps.checked=state.beeps;
       if(el.weighted) el.weighted.checked=state.weighted;
       if(el.autoReward) el.autoReward.checked=state.autoReward;
       if(el.removeWinner) el.removeWinner.checked=state.removeWinner;
@@ -616,6 +621,14 @@
     const remain = active ? (state.entryDeadline-Date.now())/1000 : 0;
     if(el.esTimer){ el.esTimer.style.display=active?"block":"none"; if(active) el.esTimer.textContent=fmtTime(remain); el.esTimer.classList.toggle("urgent",active&&remain<=10); }
     if(el.openChip){ let cd=el.openChip.querySelector(".cd"); if(active){ if(!cd){ cd=document.createElement("span"); cd.className="cd"; el.openChip.appendChild(cd); } cd.textContent=" · "+fmtTime(remain); cd.classList.toggle("urgent",remain<=10); } else if(cd){ cd.remove(); } }
+    // countdown beeps: one tick per second for the final 3s, a "go" tone at 0
+    if(active){
+      const secs=Math.max(0,Math.ceil(remain));
+      if(secs!==state.lastTick){
+        if(state.beeps){ if(secs>=1&&secs<=3) beep(880,0.13,0.22,"square"); else if(secs===0) beep(1318.5,0.5,0.26,"triangle"); }
+        state.lastTick=secs;
+      }
+    } else state.lastTick=null;
     if(IS_CONTROLLER && active && remain<=0){ const spinNext=state.autoSpinEnd; closeEntries(); toast("⏰ Entries closed"); if(spinNext) setTimeout(requestSpin,450); }
   }
   setInterval(tickTimer,250);
@@ -765,8 +778,10 @@
 
   /* sound */
   let ac=null;
-  function chime(){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); const t0=ac.currentTime;
-    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ const o=ac.createOscillator(),g=ac.createGain(); o.type="triangle"; o.frequency.value=f; o.connect(g); g.connect(ac.destination); const t=t0+i*0.09; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.5); o.start(t); o.stop(t+0.55); }); }catch(e){} }
+  function actx(){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended") ac.resume(); }catch(e){ return null; } return ac; }
+  function beep(freq,dur,vol,type){ const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.03); }catch(e){} }
+  function chime(){ const c=actx(); if(!c) return; try{ const t0=c.currentTime;
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=f; o.connect(g); g.connect(c.destination); const t=t0+i*0.09; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.5); o.start(t); o.stop(t+0.55); }); }catch(e){} }
 
   /* stream / fullscreen */
   function toggleStream(){ state.streamMode=!state.streamMode; document.body.classList.toggle("stream",state.streamMode); el.streamBtn.classList.toggle("active",state.streamMode); if(state.streamMode) toast("Stream Mode on — background transparent for OBS"); }
@@ -781,6 +796,7 @@
     el.keyword.addEventListener("change",()=>{ state.keyword=el.keyword.value.trim()||"!join"; el.keyword.value=state.keyword; save(); broadcastSync(); reflectChips(); });
     el.weighted.onchange=()=>{ state.weighted=el.weighted.checked; renderUsers(); renderWheels(); save(); broadcastSync(); };
     el.autoSpinEnd.onchange=()=>{ state.autoSpinEnd=el.autoSpinEnd.checked; save(); };
+    el.beeps.onchange=()=>{ state.beeps=el.beeps.checked; save(); broadcastSync(); if(state.beeps) beep(880,0.13,0.22,"square"); };
     const onReq=()=>{ state.restrict={sub:el.reqSub.checked,vip:el.reqVip.checked,mod:el.reqMod.checked}; save(); broadcastSync(); reflectChips(); };
     el.reqSub.onchange=onReq; el.reqVip.onchange=onReq; el.reqMod.onchange=onReq;
     el.autoReward.onchange=()=>{ state.autoReward=el.autoReward.checked; save(); };
