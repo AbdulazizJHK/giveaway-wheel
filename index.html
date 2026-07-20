@@ -128,6 +128,11 @@
   .chip .cd{font-family:var(--mono);color:var(--cyan);font-weight:700;font-variant-numeric:tabular-nums;text-shadow:0 0 10px var(--glow-c)}
   .chip .cd.urgent{color:var(--bad);text-shadow:0 0 10px rgba(255,84,104,.6)}
   .wbadge{font-family:var(--mono);font-size:11px;color:var(--warn);background:rgba(255,176,32,.16);padding:2px 7px;border-radius:20px;flex:none;font-variant-numeric:tabular-nums}
+  .rw-thumb{width:26px;height:26px;border-radius:5px;object-fit:cover;flex:none;border:1px solid var(--stroke)}
+  .rw-img{cursor:pointer;font-size:14px;line-height:1;padding:2px 5px;border-radius:6px;flex:none;opacity:.5;filter:grayscale(1);transition:opacity .15s,filter .15s}
+  .rw-img:hover{opacity:1;background:rgba(255,255,255,.08)}
+  .rw-img.has{opacity:1;filter:none}
+  .winner-img{max-width:min(320px,72vw);max-height:240px;margin:18px auto 0;display:block;border-radius:14px;object-fit:contain;border:1px solid var(--stroke-strong);box-shadow:0 16px 44px -14px rgba(0,0,0,.8)}
   .hint-sm{font-size:11px;line-height:1.5;color:var(--muted)}
   .tpl{display:flex;flex-direction:column;gap:4px}
   .tpl-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
@@ -189,7 +194,9 @@
   .halo.winpulse{animation:haloPulse 1.05s ease-in-out infinite}
 
   /* ---------- Horizontal strip roulette ---------- */
-  .strip-stage{position:relative;width:min(1180px,94%);height:148px;display:flex;align-items:center;justify-content:center;
+  .stage-dim{position:absolute;inset:0;z-index:1;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .5s ease}
+  .stage-dim.on{opacity:1}
+  .strip-stage{position:relative;z-index:5;width:min(1180px,94%);height:148px;display:flex;align-items:center;justify-content:center;
     -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
   .strip-canvas{display:block;width:100%;height:100%;position:relative;z-index:1}
   .strip-marker{position:absolute;top:-13px;bottom:-13px;left:50%;transform:translateX(-50%);width:3px;border-radius:3px;z-index:4;
@@ -341,7 +348,7 @@
           <button class="btn ghost-bad" id="closeBtn" disabled>Close</button>
         </div>
         <label class="toggle"><input type="checkbox" id="weighted"/><span class="track"></span>Weighted — each !join adds a chance</label>
-        <label class="toggle"><input type="checkbox" id="autoSpinEnd"/><span class="track"></span>Auto-spin when timer ends</label>
+        <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
         <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
       </section>
 
@@ -407,6 +414,7 @@
 
   <!-- ============ STAGE ============ -->
   <main class="stage" id="stage">
+    <div class="stage-dim" id="stageDim"></div>
     <div class="stage-top">
       <div class="chip live-chip" id="liveChip" style="display:none"><span class="dot live"></span> LIVE · <b id="topCount">0</b> entrants</div>
       <div class="chip open-chip" id="openChip" style="display:none">🎯 Entries open — type <b style="font-size:13px">!join</b></div>
@@ -435,6 +443,7 @@
   <div class="winner-card">
     <div class="eyebrow" id="winnerEyebrow">Winner</div>
     <div class="who" id="winnerName">—</div>
+    <img class="winner-img" id="winnerImg" alt="" style="display:none"/>
     <div class="prize" id="winnerPrize" style="display:none">
       <span class="pl">Reward</span><span class="pv" id="winnerPrizeVal">—</span>
     </div>
@@ -445,6 +454,7 @@
   </div>
 </div>
 <canvas id="confetti"></canvas>
+<input type="file" id="rewardImgInput" accept="image/*" style="display:none"/>
 <div id="toast-wrap"></div>
 
 <script>
@@ -467,7 +477,7 @@
     ws:null, channel:"", connected:false, reconnect:true,
     entriesOpen:false, keyword:"!join",
     wheelMode:"users",           // "users" | "rewards"
-    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:false, beeps:true,
+    weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:true, beeps:true,
     lastTick:null,                                // last integer second we beeped for
     restrict:{sub:false, vip:false, mod:false},   // entry gating by chat badge (all false = everyone)
     announce:false,                               // post event messages to chat (needs bot token)
@@ -488,7 +498,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -530,7 +540,8 @@
     if(!IS_CONTROLLER) return;
     writeShared({
       channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
-      wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()], rewards:state.rewards,
+      wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
+      rewards:state.rewards.map(r=>({name:rewardName(r)})),   // names only — keep the sync payload small (images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps
     });
   }
@@ -546,7 +557,7 @@
     if(d.restrict) state.restrict=d.restrict;
     if(typeof d.beeps==="boolean") state.beeps=d.beeps;
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
-    if(Array.isArray(d.rewards)) state.rewards=d.rewards;
+    if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
     if(state.spinning){ state.pendingSync=true; return; }
     reflectAll(); tickTimer();
   }
@@ -568,7 +579,7 @@
       const s=JSON.parse(localStorage.getItem("gw_state")||"{}");
       if(s.channel){ state.channel=s.channel; if(el.channel) el.channel.value=s.channel; }
       if(Array.isArray(s.users)){ state.users=new Map(s.users); normalizeUsers(); }
-      if(Array.isArray(s.rewards)) state.rewards=s.rewards;
+      if(Array.isArray(s.rewards)){ state.rewards=s.rewards; normalizeRewards(); }
       if(s.keyword){ state.keyword=s.keyword; if(el.keyword) el.keyword.value=s.keyword; }
       if(s.wheelMode) state.wheelMode=s.wheelMode;
       if(typeof s.weighted==="boolean") state.weighted=s.weighted;
@@ -606,13 +617,16 @@
   function toast(html){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=html; $("toast-wrap").appendChild(t); setTimeout(()=>t.remove(),2600); }
   const userName=u=>typeof u==="string"?u:u.name;
   const userWeight=u=>(typeof u==="object"&&u.weight)?u.weight:1;
+  const rewardName=r=>typeof r==="string"?r:(r&&r.name)||"";
+  const rewardImgOf=r=>(typeof r==="object"&&r&&r.img)?r.img:null;
+  function normalizeRewards(){ state.rewards=(state.rewards||[]).map(r=> typeof r==="string"?{name:r,img:null}:{name:(r&&r.name)||"",img:(r&&r.img)||null}); }
   function getSegments(){
     if(state.wheelMode==="users"){
       const out=[]; let i=0;
       for(const [,u] of state.users){ out.push({label:userName(u), weight: state.weighted?userWeight(u):1, color:SEG[i%SEG.length]}); i++; }
       return out;
     }
-    return state.rewards.map((r,i)=>({label:r, weight:1, color:SEG[i%SEG.length]}));
+    return state.rewards.map((r,i)=>({label:rewardName(r), weight:1, color:SEG[i%SEG.length]}));
   }
   function segs(){ return state.renderSegs!=null ? state.renderSegs : getSegments(); }
 
@@ -757,9 +771,25 @@
     if(el.rewardCount) el.rewardCount.textContent=state.rewards.length;
     if(!el.rewardList) return;
     if(state.rewards.length===0){ el.rewardList.innerHTML='<div class="empty">No rewards added.</div>'; return; }
-    let h=""; state.rewards.forEach((r,i)=>{ const c=SEG[i%SEG.length]; h+=`<div class="item"><span class="idx">${i+1}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(r)}</span><span class="x" data-i="${i}">×</span></div>`; });
+    let h=""; state.rewards.forEach((r,i)=>{ const c=SEG[i%SEG.length]; const img=rewardImgOf(r);
+      const lead = img ? `<img class="rw-thumb" src="${img}" alt=""/>` : `<span class="swatch" style="background:${c};color:${c}"></span>`;
+      h+=`<div class="item">${lead}<span class="name">${esc(rewardName(r))}</span><span class="rw-img${img?" has":""}" data-i="${i}" title="${img?"Change / remove image":"Add reveal image"}">🖼️</span><span class="x" data-i="${i}">×</span></div>`; });
     el.rewardList.innerHTML=h;
     el.rewardList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.rewards.splice(+x.dataset.i,1); renderRewards(); renderWheels(); save(); broadcastSync(); });
+    el.rewardList.querySelectorAll(".rw-img").forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.i;
+      if(state.rewards[i] && state.rewards[i].img){ state.rewards[i].img=null; renderRewards(); save(); broadcastSync(); return; }  // click again to remove
+      _rewardImgIdx=i; if(el.rewardImgInput) el.rewardImgInput.click();
+    });
+  }
+  let _rewardImgIdx=-1;
+  function compressImage(file,max,cb){
+    const img=new Image();
+    img.onload=()=>{ let w=img.width,h=img.height; if(w>=h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+      const cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h);
+      const type=/png|webp|gif/i.test(file.type)?"image/png":"image/jpeg"; try{ cb(cv.toDataURL(type,0.82)); }catch(e){ cb(null); } };
+    img.onerror=()=>cb(null);
+    const fr=new FileReader(); fr.onload=e=>{ img.src=e.target.result; }; fr.onerror=()=>cb(null); fr.readAsDataURL(file);
   }
   function reflectMode(){ if(!el.modeSeg)return; el.modeSeg.querySelectorAll("button").forEach(b=>{ const on=b.dataset.mode===state.wheelMode; b.classList.toggle("active",on); b.classList.toggle("rw",on&&b.dataset.mode==="rewards"); }); }
   function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); }
@@ -825,8 +855,9 @@
     cells[winCell]=winnerIdx;                                  // force the winner under the marker
     const jitter=Math.random()*0.5-0.25;                       // small offset so it doesn't stop dead-centre
     const dur=5200+Math.floor(Math.random()*900), mode=state.wheelMode;
-    let reward=null;
-    if(mode==="users" && state.rewards.length) reward=state.rewards[0];   // Entrants mode: auto-give the top reward
+    let reward=null, rewardImg=null;
+    if(mode==="users" && state.rewards.length){ reward=rewardName(state.rewards[0]); rewardImg=rewardImgOf(state.rewards[0]); }   // Entrants: auto-give top reward
+    if(mode==="rewards" && state.rewards[winnerIdx]) rewardImg=rewardImgOf(state.rewards[winnerIdx]);                              // Rewards: image of the landed prize
     let winnerUser=null, winnerUserLogin=null;
     if(mode==="rewards" && state.users.size){                             // Rewards mode: draw a random entrant to receive the prize
       const ue=[...state.users.entries()], wtot=ue.reduce((a,e)=>a+(state.weighted?userWeight(e[1]):1),0);
@@ -834,7 +865,7 @@
       for(let i=0;i<ue.length;i++){ rr-=(state.weighted?userWeight(ue[i][1]):1); if(rr<=0){ wi=i; break; } }
       winnerUserLogin=ue[wi][0]; winnerUser=userName(ue[wi][1]);
     }
-    const payload={mode,segs:S,cells,winCell,jitter,dur,label:S[winnerIdx].label,color:S[winnerIdx].color,reward,winnerUser,winnerUserLogin};
+    const payload={mode,segs:S,cells,winCell,jitter,dur,label:S[winnerIdx].label,color:S[winnerIdx].color,reward,rewardImg,winnerUser,winnerUserLogin};
     sendCmd("spin",payload);
     runSpin(payload,true);
   }
@@ -843,6 +874,7 @@
     state.spinning=true; state.renderSegs=p.segs.slice();
     state.spinCells=p.cells; state.spinWinCell=p.winCell; state.spinJitter=p.jitter||0; state.spinP=0;
     setSpinUI(true);
+    if(el.stageDim) el.stageDim.classList.add("on");    // dim the scene to focus on the scroll
     const t0=performance.now();
     (function frame(now){
       const x=Math.min(1,(now-t0)/p.dur); state.spinP=1-Math.pow(1-x,5);   // ease-out scroll
@@ -852,20 +884,20 @@
   }
   function endSpin(p,authoritative){
     state.spinning=false; setSpinUI(false); state.renderSegs=null; state.spinCells=null;
-    if(p.mode==="users") showWinner("users", p.label, p.reward, p.color);
-    else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color);   // rewards wheel + drawn entrant → Winner + prize
-    else showWinner("rewards", p.label, null, p.color);                          // no entrants → just the prize
+    if(p.mode==="users") showWinner("users", p.label, p.reward, p.color, p.rewardImg);
+    else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color, p.rewardImg);   // rewards wheel + drawn entrant → Winner + prize
+    else showWinner("rewards", p.label, null, p.color, p.rewardImg);                          // no entrants → just the prize
     chime();
     if(authoritative){
       if(p.mode==="users"){
-        if(p.reward){ const i=state.rewards.indexOf(p.reward); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
+        if(p.reward){ state.rewards.shift(); renderRewards(); }                   // the top reward was given → remove it
         if(state.removeWinner){ for(const [login,u] of state.users){ if(userName(u)===p.label){ state.users.delete(login); break; } } renderUsers(); }
         botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
       } else {
         if(p.winnerUser) botSay(fillTpl(state.msgWin,{winner:p.winnerUser, reward:p.label, count:state.users.size}));
         else botSay(fillTpl("🎁 The wheel landed on {reward}! 🎉",{reward:p.label}));
         if(state.removeWinner){
-          const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); }
+          const i=state.rewards.findIndex(r=>rewardName(r)===p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); }
           if(p.winnerUserLogin && state.users.has(p.winnerUserLogin)){ state.users.delete(p.winnerUserLogin); renderUsers(); }
         }
       }
@@ -875,14 +907,15 @@
   function setSpinUI(on){ [el.spinBtn,el.railSpin].forEach(b=>{ if(b) b.disabled=on; }); if(el.hub) el.hub.classList.toggle("disabled",on); }
 
   /* ---------------- Winner ---------------- */
-  function showWinner(mode,label,reward,color){
+  function showWinner(mode,label,reward,color,img){
     if(el.winnerEyebrow) el.winnerEyebrow.textContent = mode==="users" ? "Winner" : "Prize";
     el.winnerName.textContent=label;
+    if(el.winnerImg){ if(img){ el.winnerImg.src=img; el.winnerImg.style.display="block"; } else { el.winnerImg.style.display="none"; el.winnerImg.removeAttribute("src"); } }
     if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
     el.winner.classList.add("show"); burst();
     const glow=document.getElementById("stripGlow"); if(glow){ if(color) glow.style.setProperty("--gcol",color); glow.classList.add("winpulse"); }
   }
-  function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); renderWheels(); if(!fromBus) sendCmd("winner-close",{}); }
+  function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); if(!fromBus) sendCmd("winner-close",{}); }
 
   /* confetti */
   const cctx=el.confetti.getContext("2d"); let parts=[],raf=null;
@@ -938,7 +971,8 @@
     const addU=()=>{ const v=el.manualUser.value.trim(); if(!v)return; const login=v.toLowerCase().replace(/[^a-z0-9_]/g,"")||("guest"+state.users.size); if(state.users.has(login)){ if(state.weighted){ const u=state.users.get(login); u.weight=(u.weight||1)+1; } } else state.users.set(login,{name:v,weight:1}); renderUsers(); renderWheels(); save(); broadcastSync(); el.manualUser.value=""; el.manualUser.focus(); };
     el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
     el.clearUsers.onclick=()=>{ if(state.users.size){ state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); } };
-    const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push(v); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
+    const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push({name:v,img:null}); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
+    if(el.rewardImgInput) el.rewardImgInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f && _rewardImgIdx>=0 && state.rewards[_rewardImgIdx]){ compressImage(f,360,url=>{ if(url && state.rewards[_rewardImgIdx]){ state.rewards[_rewardImgIdx].img=url; renderRewards(); save(); broadcastSync(); toast("Reward image added"); } else toast("Couldn't read that image."); }); } e.target.value=""; };
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
     if(el.railSpin) el.railSpin.onclick=requestSpin;
     if(el.copyUrl) el.copyUrl.onclick=()=>{
