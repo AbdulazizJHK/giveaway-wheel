@@ -392,7 +392,7 @@
           <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
           <button class="btn small" id="addReward">Add</button>
         </div>
-        <label class="toggle"><input type="checkbox" id="autoReward"/><span class="track"></span>Give a reward to entrant winner</label>
+        <div class="hint-sm">🎁 In <b>Entrants</b> mode the winner is automatically given the <b>top reward</b> here — and it's named in the winner chat message (one message). Each spin uses the next reward.</div>
       </section>
 
       <!-- After spin -->
@@ -581,7 +581,7 @@
       if(s.botToken) state.bot.token=s.botToken;
       if(s.msgOpen) state.msgOpen=s.msgOpen;
       if(s.msgClose) state.msgClose=s.msgClose;
-      if(s.msgWin) state.msgWin=s.msgWin;
+      if(s.msgWin){ const OLDW="🏆 Winner: @{winner}{reward} — congrats! 🎉"; state.msgWin = (s.msgWin===OLDW) ? "🏆 @{winner} won {reward} — congrats! 🎉" : s.msgWin; }
       if(el.announce) el.announce.checked=state.announce;
       if(el.botName) el.botName.value=state.bot.name;
       if(el.botToken) el.botToken.value=state.bot.token;
@@ -825,7 +825,7 @@
     const jitter=Math.random()*0.5-0.25;                       // small offset so it doesn't stop dead-centre
     const dur=5200+Math.floor(Math.random()*900), mode=state.wheelMode;
     let reward=null;
-    if(mode==="users" && state.autoReward && state.rewards.length) reward=state.rewards[0];
+    if(mode==="users" && state.rewards.length) reward=state.rewards[0];   // auto-give the top reward to the winner
     const payload={mode,segs:S,cells,winCell,jitter,dur,label:S[winnerIdx].label,color:S[winnerIdx].color,reward};
     sendCmd("spin",payload);
     runSpin(payload,true);
@@ -848,7 +848,7 @@
     chime();
     if(authoritative){
       if(p.mode==="users"){
-        if(p.reward && state.autoReward){ const i=state.rewards.indexOf(p.reward); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
+        if(p.reward){ const i=state.rewards.indexOf(p.reward); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
         if(state.removeWinner){ for(const [login,u] of state.users){ if(userName(u)===p.label){ state.users.delete(login); break; } } renderUsers(); }
       } else {
         if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
@@ -911,7 +911,6 @@
     el.msgOpen.addEventListener("change",()=>{ state.msgOpen=el.msgOpen.value; save(); });
     el.msgClose.addEventListener("change",()=>{ state.msgClose=el.msgClose.value; save(); });
     el.msgWin.addEventListener("change",()=>{ state.msgWin=el.msgWin.value; save(); });
-    el.autoReward.onchange=()=>{ state.autoReward=el.autoReward.checked; save(); };
     el.removeWinner.onchange=()=>{ state.removeWinner=el.removeWinner.checked; save(); };
     el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
 
