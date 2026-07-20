@@ -273,10 +273,10 @@
   .winner{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(11,7,19,.6),rgba(11,7,19,.9));backdrop-filter:blur(6px)}
   .winner.show{display:grid;animation:fade .3s ease}
   @keyframes fade{from{opacity:0}to{opacity:1}}
-  .winner-card{text-align:center;padding:40px 56px;max-width:640px;animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}
+  .winner-card{text-align:center;padding:40px 56px;max-width:min(1100px,94vw);animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}
   @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   .winner-card .eyebrow{font-size:18px;font-weight:800;letter-spacing:.34em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;text-shadow:0 0 24px var(--glow-c)}
-  .winner-card .who{font-size:clamp(40px,7vw,78px);font-weight:800;line-height:1.14;letter-spacing:-.01em;text-wrap:balance;padding:0 6px .18em;background:linear-gradient(135deg,#fff 18%,var(--accent) 66%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 48px var(--glow-a));word-break:break-word;overflow-wrap:anywhere}
+  .winner-card .who{font-size:clamp(52px,9vw,104px);font-weight:800;line-height:1.1;letter-spacing:-.01em;padding:0 6px .18em;background:linear-gradient(135deg,#fff 18%,var(--accent) 66%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 48px var(--glow-a));white-space:nowrap}
   .winner-card .prize{margin-top:22px;display:inline-flex;flex-direction:column;gap:8px;align-items:center}
   .winner-card .prize .pl{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
   .winner-card .prize .pv{font-size:22px;font-weight:700;color:var(--ink);padding:10px 26px;border-radius:10px;border:1px solid var(--stroke-strong);background:rgba(124,92,255,.14)}
@@ -568,7 +568,7 @@
     entryDeadline:null,          // epoch ms when the entry timer ends (null = no timer)
     spinning:false, streamMode:false,
     renderSegs:null,             // frozen segments during a spin
-    spinP:0, spinCells:null, spinWinCell:0, spinJitter:0,  // strip-roulette animation state
+    spinP:0, spinCells:null, spinWinCell:0, spinJitter:0, spinLastCC:null,  // strip-roulette animation state
     _centerColor:"#7C5CFF",
     pendingSync:null,
   };
@@ -936,7 +936,8 @@
       const cells=state.spinCells, finalOffset=state.spinWinCell*CW+CW/2-W/2+state.spinJitter*CW, offset=state.spinP*finalOffset;
       const i0=Math.floor(offset/CW)-1, i1=Math.floor((offset+W)/CW)+1;
       for(let i=i0;i<=i1;i++){ const ci=((i%cells.length)+cells.length)%cells.length, s=S[cells[ci]]; if(s) drawCell(c,i*CW-offset,CW,H,s); }
-      if(cv.id==="strip"){ const cc=((Math.round((offset+W/2-CW/2)/CW)%cells.length)+cells.length)%cells.length, s=S[cells[cc]]; if(s) state._centerColor=s.color; }
+      if(cv.id==="strip"){ const cc=((Math.round((offset+W/2-CW/2)/CW)%cells.length)+cells.length)%cells.length, s=S[cells[cc]]; if(s) state._centerColor=s.color;
+        if(cc!==state.spinLastCC){ if(state.spinLastCC!==null) tick(); state.spinLastCC=cc; } }
     } else {
       const i1=Math.floor(W/CW)+1;
       for(let i=-1;i<=i1;i++){ const idx=((i%n)+n)%n; drawCell(c,i*CW,CW,H,S[idx]); }
@@ -976,7 +977,7 @@
   function runSpin(p,authoritative){
     if(state.spinning) return;
     state.spinning=true; state.renderSegs=p.segs.slice();
-    state.spinCells=p.cells; state.spinWinCell=p.winCell; state.spinJitter=p.jitter||0; state.spinP=0;
+    state.spinCells=p.cells; state.spinWinCell=p.winCell; state.spinJitter=p.jitter||0; state.spinP=0; state.spinLastCC=null;
     setSpinUI(true);
     if(el.stageDim) el.stageDim.classList.add("on");    // dim the scene to focus on the scroll
     updateStripVisibility();                            // reveal the wheel if it was hidden until spin
@@ -1017,9 +1018,18 @@
     el.winnerName.textContent=label;
     if(el.winnerImg){ if(img){ el.winnerImg.src=img; el.winnerImg.style.display="block"; } else { el.winnerImg.style.display="none"; el.winnerImg.removeAttribute("src"); } }
     if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
-    el.winner.classList.add("show"); burst(); updateStripVisibility();
+    el.winner.classList.add("show"); fitWinnerName(); burst(); updateStripVisibility();
     const glow=document.getElementById("stripGlow"); if(glow){ if(color) glow.style.setProperty("--gcol",color); glow.classList.add("winpulse"); }
   }
+  /* shrink the winner name so long usernames stay on one line */
+  function fitWinnerName(){ const w=el.winnerName; if(!w) return; w.style.fontSize=""; requestAnimationFrame(()=>{
+    const avail=w.clientWidth; if(!avail||w.scrollWidth<=avail) return;
+    const base=parseFloat(getComputedStyle(w).fontSize), min=24;
+    let fs=Math.max(min, Math.floor(base*avail/w.scrollWidth));
+    w.style.fontSize=fs+"px";
+    // one corrective pass in case rounding still overflows
+    if(w.scrollWidth>avail){ fs=Math.max(min,Math.floor(fs*avail/w.scrollWidth)); w.style.fontSize=fs+"px"; }
+  }); }
   function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
 
   /* confetti */
@@ -1037,6 +1047,7 @@
   let ac=null;
   function actx(){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended") ac.resume(); }catch(e){ return null; } return ac; }
   function beep(freq,dur,vol,type){ const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.03); }catch(e){} }
+  function tick(){ if(!state.beeps) return; const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type="square"; o.frequency.value=1650; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.09,t+0.002); g.gain.exponentialRampToValueAtTime(0.0001,t+0.045); o.start(t); o.stop(t+0.06); }catch(e){} }
   function chime(){ const c=actx(); if(!c) return; try{ const t0=c.currentTime;
     [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=f; o.connect(g); g.connect(c.destination); const t=t0+i*0.09; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.5); o.start(t); o.stop(t+0.55); }); }catch(e){} }
 
