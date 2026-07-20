@@ -842,8 +842,8 @@
       } else {
         if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
       }
-      const rw = p.mode==="users" ? (p.reward || "the giveaway") : p.label;   // name the prize (or "the giveaway" if none)
-      botSay(fillTpl(state.msgWin,{winner:p.label, reward:rw, count:state.users.size}));
+      if(p.mode==="users") botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
+      else botSay(fillTpl("🎁 The wheel landed on {reward}! 🎉",{reward:p.label, winner:p.label}));   // rewards-mode: no user to name
       save(); broadcastSync();
     } else if(state.pendingSync){ state.pendingSync=false; reflectAll(); }
   }
