@@ -370,6 +370,7 @@
           <div class="tpl"><span class="tpl-l">On close</span><input id="msgClose" type="text" value="🔒 Entries closed — {count} entered. Spinning the wheel now…" autocomplete="off"/></div>
           <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 @{winner} won {reward} — congrats! 🎉" autocomplete="off"/></div>
           <div class="hint-sm">Placeholders: <b>{keyword} {count} {winner} {reward} {timer}</b></div>
+          <button class="btn small" id="resetMsgs" style="flex:none;align-self:flex-start">↺ Reset messages to default</button>
         </div>
       </section>
 
@@ -487,7 +488,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -581,7 +582,7 @@
       if(s.botToken) state.bot.token=s.botToken;
       if(s.msgOpen) state.msgOpen=s.msgOpen;
       if(s.msgClose) state.msgClose=s.msgClose;
-      if(s.msgWin){ const OLDW="🏆 Winner: @{winner}{reward} — congrats! 🎉"; state.msgWin = (s.msgWin===OLDW) ? "🏆 @{winner} won {reward} — congrats! 🎉" : s.msgWin; }
+      if(s.msgWin){ const isOld = /^🏆 Winner: @\{winner\}\{reward\}/.test(s.msgWin); state.msgWin = isOld ? "🏆 @{winner} won {reward} — congrats! 🎉" : s.msgWin; }
       if(el.announce) el.announce.checked=state.announce;
       if(el.botName) el.botName.value=state.bot.name;
       if(el.botToken) el.botToken.value=state.bot.token;
@@ -924,6 +925,13 @@
     el.msgOpen.addEventListener("change",()=>{ state.msgOpen=el.msgOpen.value; save(); });
     el.msgClose.addEventListener("change",()=>{ state.msgClose=el.msgClose.value; save(); });
     el.msgWin.addEventListener("change",()=>{ state.msgWin=el.msgWin.value; save(); });
+    if(el.resetMsgs) el.resetMsgs.onclick=()=>{
+      state.msgOpen="🎡 Giveaway is OPEN! Type {keyword} to enter!";
+      state.msgClose="🔒 Entries closed — {count} entered. Spinning the wheel now…";
+      state.msgWin="🏆 @{winner} won {reward} — congrats! 🎉";
+      el.msgOpen.value=state.msgOpen; el.msgClose.value=state.msgClose; el.msgWin.value=state.msgWin;
+      save(); toast("Messages reset to default");
+    };
     el.removeWinner.onchange=()=>{ state.removeWinner=el.removeWinner.checked; save(); };
     el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
 
