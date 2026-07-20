@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Giveaway Wheel · Twitch</title>
+<title>Giveaway Roulette · Twitch</title>
 <style>
   :root{
     --bg:#0E1015;
@@ -134,6 +134,12 @@
   .rw-img.has{opacity:1;filter:none}
   .winner-img{max-width:min(320px,72vw);max-height:240px;margin:18px auto 0;display:block;border-radius:14px;object-fit:contain;border:1px solid var(--stroke-strong);box-shadow:0 16px 44px -14px rgba(0,0,0,.8)}
   .hint-sm{font-size:11px;line-height:1.5;color:var(--muted)}
+  .brand h1 span b{color:var(--accent);font-family:var(--mono);font-weight:700}
+  .rail-foot{gap:9px;padding-top:2px;border-top:1px solid var(--stroke);margin-top:4px}
+  .feedback-btn{display:block;text-align:center;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--ink);padding:11px 14px;border:1px solid var(--stroke);border-radius:10px;background:rgba(124,92,255,.08);transition:background .15s,border-color .15s}
+  .feedback-btn:hover{background:rgba(124,92,255,.16);border-color:var(--stroke-strong)}
+  .ver-line{text-align:center;font-size:11px;color:var(--faint)}
+  .ver-line b{color:var(--muted);font-family:var(--mono)}
   .tpl{display:flex;flex-direction:column;gap:4px}
   .tpl-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
   .tpl input{font-size:12.5px}
@@ -322,7 +328,7 @@
   <aside class="rail" id="rail">
     <div class="brand">
       <div class="mark"></div>
-      <h1>Giveaway Wheel<span>Twitch Live</span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.0</b></span></h1>
     </div>
 
     <div class="rail-scroll">
@@ -336,7 +342,7 @@
 
       <!-- Wheel content -->
       <section class="block">
-        <div class="label">Wheel shows</div>
+        <div class="label">Roulette shows</div>
         <div class="seg" id="modeSeg">
           <button data-mode="users" class="active">👥 Entrants</button>
           <button data-mode="rewards">🎁 Rewards</button>
@@ -379,7 +385,7 @@
         </div>
         <label class="toggle"><input type="checkbox" id="weighted"/><span class="track"></span>Weighted — each !join adds a chance</label>
         <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
-        <label class="toggle"><input type="checkbox" id="hideUntilSpin"/><span class="track"></span>Hide wheel on stream until it spins</label>
+        <label class="toggle"><input type="checkbox" id="hideUntilSpin"/><span class="track"></span>Hide roulette on stream until it spins</label>
         <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
         <div class="field">
           <div class="label" style="margin-top:2px">Banner position</div>
@@ -413,7 +419,7 @@
         <div class="status"><span class="dot" id="botDot"></span><span id="botStatus">Bot not connected</span></div>
         <div class="field">
           <div class="tpl"><span class="tpl-l">On open</span><input id="msgOpen" type="text" value="🎡 Giveaway is OPEN! Type {keyword} to enter!" autocomplete="off"/></div>
-          <div class="tpl"><span class="tpl-l">On close</span><input id="msgClose" type="text" value="🔒 Entries closed — {count} entered. Spinning the wheel now…" autocomplete="off"/></div>
+          <div class="tpl"><span class="tpl-l">On close</span><input id="msgClose" type="text" value="🔒 Entries closed — {count} entered. Spinning now…" autocomplete="off"/></div>
           <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 @{winner} won {reward} — congrats! 🎉" autocomplete="off"/></div>
           <div class="hint-sm">Placeholders: <b>{keyword} {count} {winner} {reward} {timer}</b></div>
           <button class="btn small" id="resetMsgs" style="flex:none;align-self:flex-start">↺ Reset messages to default</button>
@@ -439,13 +445,19 @@
           <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
           <button class="btn small" id="addReward">Add</button>
         </div>
-        <div class="hint-sm">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the wheel picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>.</div>
+        <div class="hint-sm">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the roulette picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>.</div>
       </section>
 
       <!-- After spin -->
       <section class="block">
         <div class="label">After Spin</div>
-        <label class="toggle"><input type="checkbox" id="removeWinner" checked/><span class="track"></span>Remove winner from wheel</label>
+        <label class="toggle"><input type="checkbox" id="removeWinner" checked/><span class="track"></span>Remove winner from the roulette</label>
+      </section>
+
+      <!-- Footer: feedback + version -->
+      <section class="block rail-foot">
+        <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
+        <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.0</b></div>
       </section>
 
     </div>
@@ -518,6 +530,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
+  const APP_VERSION = "1.0";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={
@@ -531,7 +544,7 @@
     announce:false,                               // post event messages to chat (needs bot token)
     bot:{name:"", token:"", ws:null, ready:false, reconnect:false},
     msgOpen:"🎡 Giveaway is OPEN! Type {keyword} to enter!",
-    msgClose:"🔒 Entries closed — {count} entered. Spinning the wheel now…",
+    msgClose:"🔒 Entries closed — {count} entered. Spinning now…",
     msgWin:"🏆 @{winner} won {reward} — congrats! 🎉",
     users:new Map(),             // login -> {name, weight}
     rewards:[],
@@ -915,7 +928,7 @@
     if(ROLE==="stage") return;              // stage never initiates
     if(state.spinning) return;
     const S=getSegments(), n=S.length;
-    if(n===0){ toast(state.wheelMode==="users"?"No entrants on the wheel yet.":"Add some rewards first."); return; }
+    if(n===0){ toast(state.wheelMode==="users"?"No entrants yet.":"Add some rewards first."); return; }
     const total=S.reduce((a,s)=>a+(s.weight||1),0);
     const pick=()=>{ let r=Math.random()*total; for(let i=0;i<n;i++){ r-=(S[i].weight||1); if(r<=0) return i; } return n-1; };
     const winnerIdx=pick();                                   // weighted winner
@@ -965,7 +978,7 @@
         botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
       } else {
         if(p.winnerUser) botSay(fillTpl(state.msgWin,{winner:p.winnerUser, reward:p.label, count:state.users.size}));
-        else botSay(fillTpl("🎁 The wheel landed on {reward}! 🎉",{reward:p.label}));
+        else botSay(fillTpl("🎁 The roulette landed on {reward}! 🎉",{reward:p.label}));
         if(state.removeWinner){
           const i=state.rewards.findIndex(r=>rewardName(r)===p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); }
           if(p.winnerUserLogin && state.users.has(p.winnerUserLogin)){ state.users.delete(p.winnerUserLogin); renderUsers(); }
@@ -1032,7 +1045,7 @@
     el.msgWin.addEventListener("change",()=>{ state.msgWin=el.msgWin.value; save(); });
     if(el.resetMsgs) el.resetMsgs.onclick=()=>{
       state.msgOpen="🎡 Giveaway is OPEN! Type {keyword} to enter!";
-      state.msgClose="🔒 Entries closed — {count} entered. Spinning the wheel now…";
+      state.msgClose="🔒 Entries closed — {count} entered. Spinning now…";
       state.msgWin="🏆 @{winner} won {reward} — congrats! 🎉";
       el.msgOpen.value=state.msgOpen; el.msgClose.value=state.msgClose; el.msgWin.value=state.msgWin;
       save(); toast("Messages reset to default");
@@ -1083,6 +1096,8 @@
   }
 
   /* ---------------- Init ---------------- */
+  ["verTag","verTag2"].forEach(id=>{ const e=$(id); if(e) e.textContent="v"+APP_VERSION; });   // stamp version
+  try{ document.title="Giveaway Roulette v"+APP_VERSION+" · Twitch"; }catch(e){}
   function fitAll(){ document.querySelectorAll(".strip-canvas").forEach(fitCanvas); }
   fitAll();
   addEventListener("resize",()=>{ fitAll(); if(!state.spinning) renderWheels(); });

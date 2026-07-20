@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Giveaway Roulette · Setup Guide</title>
+<style>
+  :root{
+    --bg:#0E1015;--surface:#14161D;--card:#191C24;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
+    --ink:#E8EAF0;--muted:#949AA6;--faint:#5C6270;--accent:#7C5CFF;--accent2:#6847E8;--good:#34D399;--cyan:#22C3A6;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;--mono:ui-monospace,"Cascadia Code",Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;
+    background-image:radial-gradient(90% 60% at 50% -10%, rgba(124,92,255,.10), transparent 60%);min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 22px 80px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .mark{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,var(--accent),var(--accent2));position:relative;flex:none;box-shadow:0 4px 16px -4px rgba(124,92,255,.6)}
+  .mark::after{content:"";position:absolute;inset:12px;border-radius:50%;background:var(--surface)}
+  h1{font-size:26px;font-weight:800;letter-spacing:-.01em}
+  h1 span{display:block;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  h1 span b{color:var(--accent);font-family:var(--mono)}
+  .lead{color:var(--muted);font-size:16px;margin:14px 0 34px;max-width:60ch}
+  h2{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:38px 0 16px;display:flex;align-items:center;gap:10px}
+  h2::before{content:attr(data-n);display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:800;font-family:var(--mono);flex:none}
+  h2.plain::before{display:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+  .url-row{display:flex;align-items:center;gap:10px;margin:12px 0;flex-wrap:wrap}
+  .url-row .tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);min-width:120px}
+  code,.url{font-family:var(--mono);font-size:13px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px;padding:8px 11px;color:var(--ink);word-break:break-all;flex:1;min-width:220px}
+  .copy{appearance:none;border:none;cursor:pointer;font:inherit;font-weight:650;font-size:12.5px;color:#fff;background:var(--accent);border-radius:8px;padding:9px 15px;transition:background .15s;flex:none}
+  .copy:hover{background:var(--accent2)}
+  ol,ul{margin:6px 0 6px 4px;padding-left:22px}
+  li{margin:8px 0}
+  b.k{font-family:var(--mono);background:rgba(124,92,255,.16);color:#fff;padding:1px 8px;border-radius:6px;font-size:.92em}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12px;background:rgba(34,195,166,.14);color:var(--cyan);padding:2px 9px;border-radius:20px}
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:8px}
+  .feat div{font-size:14px;color:var(--muted)}
+  .feat b{color:var(--ink);font-weight:650}
+  .note{border-left:3px solid var(--accent);background:rgba(124,92,255,.06);padding:12px 16px;border-radius:0 10px 10px 0;font-size:14px;color:var(--muted);margin:14px 0}
+  .cta{display:block;text-align:center;text-decoration:none;font-weight:700;color:#fff;background:linear-gradient(145deg,var(--accent),var(--accent2));padding:14px;border-radius:12px;margin:10px 0;font-size:15px}
+  .feedback{display:block;text-align:center;text-decoration:none;font-weight:650;color:var(--ink);background:rgba(124,92,255,.08);border:1px solid var(--line2);padding:14px;border-radius:12px}
+  footer{margin-top:44px;text-align:center;color:var(--faint);font-size:12px;border-top:1px solid var(--line);padding-top:22px}
+  footer b{font-family:var(--mono);color:var(--muted)}
+  a{color:var(--accent)}
+  @media(max-width:560px){.feat{grid-template-columns:1fr}.url-row .tag{min-width:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark"></div>
+    <h1>Giveaway Roulette<span>Twitch · <b id="ver">v1.0</b></span></h1>
+  </header>
+  <p class="lead">A live giveaway picker for Twitch streams. Viewers type <b class="k">!join</b> in chat, and a sideways-scrolling roulette picks the winner — with rewards, images, weighted odds, a countdown, and auto chat announcements. Nothing to install: it runs as OBS browser sources.</p>
+
+  <h2 data-n="1">Add it to OBS</h2>
+  <div class="card">
+    <p style="color:var(--muted);font-size:14px;margin-bottom:6px">Two pieces from the same page — the <b style="color:var(--ink)">wheel</b> goes on your stream, the <b style="color:var(--ink)">controls</b> stay private in a dock.</p>
+    <div class="url-row">
+      <span class="tag">On stream</span>
+      <span class="url" id="stageUrl">https://abdulazizjhk.github.io/giveaway-wheel/wheel.html?view=stage</span>
+      <button class="copy" data-t="stageUrl">Copy</button>
+    </div>
+    <div class="url-row">
+      <span class="tag">Your controls</span>
+      <span class="url" id="dockUrl">https://abdulazizjhk.github.io/giveaway-wheel/wheel.html?view=dock</span>
+      <button class="copy" data-t="dockUrl">Copy</button>
+    </div>
+    <ol>
+      <li>In your scene, <b>Sources → ➕ Browser</b> → paste the <b>On stream</b> URL → set <b>1920 × 1080</b> → uncheck “Shutdown source when not visible”. It’s transparent, so it sits over your scene.</li>
+      <li>Top menu <b>Docks → Custom Browser Docks…</b> → name it “Giveaway” → paste the <b>Your controls</b> URL → <b>Apply</b>. Dock it wherever you like — only you see this.</li>
+    </ol>
+    <div class="note">Seeing an old version after an update? Change the URL’s end from <code style="padding:1px 6px">&amp;v=1</code> to <code style="padding:1px 6px">&amp;v=2</code> (bump the number) to force a fresh load, or right-click the source → Refresh.</div>
+  </div>
+
+  <h2 data-n="2">Run a giveaway</h2>
+  <div class="card">
+    <ol>
+      <li>In the dock, type your <b>Twitch channel</b> → <b>Connect</b> (no login needed — it reads chat anonymously).</li>
+      <li>Set a <b>Timer</b> (e.g. 60s) and click <b>Open Entries</b>. Viewers type <b class="k">!join</b> to enter — the on-stream banner shows the live count + countdown.</li>
+      <li>When the timer ends it <b>auto-spins</b> (the roulette scrolls and lands on a winner). Or press <b class="k">Spin</b> / <b class="k">Space</b> any time.</li>
+      <li>The winner is revealed with confetti — and if you added rewards, the prize (and its image) shows too.</li>
+    </ol>
+  </div>
+
+  <h2 data-n="3">Rewards &amp; prizes</h2>
+  <div class="card">
+    <ul>
+      <li>Add prizes in the <b>Rewards</b> list. In <b>Entrants</b> mode the winner automatically gets the top reward; in <b>Rewards</b> mode the roulette picks the prize and gives it to a random entrant. Either way, one clean result.</li>
+      <li>Click the <b>🖼️</b> next to a reward to attach an image (logo / prize art) — it reveals big when that prize is won.</li>
+    </ul>
+  </div>
+
+  <h2 class="plain">Everything you can do</h2>
+  <div class="card">
+    <div class="feat">
+      <div><b>!join entries</b> — auto-collected from chat</div>
+      <div><b>Weighted odds</b> — repeat !join = more chances</div>
+      <div><b>Sub / VIP / Mod only</b> — gate by chat badge</div>
+      <div><b>Countdown</b> — with 3-2-1 beeps</div>
+      <div><b>Auto-spin</b> when the timer ends</div>
+      <div><b>Hide until spin</b> — reveal on cue</div>
+      <div><b>Reward images</b> — shown on the win</div>
+      <div><b>Chat announcements</b> — @winner won {reward}</div>
+      <div><b>Banner position</b> — place it anywhere</div>
+      <div><b>Colour glow</b> that pulses on the win</div>
+    </div>
+  </div>
+
+  <h2 data-n="4">Chat announcements <span class="pill" style="margin-left:6px">optional</span></h2>
+  <div class="card">
+    <p style="color:var(--muted);font-size:14px">Want the bot to post “🏆 @winner won {reward}!” to chat? In the dock’s <b style="color:var(--ink)">Chat announcements</b> section:</p>
+    <ol>
+      <li>Get an OAuth token at <a href="https://twitchtokengenerator.com" target="_blank" rel="noopener">twitchtokengenerator.com</a> (scopes: <code style="padding:1px 6px">chat:edit</code>, <code style="padding:1px 6px">chat:read</code>).</li>
+      <li>Enter your channel/bot username + the token → <b>Connect bot</b> → tick <b>Post event messages</b>. The token stays only in your browser.</li>
+    </ol>
+  </div>
+
+  <a class="cta" href="wheel.html?view=dock" target="_blank" rel="noopener">Open the control dock →</a>
+  <a class="feedback" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us here</a>
+
+  <footer>Giveaway Roulette · <b id="ver2">v1.0</b> · made for Twitch streamers</footer>
+</div>
+<script>
+  document.querySelectorAll(".copy").forEach(b=>b.onclick=()=>{
+    const t=document.getElementById(b.dataset.t).textContent.trim();
+    navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>{ b.textContent="✓ Copied"; setTimeout(()=>b.textContent="Copy",1400); }).catch(()=>{});
+  });
+</script>
+</body>
+</html>
