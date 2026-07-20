@@ -177,9 +177,10 @@
   .chip.open-chip{border-color:var(--stroke-strong);box-shadow:0 0 22px -8px var(--glow-a)}
 
   .wheel-wrap{position:relative;display:grid;place-items:center;flex:none}
-  /* subtle static glow behind wheel */
-  .halo{position:absolute;width:118%;height:118%;border-radius:50%;z-index:0;
-    background:radial-gradient(circle, rgba(124,92,255,.16), transparent 68%);filter:blur(20px)}
+  /* ambient glow behind wheel — colour-matched to the pie slices, driven from JS */
+  .halo{position:absolute;width:126%;height:126%;border-radius:50%;z-index:0;opacity:.5;
+    filter:blur(34px) saturate(1.1);will-change:transform;
+    background:radial-gradient(circle, rgba(124,92,255,.16), transparent 68%)}
   .halo.two{display:none}
   #wheel{display:block;border-radius:50%;position:relative;z-index:1;filter:drop-shadow(0 24px 50px rgba(0,0,0,.5));touch-action:none}
   .hub{position:absolute;z-index:3;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#20242E,#14161D);border:1px solid var(--stroke-strong);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 7px var(--bg),0 8px 22px -8px rgba(0,0,0,.8);transition:transform .15s,border-color .2s}
@@ -741,7 +742,24 @@
   /* ---------------- Wheel drawing ---------------- */
   const DPR=Math.min(window.devicePixelRatio||1,2);
   function fitCanvas(cv){ const s=+cv.dataset.size; cv.width=s*DPR; cv.height=s*DPR; cv.style.width=s+"px"; cv.style.height=s+"px"; const c=cv.getContext("2d"); c.setTransform(DPR,0,0,DPR,0,0); }
-  function renderWheels(){ document.querySelectorAll("canvas.wheel-canvas").forEach(drawWheel); }
+  function renderWheels(){ document.querySelectorAll("canvas.wheel-canvas").forEach(drawWheel); updateHalo(); }
+  let _haloSig="";
+  function updateHalo(){
+    const halo=document.querySelector(".wheel-wrap .halo:not(.two)");
+    if(!halo) return;                         // only the big stage/full wheel has a halo
+    const S=segs();
+    const sig=S.map(s=>s.color+":"+(s.weight||1)).join("|");
+    if(sig!==_haloSig){                        // rebuild the colour ring only when slices change
+      _haloSig=sig;
+      if(!S.length){ halo.style.background="radial-gradient(circle, rgba(124,92,255,.16), transparent 68%)"; }
+      else{
+        const total=S.reduce((a,s)=>a+(s.weight||1),0); let acc=0; const stops=[];
+        for(const s of S){ const p0=acc/total*100; acc+=(s.weight||1); const p1=acc/total*100; stops.push(`${s.color} ${p0.toFixed(1)}% ${p1.toFixed(1)}%`); }
+        halo.style.background=`conic-gradient(from 90deg, ${stops.join(",")})`;
+      }
+    }
+    halo.style.transform=`rotate(${(state.rotation*180/Math.PI).toFixed(1)}deg)`;  // spin in sync
+  }
   function drawWheel(cv){
     const c=cv.getContext("2d"), size=+cv.dataset.size, R=size/2, cx=R, cy=R;
     c.setTransform(DPR,0,0,DPR,0,0); c.clearRect(0,0,size,size);
