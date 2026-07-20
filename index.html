@@ -213,6 +213,19 @@
   .eb-timer{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--cyan);font-variant-numeric:tabular-nums;text-shadow:0 0 12px var(--glow-c);margin-left:6px}
   .eb-timer.urgent{color:var(--bad);text-shadow:0 0 12px rgba(242,109,109,.6);animation:blink .6s infinite}
   .eb-lock{color:var(--cyan);font-size:13px;font-weight:650}
+  /* banner position picker */
+  .pos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:rgba(9,10,14,.6);border:1px solid var(--stroke);border-radius:10px;padding:6px}
+  .pos-grid button{aspect-ratio:16/9;border:1px solid var(--stroke);background:rgba(255,255,255,.03);border-radius:6px;cursor:pointer;position:relative;transition:background .15s,border-color .15s}
+  .pos-grid button:hover{background:rgba(255,255,255,.07);border-color:var(--stroke-strong)}
+  .pos-grid button::after{content:"";position:absolute;width:26%;height:20%;background:var(--faint);border-radius:2px}
+  .pos-grid button[data-pos$="left"]::after{left:12%}
+  .pos-grid button[data-pos$="center"]::after{left:50%;margin-left:-13%}
+  .pos-grid button[data-pos$="right"]::after{right:12%}
+  .pos-grid button[data-pos^="top"]::after{top:14%}
+  .pos-grid button[data-pos^="mid"]::after{top:50%;margin-top:-10%}
+  .pos-grid button[data-pos^="bottom"]::after{bottom:14%}
+  .pos-grid button.active{border-color:var(--accent);background:rgba(124,92,255,.14)}
+  .pos-grid button.active::after{background:var(--accent);box-shadow:0 0 8px var(--glow-a)}
   .strip-stage{position:relative;z-index:5;width:min(1180px,94%);height:148px;display:flex;align-items:center;justify-content:center;
     -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
   .strip-canvas{display:block;width:100%;height:100%;position:relative;z-index:1}
@@ -368,6 +381,14 @@
         <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
         <label class="toggle"><input type="checkbox" id="hideUntilSpin"/><span class="track"></span>Hide wheel on stream until it spins</label>
         <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
+        <div class="field">
+          <div class="label" style="margin-top:2px">Banner position</div>
+          <div class="pos-grid" id="posGrid">
+            <button data-pos="top-left"></button><button data-pos="top-center"></button><button data-pos="top-right"></button>
+            <button data-pos="mid-left"></button><button data-pos="mid-center"></button><button data-pos="mid-right"></button>
+            <button data-pos="bottom-left"></button><button data-pos="bottom-center"></button><button data-pos="bottom-right"></button>
+          </div>
+        </div>
       </section>
 
       <!-- Who can enter -->
@@ -433,7 +454,7 @@
   <!-- ============ STAGE ============ -->
   <main class="stage" id="stage">
     <div class="stage-dim" id="stageDim"></div>
-    <div class="stage-top">
+    <div class="stage-top" id="stageTop">
       <div class="entry-banner" id="entryBanner" style="display:none">
         <span class="eb-dot"></span>
         <span class="eb-label">Entries Open</span>
@@ -504,6 +525,7 @@
     entriesOpen:false, keyword:"!join",
     wheelMode:"users",           // "users" | "rewards"
     weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:true, beeps:true, hideUntilSpin:false,
+    bannerPos:"top-center",                       // on-screen position of the Entries Open banner
     lastTick:null,                                // last integer second we beeped for
     restrict:{sub:false, vip:false, mod:false},   // entry gating by chat badge (all false = everyone)
     announce:false,                               // post event messages to chat (needs bot token)
@@ -524,7 +546,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","hideUntilSpin","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","entryBanner","ebKeyword","ebCount","ebTimer","ebLock","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","hideUntilSpin","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","entryBanner","ebKeyword","ebCount","ebTimer","ebLock","stageTop","posGrid","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -568,7 +590,7 @@
       channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
-      entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin
+      entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos
     });
   }
   function applySync(d){
@@ -583,6 +605,7 @@
     if(d.restrict) state.restrict=d.restrict;
     if(typeof d.beeps==="boolean") state.beeps=d.beeps;
     if(typeof d.hideUntilSpin==="boolean") state.hideUntilSpin=d.hideUntilSpin;
+    if(d.bannerPos) state.bannerPos=d.bannerPos;
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
     if(state.spinning){ state.pendingSync=true; return; }
@@ -596,7 +619,7 @@
       channel:state.channel, users:[...state.users.entries()], rewards:state.rewards,
       keyword:state.keyword, wheelMode:state.wheelMode, weighted:state.weighted,
       autoReward:state.autoReward, removeWinner:state.removeWinner, autoSpinEnd:state.autoSpinEnd,
-      restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin,
+      restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos,
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin
     })); }catch(e){}
@@ -616,6 +639,7 @@
       if(s.restrict) state.restrict={sub:!!s.restrict.sub,vip:!!s.restrict.vip,mod:!!s.restrict.mod};
       if(typeof s.beeps==="boolean") state.beeps=s.beeps;
       if(typeof s.hideUntilSpin==="boolean") state.hideUntilSpin=s.hideUntilSpin;
+      if(s.bannerPos) state.bannerPos=s.bannerPos;
       if(el.hideUntilSpin) el.hideUntilSpin.checked=state.hideUntilSpin;
       if(typeof s.announce==="boolean") state.announce=s.announce;
       if(s.botName) state.bot.name=s.botName;
@@ -777,6 +801,17 @@
 
   /* ---------------- Rendering ---------------- */
   function restrictLabel(){ const R=state.restrict, p=[]; if(R.sub)p.push("Subs"); if(R.vip)p.push("VIPs"); if(R.mod)p.push("Mods"); return p.join("/"); }
+  function applyBannerPos(){
+    const t=el.stageTop; if(!t) return;
+    const [v,h]=(state.bannerPos||"top-center").split("-");
+    t.style.top = v==="top" ? "22px" : (v==="mid" ? "50%" : "auto");
+    t.style.bottom = v==="bottom" ? "22px" : "auto";
+    t.style.transform = v==="mid" ? "translateY(-50%)" : "none";
+    t.style.justifyContent = h==="left" ? "flex-start" : (h==="right" ? "flex-end" : "center");
+    t.style.paddingLeft = h==="left" ? "26px" : "0";
+    t.style.paddingRight = h==="right" ? "26px" : "0";
+  }
+  function reflectPosGrid(){ if(!el.posGrid) return; el.posGrid.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.pos===state.bannerPos)); }
   function reflectChips(){
     if(!el.entryBanner) return;
     el.entryBanner.style.display = state.entriesOpen ? "inline-flex" : "none";   // only while entries are open
@@ -820,7 +855,7 @@
     const fr=new FileReader(); fr.onload=e=>{ img.src=e.target.result; }; fr.onerror=()=>cb(null); fr.readAsDataURL(file);
   }
   function reflectMode(){ if(!el.modeSeg)return; el.modeSeg.querySelectorAll("button").forEach(b=>{ const on=b.dataset.mode===state.wheelMode; b.classList.toggle("active",on); b.classList.toggle("rw",on&&b.dataset.mode==="rewards"); }); }
-  function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); updateStripVisibility(); }
+  function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); updateStripVisibility(); applyBannerPos(); reflectPosGrid(); }
 
   /* ---------------- Wheel drawing ---------------- */
   const DPR=Math.min(window.devicePixelRatio||1,2);
@@ -984,6 +1019,7 @@
     el.weighted.onchange=()=>{ state.weighted=el.weighted.checked; renderUsers(); renderWheels(); save(); broadcastSync(); };
     el.autoSpinEnd.onchange=()=>{ state.autoSpinEnd=el.autoSpinEnd.checked; save(); };
     el.hideUntilSpin.onchange=()=>{ state.hideUntilSpin=el.hideUntilSpin.checked; save(); broadcastSync(); updateStripVisibility(); };
+    if(el.posGrid) el.posGrid.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.bannerPos=b.dataset.pos; reflectPosGrid(); applyBannerPos(); save(); broadcastSync(); });
     el.beeps.onchange=()=>{ state.beeps=el.beeps.checked; save(); broadcastSync(); if(state.beeps) beep(880,0.13,0.22,"square"); };
     const onReq=()=>{ state.restrict={sub:el.reqSub.checked,vip:el.reqVip.checked,mod:el.reqMod.checked}; save(); broadcastSync(); reflectChips(); };
     el.reqSub.onchange=onReq; el.reqVip.onchange=onReq; el.reqMod.onchange=onReq;
