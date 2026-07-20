@@ -541,7 +541,7 @@
     writeShared({
       channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
-      rewards:state.rewards.map(r=>({name:rewardName(r)})),   // names only — keep the sync payload small (images stay local)
+      rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps
     });
   }
