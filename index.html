@@ -344,7 +344,7 @@
         <div class="field">
           <div class="tpl"><span class="tpl-l">On open</span><input id="msgOpen" type="text" value="🎡 Giveaway is OPEN! Type {keyword} to enter!" autocomplete="off"/></div>
           <div class="tpl"><span class="tpl-l">On close</span><input id="msgClose" type="text" value="🔒 Entries closed — {count} entered. Spinning the wheel now…" autocomplete="off"/></div>
-          <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 Winner: @{winner}{reward} — congrats! 🎉" autocomplete="off"/></div>
+          <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 @{winner} won {reward} — congrats! 🎉" autocomplete="off"/></div>
           <div class="hint-sm">Placeholders: <b>{keyword} {count} {winner} {reward} {timer}</b></div>
         </div>
       </section>
@@ -451,7 +451,7 @@
     bot:{name:"", token:"", ws:null, ready:false, reconnect:false},
     msgOpen:"🎡 Giveaway is OPEN! Type {keyword} to enter!",
     msgClose:"🔒 Entries closed — {count} entered. Spinning the wheel now…",
-    msgWin:"🏆 Winner: @{winner}{reward} — congrats! 🎉",
+    msgWin:"🏆 @{winner} won {reward} — congrats! 🎉",
     users:new Map(),             // login -> {name, weight}
     rewards:[],
     entryDeadline:null,          // epoch ms when the entry timer ends (null = no timer)
@@ -842,7 +842,8 @@
       } else {
         if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
       }
-      botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.mode==="users"&&p.reward)?(" ("+p.reward+")"):"", count:state.users.size}));
+      const rw = p.mode==="users" ? (p.reward || "the giveaway") : p.label;   // name the prize (or "the giveaway" if none)
+      botSay(fillTpl(state.msgWin,{winner:p.label, reward:rw, count:state.users.size}));
       save(); broadcastSync();
     } else if(state.pendingSync){ state.pendingSync=false; reflectAll(); }
   }
