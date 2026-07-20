@@ -232,10 +232,16 @@
   body.role-stage::before,body.role-stage::after{display:none}
   body.role-stage .hub{cursor:default}
 
-  /* Dock view (?view=dock): only controls + small preview — for OBS Custom Browser Dock */
-  body.role-dock .app{grid-template-columns:1fr}
+  /* Dock view (?view=dock): only controls + small preview — for OBS Custom Browser Dock.
+     Use plain document flow + page scroll instead of an internal 100vh scroller,
+     because OBS's browser dock doesn't size a viewport-height flex/grid scroller reliably. */
+  body.role-dock{overflow:auto;height:auto}
+  body.role-dock .app{display:block;height:auto;min-height:100%}
   body.role-dock .stage{display:none}
+  body.role-dock .rail{height:auto;min-height:100vh;border-right:none;box-shadow:none}
+  body.role-dock .rail-scroll{flex:none;overflow:visible;min-height:0}
   body.role-dock .dock-only{display:flex}
+  html:has(body.role-dock){height:auto;overflow:auto}
 
   @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.05ms!important}body::before{animation:none}.halo{animation:none}.brand .mark{animation:none}}
   @media (max-width:880px){body:not(.role-stage):not(.role-dock) .app{grid-template-columns:1fr;grid-template-rows:auto 1fr}.rail{max-height:44vh}}
