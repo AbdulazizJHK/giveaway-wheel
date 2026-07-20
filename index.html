@@ -312,7 +312,7 @@
   body.role-dock{overflow:auto;height:auto}
   body.role-dock .app{display:block;height:auto;min-height:100%}
   body.role-dock .stage{display:none}
-  body.role-dock .rail{height:auto;min-height:100vh;border-right:none;box-shadow:none}
+  body.role-dock .rail{height:auto;min-height:100vh;border-right:none;box-shadow:none;max-width:480px;margin:0 auto}
   body.role-dock .rail-scroll{flex:none;overflow:visible;min-height:0}
   body.role-dock .dock-only{display:flex}
   html:has(body.role-dock){height:auto;overflow:auto}
@@ -530,7 +530,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "1.0";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "1.1";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={

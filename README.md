@@ -1,4 +1,4 @@
-# 🎡 Giveaway Roulette — for Twitch (v1.0)
+# 🎡 Giveaway Roulette — for Twitch (v1.1)
 
 A live giveaway picker for Twitch streams. Viewers type **`!join`** in chat and a sideways‑scrolling roulette picks the winner — with rewards, prize images, weighted odds, a countdown, an "Entries Open" banner, and automatic chat announcements.
 
