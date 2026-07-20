@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Giveaway Wheel · Twitch</title>
+<style>
+  :root{
+    --bg:#0B0713;
+    --bg-2:#120B20;
+    --panel:rgba(30,20,50,.72);
+    --panel-solid:#150E24;
+    --stroke:rgba(169,112,255,.22);
+    --stroke-strong:rgba(169,112,255,.5);
+    --ink:#EDE9F6;
+    --muted:#9C95B2;
+    --faint:#655C7A;
+    --accent:#B57DFF;
+    --pink:#FF4D9D;
+    --cyan:#2EE6D6;
+    --good:#3DDC84;
+    --warn:#FFB020;
+    --bad:#FF5468;
+    --glow-a:rgba(181,125,255,.55);
+    --glow-p:rgba(255,77,157,.55);
+    --glow-c:rgba(46,230,214,.5);
+    --radius:16px;
+    --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+    --mono:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,monospace;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font);color:var(--ink);
+    background:var(--bg);
+    overflow:hidden;-webkit-font-smoothing:antialiased;position:relative;
+  }
+  /* animated aurora / nebula ground */
+  body::before{
+    content:"";position:fixed;inset:-20%;z-index:-2;
+    background:
+      radial-gradient(48% 46% at 20% 22%, rgba(181,125,255,.28), transparent 60%),
+      radial-gradient(42% 40% at 82% 18%, rgba(255,77,157,.20), transparent 60%),
+      radial-gradient(50% 48% at 72% 88%, rgba(46,230,214,.18), transparent 60%),
+      radial-gradient(46% 44% at 12% 84%, rgba(108,123,255,.20), transparent 60%);
+    filter:blur(30px);animation:drift 26s ease-in-out infinite alternate;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 30%, transparent 40%, rgba(11,7,19,.7) 100%);
+  }
+  @keyframes drift{
+    0%{transform:translate3d(-3%,-2%,0) scale(1.05) rotate(0deg)}
+    100%{transform:translate3d(3%,3%,0) scale(1.15) rotate(8deg)}
+  }
+
+  .app{display:grid;grid-template-columns:370px 1fr;height:100vh;transition:grid-template-columns .35s cubic-bezier(.4,0,.2,1)}
+
+  /* ---------- Control Rail ---------- */
+  .rail{
+    background:linear-gradient(180deg, rgba(26,16,44,.86), rgba(15,9,26,.9));
+    border-right:1px solid var(--stroke);backdrop-filter:blur(16px);
+    display:flex;flex-direction:column;min-height:0;
+    box-shadow:24px 0 70px -34px rgba(0,0,0,.85), inset -1px 0 0 rgba(181,125,255,.08);
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--stroke)}
+  .brand .mark{
+    width:36px;height:36px;border-radius:11px;flex:none;position:relative;
+    background:conic-gradient(from 140deg, var(--accent), var(--pink), var(--cyan), var(--accent));
+    box-shadow:0 0 26px -2px var(--glow-a), 0 0 8px var(--glow-p);animation:spinmark 8s linear infinite;
+  }
+  @keyframes spinmark{to{transform:rotate(360deg)}}
+  .brand .mark::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--bg-2);box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
+  .brand h1{font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;line-height:1.1}
+  .brand h1 span{display:block;font-size:10px;font-weight:600;letter-spacing:.34em;color:var(--accent);margin-top:3px;text-shadow:0 0 12px var(--glow-a)}
+
+  .rail-scroll{overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:20px;flex:1;min-height:0}
+  .rail-scroll::-webkit-scrollbar{width:9px}
+  .rail-scroll::-webkit-scrollbar-thumb{background:rgba(181,125,255,.32);border-radius:20px;border:2px solid transparent;background-clip:content-box}
+
+  .block{display:flex;flex-direction:column;gap:11px}
+  .block>.label{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:8px}
+  .block>.label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--stroke),transparent)}
+
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field small{font-size:11px;color:var(--muted)}
+  input[type=text]{width:100%;background:rgba(8,5,15,.7);border:1px solid var(--stroke);color:var(--ink);font:inherit;font-size:14px;padding:11px 13px;border-radius:11px;outline:none;transition:border-color .2s,box-shadow .2s}
+  input[type=text]:focus{border-color:var(--stroke-strong);box-shadow:0 0 0 3px rgba(181,125,255,.16),0 0 20px -4px var(--glow-a)}
+  input[type=text]::placeholder{color:var(--faint)}
+
+  .row{display:flex;gap:9px}
+  .btn{appearance:none;border:1px solid var(--stroke);background:rgba(255,255,255,.03);color:var(--ink);font:inherit;font-weight:650;font-size:13.5px;padding:11px 15px;border-radius:11px;cursor:pointer;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,background .2s,border-color .2s,box-shadow .2s}
+  .btn:hover{background:rgba(181,125,255,.1);border-color:var(--stroke-strong);box-shadow:0 0 18px -6px var(--glow-a)}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#8039ff);border-color:transparent;color:#fff;box-shadow:0 8px 26px -10px var(--glow-a),0 0 16px -6px var(--glow-a)}
+  .btn.primary:hover{box-shadow:0 10px 34px -8px var(--glow-a),0 0 24px -4px var(--glow-a)}
+  .btn.pink{background:linear-gradient(135deg,var(--pink),#e0357a);border-color:transparent;color:#fff;box-shadow:0 8px 26px -10px var(--glow-p)}
+  .btn.ghost-bad{color:var(--bad);border-color:rgba(255,84,104,.32)}
+  .btn.ghost-bad:hover{background:rgba(255,84,104,.1);box-shadow:0 0 18px -8px rgba(255,84,104,.6)}
+  .btn.small{padding:8px 12px;font-size:12.5px;flex:none}
+
+  /* segmented toggle for wheel content */
+  .seg{display:flex;background:rgba(8,5,15,.65);border:1px solid var(--stroke);border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;font-weight:650;font-size:13px;padding:9px;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+  .seg button.active{color:#fff;background:linear-gradient(135deg,var(--accent),#8039ff);box-shadow:0 4px 16px -6px var(--glow-a)}
+  .seg button.active.rw{background:linear-gradient(135deg,var(--pink),#e0357a);box-shadow:0 4px 16px -6px var(--glow-p)}
+
+  .status{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);padding:9px 12px;border:1px solid var(--stroke);border-radius:11px;background:rgba(8,5,15,.5)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--faint);flex:none}
+  .dot.live{background:var(--good);box-shadow:0 0 0 0 rgba(61,220,132,.6),0 0 10px var(--good);animation:pulse 1.8s infinite}
+  .dot.connecting{background:var(--warn);animation:blink .8s infinite}
+  .dot.error{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(61,220,132,.55),0 0 10px var(--good)}70%{box-shadow:0 0 0 8px rgba(61,220,132,0),0 0 10px var(--good)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0),0 0 10px var(--good)}}
+  @keyframes blink{50%{opacity:.35}}
+  .status b{color:var(--ink);font-weight:650}
+
+  .entry-state{border-radius:12px;padding:12px 14px;border:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(8,5,15,.5)}
+  .entry-state.open{border-color:rgba(61,220,132,.45);background:rgba(61,220,132,.08);box-shadow:0 0 24px -10px rgba(61,220,132,.5)}
+  .entry-state .es-l{font-size:12.5px;color:var(--muted)}
+  .entry-state .es-l b{display:block;color:var(--ink);font-size:14px;font-weight:750;margin-top:2px}
+  .entry-state.open .es-l b{color:var(--good)}
+  .entry-state .es-count{font-family:var(--mono);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+
+  .kw{display:flex;align-items:center;gap:8px}
+  .kw .pfx{color:var(--muted);font-size:13px}
+
+  .list{border:1px solid var(--stroke);border-radius:12px;background:rgba(8,5,15,.4);max-height:190px;overflow-y:auto}
+  .list::-webkit-scrollbar{width:8px}
+  .list::-webkit-scrollbar-thumb{background:rgba(181,125,255,.3);border-radius:20px}
+  .list.rewards{max-height:170px}
+  .item{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .item:last-child{border-bottom:none}
+  .item .idx{font-family:var(--mono);font-size:11px;color:var(--faint);width:22px;flex:none;font-variant-numeric:tabular-nums}
+  .item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .swatch{width:9px;height:9px;border-radius:3px;flex:none;box-shadow:0 0 8px currentColor}
+  .item .x{color:var(--faint);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:6px;flex:none;transition:color .15s,background .15s}
+  .item .x:hover{color:var(--bad);background:rgba(255,84,104,.12)}
+  .empty{padding:16px 12px;text-align:center;color:var(--faint);font-size:12.5px;font-style:italic}
+
+  .list-tools{display:flex;gap:8px;align-items:center}
+  .count-pill{font-family:var(--mono);font-size:12px;color:var(--accent);background:rgba(181,125,255,.14);padding:3px 9px;border-radius:20px;font-variant-numeric:tabular-nums;text-shadow:0 0 10px var(--glow-a)}
+
+  .toggle{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+  .toggle input{display:none}
+  .toggle .track{width:36px;height:20px;border-radius:20px;background:rgba(255,255,255,.1);position:relative;transition:background .2s,box-shadow .2s;flex:none}
+  .toggle .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+  .toggle input:checked+.track{background:var(--accent);box-shadow:0 0 14px -2px var(--glow-a)}
+  .toggle input:checked+.track::after{transform:translateX(16px)}
+
+  /* dock-only: preview + spin */
+  .dock-only{display:none}
+  .dock-preview{flex-direction:column;align-items:center;gap:14px;padding:6px 0 2px}
+  .rail-spin{padding:14px 15px;font-size:16px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#fff;border:none;border-radius:13px;cursor:pointer;background:linear-gradient(135deg,var(--pink),#c9256a 55%,var(--accent));background-size:200% 100%;box-shadow:0 12px 34px -12px var(--glow-p),0 0 20px -6px var(--glow-a);transition:background-position .5s,transform .12s}
+  .rail-spin:hover{background-position:100% 0}
+  .rail-spin:active{transform:translateY(2px)}
+  .rail-spin:disabled{opacity:.5}
+
+  /* ---------- Stage ---------- */
+  .stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;overflow:hidden;gap:26px;padding:30px}
+  .stage-top{position:absolute;top:22px;left:0;right:0;display:flex;justify-content:center;gap:14px;pointer-events:none;z-index:6}
+  .chip{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:30px;background:var(--panel);border:1px solid var(--stroke);backdrop-filter:blur(10px);font-size:13px;color:var(--muted);box-shadow:0 4px 20px -8px rgba(0,0,0,.6)}
+  .chip b{color:var(--ink);font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums}
+  .chip.live-chip{border-color:rgba(61,220,132,.4);box-shadow:0 0 22px -8px rgba(61,220,132,.5)}
+  .chip.open-chip{border-color:var(--stroke-strong);box-shadow:0 0 22px -8px var(--glow-a)}
+
+  .wheel-wrap{position:relative;display:grid;place-items:center;flex:none}
+  /* rotating glow halo behind wheel */
+  .halo{position:absolute;width:112%;height:112%;border-radius:50%;z-index:0;
+    background:conic-gradient(from 0deg, var(--accent), var(--pink), var(--cyan), var(--accent));
+    filter:blur(38px);opacity:.55;animation:spinmark 14s linear infinite}
+  .halo.two{width:126%;height:126%;filter:blur(64px);opacity:.3;animation-duration:22s;animation-direction:reverse}
+  #wheel{display:block;border-radius:50%;position:relative;z-index:1;filter:drop-shadow(0 26px 60px rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(181,125,255,.3));touch-action:none}
+  .hub{position:absolute;z-index:3;width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2a1840,#140b22);border:2px solid rgba(181,125,255,.6);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 6px rgba(11,7,19,.9),0 10px 30px -8px rgba(0,0,0,.8),inset 0 0 22px rgba(181,125,255,.25),0 0 24px -4px var(--glow-a);transition:transform .15s,box-shadow .2s}
+  .hub:hover{transform:scale(1.05);box-shadow:0 0 0 6px rgba(11,7,19,.9),0 0 34px 0 var(--glow-a),inset 0 0 26px rgba(181,125,255,.35)}
+  .hub:active{transform:scale(.97)}
+  .hub.disabled{pointer-events:none;opacity:.55;filter:grayscale(.4)}
+  .hub span{font-size:13px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .pointer{position:absolute;top:-8px;left:50%;transform:translateX(-50%);z-index:4;width:0;height:0;border-left:19px solid transparent;border-right:19px solid transparent;border-top:34px solid var(--pink);filter:drop-shadow(0 4px 10px var(--glow-p))}
+  .pointer::after{content:"";position:absolute;top:-48px;left:-8px;width:16px;height:16px;border-radius:50%;background:var(--pink);box-shadow:0 0 16px 3px var(--glow-p)}
+
+  .spin-cta{display:flex;flex-direction:column;align-items:center;gap:10px;z-index:6}
+  .btn-spin{appearance:none;border:none;cursor:pointer;font:inherit;font-size:19px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;padding:16px 48px;border-radius:15px;background:linear-gradient(135deg,var(--pink),#c9256a 55%,var(--accent));background-size:200% 100%;box-shadow:0 14px 44px -12px var(--glow-p),0 0 22px -6px var(--glow-a);transition:transform .12s,box-shadow .2s,background-position .5s}
+  .btn-spin:hover{background-position:100% 0;box-shadow:0 18px 54px -12px var(--glow-a),0 0 30px -4px var(--glow-p)}
+  .btn-spin:active{transform:translateY(2px) scale(.99)}
+  .btn-spin:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .hint{font-size:12px;color:var(--faint)}
+  .hint kbd{font-family:var(--mono);background:rgba(255,255,255,.07);border:1px solid var(--stroke);border-radius:5px;padding:1px 6px;font-size:11px}
+
+  .float-tools{position:absolute;top:20px;right:20px;display:flex;gap:9px;z-index:7}
+  .icon-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--stroke);background:var(--panel);backdrop-filter:blur(10px);color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:color .2s,border-color .2s,background .2s,box-shadow .2s}
+  .icon-btn:hover{color:var(--ink);border-color:var(--stroke-strong);background:rgba(181,125,255,.14);box-shadow:0 0 18px -6px var(--glow-a)}
+  .icon-btn.active{color:var(--cyan);border-color:rgba(46,230,214,.55);box-shadow:0 0 18px -6px var(--glow-c)}
+
+  /* winner overlay */
+  .winner{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(11,7,19,.72),rgba(11,7,19,.94));backdrop-filter:blur(7px)}
+  .winner.show{display:grid;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .winner-card{text-align:center;padding:40px 56px;max-width:640px;animation:pop .5s cubic-bezier(.2,1.3,.4,1) both}
+  @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .winner-card .eyebrow{font-size:18px;font-weight:800;letter-spacing:.34em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;text-shadow:0 0 24px var(--glow-c)}
+  .winner-card .who{font-size:clamp(40px,7vw,78px);font-weight:800;line-height:1.14;letter-spacing:-.01em;text-wrap:balance;padding:0 6px .18em;background:linear-gradient(135deg,#fff 18%,var(--accent) 66%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 48px var(--glow-a));word-break:break-word;overflow-wrap:anywhere}
+  .winner-card .prize{margin-top:22px;display:inline-flex;flex-direction:column;gap:8px;align-items:center}
+  .winner-card .prize .pl{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint)}
+  .winner-card .prize .pv{font-size:22px;font-weight:700;color:var(--ink);padding:10px 26px;border-radius:12px;border:1px solid var(--stroke-strong);background:rgba(181,125,255,.14);box-shadow:0 0 26px -8px var(--glow-a)}
+  .winner-actions{margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  #confetti{position:fixed;inset:0;z-index:19;pointer-events:none;display:none}
+  #confetti.show{display:block}
+
+  #toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+  .toast{background:var(--panel-solid);border:1px solid var(--stroke-strong);color:var(--ink);padding:10px 18px;border-radius:30px;font-size:13.5px;box-shadow:0 12px 30px -10px rgba(0,0,0,.7),0 0 22px -8px var(--glow-a);animation:toastIn .3s ease,toastOut .3s ease 2.2s forwards;display:flex;align-items:center;gap:9px}
+  .toast b{color:var(--accent)}
+  @keyframes toastIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes toastOut{to{transform:translateY(14px);opacity:0}}
+
+  /* ---------- Role layouts ---------- */
+  /* Full = default: rail + stage. Stream Mode hides rail + transparent. */
+  body.stream .app{grid-template-columns:0 1fr}
+  body.stream .rail{opacity:0;pointer-events:none}
+  body.stream,body.stream .stage{background:transparent}
+  body.stream::before,body.stream::after{opacity:0}
+
+  /* Stage view (?view=stage): transparent, only the wheel — for OBS Browser Source */
+  body.role-stage .app{grid-template-columns:1fr}
+  body.role-stage .rail,body.role-stage .spin-cta,body.role-stage .float-tools,body.role-stage .winner-actions{display:none}
+  body.role-stage,body.role-stage .stage{background:transparent}
+  body.role-stage::before,body.role-stage::after{display:none}
+  body.role-stage .hub{cursor:default}
+
+  /* Dock view (?view=dock): only controls + small preview — for OBS Custom Browser Dock */
+  body.role-dock .app{grid-template-columns:1fr}
+  body.role-dock .stage{display:none}
+  body.role-dock .dock-only{display:flex}
+
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.05ms!important}body::before{animation:none}.halo{animation:none}.brand .mark{animation:none}}
+  @media (max-width:880px){body:not(.role-stage):not(.role-dock) .app{grid-template-columns:1fr;grid-template-rows:auto 1fr}.rail{max-height:44vh}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ CONTROL RAIL ============ -->
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <div class="mark"></div>
+      <h1>Giveaway Wheel<span>Twitch Live</span></h1>
+    </div>
+
+    <div class="rail-scroll">
+
+      <!-- Dock preview + spin (dock view only) -->
+      <section class="block dock-only dock-preview">
+        <canvas class="wheel-canvas" id="dockWheel" data-size="230" width="230" height="230" style="width:230px;height:230px"></canvas>
+        <button class="rail-spin" id="railSpin" style="width:100%">Spin the Wheel</button>
+      </section>
+
+      <!-- Wheel content -->
+      <section class="block">
+        <div class="label">Wheel shows</div>
+        <div class="seg" id="modeSeg">
+          <button data-mode="users" class="active">👥 Entrants</button>
+          <button data-mode="rewards">🎁 Rewards</button>
+        </div>
+      </section>
+
+      <!-- Connect -->
+      <section class="block">
+        <div class="label">Channel</div>
+        <div class="field">
+          <input id="channel" type="text" placeholder="your_twitch_name" autocomplete="off" spellcheck="false" />
+          <small>Reads chat anonymously — no login needed.</small>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="connectBtn">Connect</button>
+          <button class="btn" id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+        <div class="status" id="status"><span class="dot" id="dot"></span><span id="statusText">Not connected</span></div>
+      </section>
+
+      <!-- Entries -->
+      <section class="block">
+        <div class="label">Entries</div>
+        <div class="entry-state" id="entryState">
+          <div class="es-l">Entry keyword<b id="esStatus">Entries closed</b></div>
+          <div class="es-count" id="esCount">0</div>
+        </div>
+        <div class="field">
+          <div class="kw"><span class="pfx">Type to join:</span><input id="keyword" type="text" value="!join" autocomplete="off" spellcheck="false" style="max-width:120px" /></div>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="openBtn" disabled>Open Entries</button>
+          <button class="btn ghost-bad" id="closeBtn" disabled>Close</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="oneEntry" checked/><span class="track"></span>One entry per user</label>
+      </section>
+
+      <!-- Entrants -->
+      <section class="block">
+        <div class="label">Entrants <span class="count-pill" id="userCount">0</span></div>
+        <div class="list" id="userList"><div class="empty">No entrants yet.</div></div>
+        <div class="row list-tools">
+          <input id="manualUser" type="text" placeholder="Add manually…" style="flex:1" autocomplete="off"/>
+          <button class="btn small" id="addUserBtn">Add</button>
+        </div>
+        <button class="btn ghost-bad small" id="clearUsers" style="flex:1">Clear entrants</button>
+      </section>
+
+      <!-- Rewards -->
+      <section class="block">
+        <div class="label">Rewards <span class="count-pill" id="rewardCount">0</span></div>
+        <div class="list rewards" id="rewardList"><div class="empty">No rewards added.</div></div>
+        <div class="row list-tools">
+          <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
+          <button class="btn small" id="addReward">Add</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="autoReward"/><span class="track"></span>Give a reward to entrant winner</label>
+      </section>
+
+      <!-- After spin -->
+      <section class="block">
+        <div class="label">After Spin</div>
+        <label class="toggle"><input type="checkbox" id="removeWinner" checked/><span class="track"></span>Remove winner from wheel</label>
+      </section>
+
+    </div>
+  </aside>
+
+  <!-- ============ STAGE ============ -->
+  <main class="stage" id="stage">
+    <div class="stage-top">
+      <div class="chip live-chip" id="liveChip" style="display:none"><span class="dot live"></span> LIVE · <b id="topCount">0</b> entrants</div>
+      <div class="chip open-chip" id="openChip" style="display:none">🎯 Entries open — type <b style="font-size:13px">!join</b></div>
+    </div>
+
+    <div class="float-tools">
+      <button class="icon-btn" id="streamBtn" title="Stream Mode (transparent, hides controls)">📺</button>
+      <button class="icon-btn" id="fsBtn" title="Fullscreen">⛶</button>
+    </div>
+
+    <div class="wheel-wrap">
+      <div class="halo two"></div>
+      <div class="halo"></div>
+      <div class="pointer"></div>
+      <canvas class="wheel-canvas" id="wheel" data-size="620" width="620" height="620" style="width:620px;height:620px"></canvas>
+      <div class="hub" id="hub"><span>SPIN</span></div>
+    </div>
+
+    <div class="spin-cta">
+      <button class="btn-spin" id="spinBtn">Spin the Wheel</button>
+      <div class="hint">Press <kbd>Space</kbd> to spin · click the hub too</div>
+    </div>
+  </main>
+</div>
+
+<!-- Winner overlay -->
+<div class="winner" id="winner">
+  <div class="winner-card">
+    <div class="eyebrow" id="winnerEyebrow">Winner</div>
+    <div class="who" id="winnerName">—</div>
+    <div class="prize" id="winnerPrize" style="display:none">
+      <span class="pl">Reward</span><span class="pv" id="winnerPrizeVal">—</span>
+    </div>
+    <div class="winner-actions">
+      <button class="btn primary" id="winClose" style="flex:none;padding:12px 26px">Close</button>
+      <button class="btn pink" id="winAgain" style="flex:none;padding:12px 26px">Spin Again</button>
+    </div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+<div id="toast-wrap"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Role ---------------- */
+  const params=new URLSearchParams(location.search);
+  const VIEW=(params.get("view")||"").toLowerCase();   // "", "dock", "stage"
+  const ROLE = VIEW==="stage" ? "stage" : (VIEW==="dock" ? "dock" : "full");
+  const IS_CONTROLLER = ROLE!=="stage";                 // full & dock drive state + Twitch
+  document.body.classList.add("role-"+ROLE);
+  if(ROLE==="stage") document.title="Wheel (Stage)";
+  if(ROLE==="dock")  document.title="Wheel (Controls)";
+
+  const MYID = Math.random().toString(36).slice(2);
+
+  /* ---------------- State ---------------- */
+  const state={
+    ws:null, channel:"", connected:false, reconnect:true,
+    entriesOpen:false, keyword:"!join",
+    wheelMode:"users",           // "users" | "rewards"
+    oneEntry:true, autoReward:false, removeWinner:true,
+    users:new Map(), rewards:[],
+    spinning:false, rotation:0, streamMode:false,
+    renderItems:null,            // frozen list during a spin
+    pendingSync:null,
+  };
+  const SEG=["#B57DFF","#FF4D9D","#2EE6D6","#FFB020","#6C7BFF","#3DDC84","#FF7A45","#C56BFF","#2EC5FF","#FF5C8A"];
+
+  const $=id=>document.getElementById(id);
+  const el={};
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","openBtn","closeBtn","esStatus","esCount","entryState","oneEntry","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
+  el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
+
+  /* ---------------- Cross-window bus (dock <-> stage) ----------------
+     Two transports, so it works everywhere:
+       • BroadcastChannel  — instant, for tabs in the same browser context
+       • shared localStorage + a 250ms poller — works across OBS's separate
+         browser instances (a Browser Source and a Custom Browser Dock),
+         which don't share a BroadcastChannel but DO share localStorage per origin.
+     State snapshots go in gw_shared (idempotent, versioned); one-shot
+     commands (spin / close) go in gw_cmd. No live server required. */
+  let BUS=null; try{ BUS=new BroadcastChannel("gw-wheel"); }catch(e){}
+  let sharedVer=0, lastSeenVer=0, lastCmdId="";
+  const nextVer=()=>{ sharedVer=Math.max(sharedVer+1, Date.now()); return sharedVer; };
+
+  function writeShared(data){
+    const v=nextVer(); lastSeenVer=v;
+    try{ localStorage.setItem("gw_shared", JSON.stringify({v,src:MYID,data})); }catch(e){}
+    if(BUS) BUS.postMessage({kind:"sync",v,src:MYID,data});
+  }
+  function sendCmd(cmd,payload){
+    const id=MYID+":"+Date.now()+":"+Math.random().toString(36).slice(2); lastCmdId=id;
+    try{ localStorage.setItem("gw_cmd", JSON.stringify({id,src:MYID,cmd,payload})); }catch(e){}
+    if(BUS) BUS.postMessage({kind:"cmd",id,src:MYID,cmd,payload});
+  }
+  function handleSync(v,src,data){ if(src===MYID||v<=lastSeenVer) return; lastSeenVer=v; applySync(data); }
+  function handleCmd(id,src,cmd,payload){ if(src===MYID||id===lastCmdId) return; lastCmdId=id;
+    if(cmd==="spin") runSpin(payload,false); else if(cmd==="winner-close") closeWinner(true); }
+
+  if(BUS) BUS.onmessage=e=>{ const m=e.data; if(!m) return; if(m.kind==="sync") handleSync(m.v,m.src,m.data); else if(m.kind==="cmd") handleCmd(m.id,m.src,m.cmd,m.payload); };
+  function pollBus(){
+    try{ const s=localStorage.getItem("gw_shared"); if(s){ const m=JSON.parse(s); handleSync(m.v,m.src,m.data); } }catch(e){}
+    try{ const c=localStorage.getItem("gw_cmd"); if(c){ const m=JSON.parse(c); handleCmd(m.id,m.src,m.cmd,m.payload); } }catch(e){}
+  }
+  window.addEventListener("storage",pollBus);
+  setInterval(pollBus,250);
+
+  function broadcastSync(){
+    if(!IS_CONTROLLER) return;
+    writeShared({
+      channel:state.channel, connected:state.connected, entriesOpen:state.entriesOpen, keyword:state.keyword,
+      wheelMode:state.wheelMode, users:[...state.users.entries()], rewards:state.rewards
+    });
+  }
+  function applySync(d){
+    // stage / mirror windows: adopt controller state
+    if(d.channel!=null) state.channel=d.channel;
+    state.connected=!!d.connected;
+    state.keyword=d.keyword||state.keyword;
+    state.wheelMode=d.wheelMode||state.wheelMode;
+    state.entriesOpen=!!d.entriesOpen;
+    if(Array.isArray(d.users)) state.users=new Map(d.users);
+    if(Array.isArray(d.rewards)) state.rewards=d.rewards;
+    if(state.spinning){ state.pendingSync=true; return; }
+    reflectAll();
+  }
+
+  /* ---------------- Persistence (controller only) ---------------- */
+  function save(){
+    if(!IS_CONTROLLER) return;
+    try{ localStorage.setItem("gw_state",JSON.stringify({
+      channel:state.channel, users:[...state.users.entries()], rewards:state.rewards,
+      keyword:state.keyword, wheelMode:state.wheelMode, oneEntry:state.oneEntry,
+      autoReward:state.autoReward, removeWinner:state.removeWinner
+    })); }catch(e){}
+  }
+  function load(){
+    try{
+      const s=JSON.parse(localStorage.getItem("gw_state")||"{}");
+      if(s.channel){ state.channel=s.channel; if(el.channel) el.channel.value=s.channel; }
+      if(Array.isArray(s.users)) state.users=new Map(s.users);
+      if(Array.isArray(s.rewards)) state.rewards=s.rewards;
+      if(s.keyword){ state.keyword=s.keyword; if(el.keyword) el.keyword.value=s.keyword; }
+      if(s.wheelMode) state.wheelMode=s.wheelMode;
+      if(typeof s.oneEntry==="boolean") state.oneEntry=s.oneEntry;
+      if(typeof s.autoReward==="boolean") state.autoReward=s.autoReward;
+      if(typeof s.removeWinner==="boolean") state.removeWinner=s.removeWinner;
+    }catch(e){}
+  }
+
+  /* ---------------- Helpers ---------------- */
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  function toast(html){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=html; $("toast-wrap").appendChild(t); setTimeout(()=>t.remove(),2600); }
+  function items(){ return state.renderItems!=null ? state.renderItems : (state.wheelMode==="users" ? [...state.users.values()] : state.rewards.slice()); }
+
+  /* ---------------- Twitch IRC (controller only) ---------------- */
+  function setStatus(cls,text){ if(!el.dot)return; el.dot.className="dot"+(cls?" "+cls:""); el.statusText.textContent=text; }
+  function connect(){
+    const ch=el.channel.value.trim().toLowerCase().replace(/^#/,"").replace(/[^a-z0-9_]/g,"");
+    if(!ch){ toast("Enter a Twitch channel name first."); el.channel.focus(); return; }
+    state.channel=ch; el.channel.value=ch; save(); broadcastSync();
+    disconnectWs(false); state.reconnect=true; setStatus("connecting","Connecting…");
+    let ws; try{ ws=new WebSocket("wss://irc-ws.chat.twitch.tv:443"); }catch(e){ setStatus("error","Connection failed"); return; }
+    state.ws=ws;
+    ws.onopen=()=>{ const nick="justinfan"+Math.floor(Math.random()*90000+10000); ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands"); ws.send("NICK "+nick); ws.send("JOIN #"+ch); };
+    ws.onmessage=ev=>{ ev.data.split("\r\n").forEach(l=>{ if(l) handleIRC(l,ws); }); };
+    ws.onclose=()=>{ if(state.connected){ setStatus("error","Disconnected"); setConnectedUI(false); } if(state.reconnect){ setStatus("connecting","Reconnecting…"); setTimeout(()=>{ if(state.reconnect) connect(); },2500); } };
+    ws.onerror=()=>setStatus("error","Connection error");
+  }
+  function handleIRC(line,ws){
+    if(line.startsWith("PING")){ ws.send("PONG :tmi.twitch.tv"); return; }
+    const m=parseIRC(line);
+    if(m.command==="366"){ state.connected=true; setConnectedUI(true); setStatus("live","Connected to #"+state.channel); broadcastSync(); return; }
+    if(m.command==="NOTICE" && /authentication failed|improperly formatted/i.test(m.params||"")){ setStatus("error","Channel not found"); return; }
+    if(m.command==="PRIVMSG"){
+      const login=(m.prefix||"").split("!")[0];
+      const disp=(m.tags["display-name"]||login).trim();
+      const text=m.params.substring(m.params.indexOf(" :")+2);
+      onChat(login,disp,text);
+    }
+  }
+  function parseIRC(line){ const o={tags:{},prefix:null,command:"",params:""}; let r=line;
+    if(r[0]==="@"){ const sp=r.indexOf(" "); r.slice(1,sp).split(";").forEach(p=>{const i=p.indexOf("=");o.tags[p.slice(0,i)]=p.slice(i+1);}); r=r.slice(sp+1); }
+    if(r[0]===":"){ const sp=r.indexOf(" "); o.prefix=r.slice(1,sp); r=r.slice(sp+1); }
+    const sp=r.indexOf(" "); if(sp===-1) o.command=r; else { o.command=r.slice(0,sp); o.params=r.slice(sp+1); } return o; }
+  function onChat(login,disp,text){
+    if(!state.entriesOpen) return;
+    if(text.trim().split(/\s+/)[0].toLowerCase()!==state.keyword.toLowerCase()) return;
+    if(state.oneEntry && state.users.has(login)) return;
+    if(!state.users.has(login)){ state.users.set(login,disp); renderUsers(); renderWheels(); save(); broadcastSync(); toast(`<b>${esc(disp)}</b> joined!`); }
+  }
+  function disconnectWs(userInit){ state.reconnect=false; if(state.ws){ try{state.ws.close();}catch(e){} state.ws=null; } if(userInit){ state.connected=false; setConnectedUI(false); setStatus("","Not connected"); broadcastSync(); } }
+  function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
+
+  /* ---------------- Entries ---------------- */
+  function openEntries(){ if(!state.connected)return; state.keyword=el.keyword.value.trim()||"!join"; el.keyword.value=state.keyword; state.entriesOpen=true; el.esStatus.textContent="Entries OPEN"; el.entryState.classList.add("open"); el.open.disabled=true; el.close.disabled=false; save(); broadcastSync(); reflectChips(); toast(`Entries open — viewers type <b>${esc(state.keyword)}</b>`); }
+  function closeEntries(){ state.entriesOpen=false; if(el.esStatus){ el.esStatus.textContent="Entries closed"; el.entryState.classList.remove("open"); el.open.disabled=!state.connected; el.close.disabled=true; } broadcastSync(); reflectChips(); }
+
+  /* ---------------- Rendering ---------------- */
+  function reflectChips(){
+    if(el.liveChip) el.liveChip.style.display=state.connected?"flex":"none";
+    if(el.openChip){ el.openChip.style.display=state.entriesOpen?"flex":"none"; const b=el.openChip.querySelector("b"); if(b) b.textContent=state.keyword; }
+  }
+  function renderUsers(){
+    const n=state.users.size;
+    if(el.userCount) el.userCount.textContent=n;
+    if(el.esCount) el.esCount.textContent=n;
+    if(el.topCount) el.topCount.textContent=n;
+    if(!el.userList) return;
+    if(n===0){ el.userList.innerHTML='<div class="empty">No entrants yet.</div>'; return; }
+    let h="",i=0; for(const [login,disp] of state.users){ const c=SEG[i%SEG.length]; h+=`<div class="item"><span class="idx">${++i}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(disp)}</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
+    el.userList.innerHTML=h;
+    el.userList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.users.delete(x.dataset.login); renderUsers(); renderWheels(); save(); broadcastSync(); });
+  }
+  function renderRewards(){
+    if(el.rewardCount) el.rewardCount.textContent=state.rewards.length;
+    if(!el.rewardList) return;
+    if(state.rewards.length===0){ el.rewardList.innerHTML='<div class="empty">No rewards added.</div>'; return; }
+    let h=""; state.rewards.forEach((r,i)=>{ const c=SEG[i%SEG.length]; h+=`<div class="item"><span class="idx">${i+1}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(r)}</span><span class="x" data-i="${i}">×</span></div>`; });
+    el.rewardList.innerHTML=h;
+    el.rewardList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.rewards.splice(+x.dataset.i,1); renderRewards(); renderWheels(); save(); broadcastSync(); });
+  }
+  function reflectMode(){ if(!el.modeSeg)return; el.modeSeg.querySelectorAll("button").forEach(b=>{ const on=b.dataset.mode===state.wheelMode; b.classList.toggle("active",on); b.classList.toggle("rw",on&&b.dataset.mode==="rewards"); }); }
+  function reflectAll(){ reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); }
+
+  /* ---------------- Wheel drawing ---------------- */
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+  function fitCanvas(cv){ const s=+cv.dataset.size; cv.width=s*DPR; cv.height=s*DPR; cv.style.width=s+"px"; cv.style.height=s+"px"; const c=cv.getContext("2d"); c.setTransform(DPR,0,0,DPR,0,0); }
+  function renderWheels(){ document.querySelectorAll("canvas.wheel-canvas").forEach(drawWheel); }
+  function drawWheel(cv){
+    const c=cv.getContext("2d"), size=+cv.dataset.size, R=size/2, cx=R, cy=R;
+    c.setTransform(DPR,0,0,DPR,0,0); c.clearRect(0,0,size,size);
+    const list=items(), n=list.length;
+    // rim
+    c.save(); c.beginPath(); c.arc(cx,cy,R-3,0,Math.PI*2); c.lineWidth=6; c.strokeStyle="rgba(181,125,255,.55)"; c.stroke(); c.restore();
+    if(n===0){
+      c.fillStyle="#120B20"; c.beginPath(); c.arc(cx,cy,R-8,0,Math.PI*2); c.fill();
+      c.fillStyle="#6a6086"; c.textAlign="center"; c.textBaseline="middle";
+      c.font="600 "+Math.max(13,size*0.036)+"px "+FONT;
+      c.fillText(state.wheelMode==="users"?"Waiting for entrants…":"Add rewards…",cx,cy-6);
+      c.font="400 "+Math.max(10,size*0.023)+"px "+FONT; c.fillStyle="#4a4260";
+      c.fillText(state.wheelMode==="users"?("Chat types "+state.keyword):"Use the Rewards list",cx,cy+size*0.045);
+      return;
+    }
+    const per=(Math.PI*2)/n;
+    c.save(); c.translate(cx,cy); c.rotate(state.rotation);
+    for(let i=0;i<n;i++){
+      const a0=i*per,a1=a0+per,col=SEG[i%SEG.length];
+      c.beginPath(); c.moveTo(0,0); c.arc(0,0,R-8,a0,a1); c.closePath();
+      c.fillStyle=col; c.fill();
+      c.fillStyle="rgba(0,0,0,"+(i%2?0.14:0.02)+")"; c.fill();
+      c.strokeStyle="rgba(11,7,19,.55)"; c.lineWidth=2; c.stroke();
+      c.save(); c.rotate(a0+per/2); c.textAlign="right"; c.textBaseline="middle"; c.fillStyle=ink(col);
+      const fs=Math.max(9,Math.min(size*0.04,(size*0.048)-n*(size*0.0006)));
+      c.font="700 "+fs+"px "+FONT;
+      let t=list[i]; const maxw=R-size*0.11;
+      if(c.measureText(t).width>maxw){ while(t.length>1&&c.measureText(t+"…").width>maxw) t=t.slice(0,-1); t+="…"; }
+      c.fillText(t,R-size*0.045,0); c.restore();
+    }
+    c.restore();
+  }
+  const FONT='"Segoe UI",system-ui,sans-serif';
+  function ink(hex){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return (0.299*r+0.587*g+0.114*b)>150?"rgba(18,8,26,.92)":"rgba(255,255,255,.96)"; }
+
+  /* ---------------- Spin ---------------- */
+  function requestSpin(){
+    if(ROLE==="stage") return;              // stage never initiates
+    if(state.spinning) return;
+    const list=items(), n=list.length;
+    if(n===0){ toast(state.wheelMode==="users"?"No entrants on the wheel yet.":"Add some rewards first."); return; }
+    const winnerIdx=Math.floor(Math.random()*n);
+    const turns=6+Math.floor(Math.random()*3);
+    const dur=5200+Math.floor(Math.random()*800);
+    const mode=state.wheelMode;
+    let reward=null;
+    if(mode==="users" && state.autoReward && state.rewards.length) reward=state.rewards[0];
+    const payload={mode,items:list.slice(),winnerIdx,turns,dur,label:list[winnerIdx],reward};
+    sendCmd("spin",payload);
+    runSpin(payload,true);
+  }
+  function runSpin(p,authoritative){
+    if(state.spinning) return;
+    state.spinning=true; state.renderItems=p.items.slice();
+    setSpinUI(true);
+    const n=p.items.length, per=(Math.PI*2)/n, pointer=-Math.PI/2, center=p.winnerIdx*per+per/2;
+    const cur=state.rotation%(Math.PI*2);
+    const target=(pointer-center-cur)-(Math.PI*2)*p.turns;
+    const start=state.rotation, t0=performance.now();
+    (function frame(now){
+      const x=Math.min(1,(now-t0)/p.dur), e=1-Math.pow(1-x,5);
+      state.rotation=start+target*e; renderWheels();
+      if(x<1) requestAnimationFrame(frame); else endSpin(p,authoritative);
+    })(performance.now());
+  }
+  function endSpin(p,authoritative){
+    state.spinning=false; setSpinUI(false); state.renderItems=null;
+    showWinner(p.mode, p.label, p.mode==="users"?p.reward:null);
+    chime();
+    if(authoritative){
+      if(p.mode==="users"){
+        if(p.reward && state.autoReward){ const i=state.rewards.indexOf(p.reward); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
+        if(state.removeWinner){ for(const [login,disp] of state.users){ if(disp===p.label){ state.users.delete(login); break; } } renderUsers(); }
+      } else {
+        if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
+      }
+      save(); broadcastSync();
+    } else if(state.pendingSync){ state.pendingSync=false; reflectAll(); }
+  }
+  function setSpinUI(on){ [el.spinBtn,el.railSpin].forEach(b=>{ if(b) b.disabled=on; }); if(el.hub) el.hub.classList.toggle("disabled",on); }
+
+  /* ---------------- Winner ---------------- */
+  function showWinner(mode,label,reward){
+    if(el.winnerEyebrow) el.winnerEyebrow.textContent = mode==="users" ? "Winner" : "Prize";
+    el.winnerName.textContent=label;
+    if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
+    el.winner.classList.add("show"); burst();
+  }
+  function closeWinner(fromBus){ el.winner.classList.remove("show"); stopBurst(); renderWheels(); if(!fromBus) sendCmd("winner-close",{}); }
+
+  /* confetti */
+  const cctx=el.confetti.getContext("2d"); let parts=[],raf=null;
+  function sizeConf(){ el.confetti.width=innerWidth; el.confetti.height=innerHeight; }
+  function burst(){ sizeConf(); el.confetti.classList.add("show"); parts=[]; const cols=["#B57DFF","#FF4D9D","#2EE6D6","#FFB020","#6C7BFF","#3DDC84","#fff"];
+    for(let i=0;i<190;i++) parts.push({x:innerWidth/2+(Math.random()-.5)*240,y:innerHeight*0.42,vx:(Math.random()-.5)*17,vy:-(Math.random()*16+6),g:0.32+Math.random()*0.18,w:6+Math.random()*7,h:9+Math.random()*9,rot:Math.random()*6.28,vr:(Math.random()-.5)*0.4,col:cols[i%cols.length],life:0,ttl:120+Math.random()*60});
+    if(!raf) raf=requestAnimationFrame(confFrame); }
+  function confFrame(){ cctx.clearRect(0,0,el.confetti.width,el.confetti.height); let alive=0;
+    for(const p of parts){ p.life++; if(p.life>p.ttl) continue; alive++; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.vx*=0.99; p.rot+=p.vr; const a=Math.max(0,1-p.life/p.ttl); cctx.save(); cctx.translate(p.x,p.y); cctx.rotate(p.rot); cctx.globalAlpha=a; cctx.fillStyle=p.col; cctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); cctx.restore(); }
+    raf = alive>0 ? requestAnimationFrame(confFrame) : null; }
+  function stopBurst(){ if(raf){ cancelAnimationFrame(raf); raf=null; } cctx.clearRect(0,0,el.confetti.width,el.confetti.height); el.confetti.classList.remove("show"); }
+
+  /* sound */
+  let ac=null;
+  function chime(){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); const t0=ac.currentTime;
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ const o=ac.createOscillator(),g=ac.createGain(); o.type="triangle"; o.frequency.value=f; o.connect(g); g.connect(ac.destination); const t=t0+i*0.09; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.16,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.5); o.start(t); o.stop(t+0.55); }); }catch(e){} }
+
+  /* stream / fullscreen */
+  function toggleStream(){ state.streamMode=!state.streamMode; document.body.classList.toggle("stream",state.streamMode); el.streamBtn.classList.toggle("active",state.streamMode); if(state.streamMode) toast("Stream Mode on — background transparent for OBS"); }
+  function toggleFs(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+
+  /* ---------------- Wiring (controllers) ---------------- */
+  if(IS_CONTROLLER){
+    el.connect.onclick=connect;
+    el.disconnect.onclick=()=>{ disconnectWs(true); closeEntries(); };
+    el.channel.addEventListener("keydown",e=>{ if(e.key==="Enter") connect(); });
+    el.open.onclick=openEntries; el.close.onclick=closeEntries;
+    el.keyword.addEventListener("change",()=>{ state.keyword=el.keyword.value.trim()||"!join"; el.keyword.value=state.keyword; save(); broadcastSync(); reflectChips(); });
+    el.oneEntry.onchange=()=>{ state.oneEntry=el.oneEntry.checked; save(); };
+    el.autoReward.onchange=()=>{ state.autoReward=el.autoReward.checked; save(); };
+    el.removeWinner.onchange=()=>{ state.removeWinner=el.removeWinner.checked; save(); };
+    el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
+
+    const addU=()=>{ const v=el.manualUser.value.trim(); if(!v)return; const login=v.toLowerCase().replace(/[^a-z0-9_]/g,"")||("guest"+state.users.size); if(!state.users.has(login)){ state.users.set(login,v); renderUsers(); renderWheels(); save(); broadcastSync(); } el.manualUser.value=""; el.manualUser.focus(); };
+    el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
+    el.clearUsers.onclick=()=>{ if(state.users.size){ state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); } };
+    const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push(v); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
+    el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
+    if(el.railSpin) el.railSpin.onclick=requestSpin;
+  }
+
+  /* Wiring (all) */
+  if(el.spinBtn) el.spinBtn.onclick=requestSpin;
+  if(el.hub) el.hub.onclick=requestSpin;
+  el.winClose.onclick=()=>closeWinner(false);
+  el.winAgain.onclick=()=>{ closeWinner(false); setTimeout(requestSpin,250); };
+  if(el.streamBtn) el.streamBtn.onclick=toggleStream;
+  if(el.fsBtn) el.fsBtn.onclick=toggleFs;
+  document.addEventListener("keydown",e=>{ if(e.code==="Space"&&!/input|textarea/i.test(e.target.tagName)){ e.preventDefault(); if(el.winner.classList.contains("show"))return; requestSpin(); } if(e.key==="Escape"&&el.winner.classList.contains("show")) closeWinner(false); });
+  addEventListener("resize",()=>{ if(el.confetti.classList.contains("show")) sizeConf(); });
+
+  /* ---------------- Init ---------------- */
+  document.querySelectorAll("canvas.wheel-canvas").forEach(fitCanvas);
+  if(IS_CONTROLLER){ load(); reflectAll(); broadcastSync(); }   // publish initial snapshot for any stage
+  else { pollBus(); reflectAll(); }                              // stage adopts current shared state
+  renderWheels();
+})();
+</script>
+</body>
+</html>
