@@ -328,7 +328,7 @@
   <aside class="rail" id="rail">
     <div class="brand">
       <div class="mark"></div>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.0</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.2</b></span></h1>
     </div>
 
     <div class="rail-scroll">
@@ -457,7 +457,7 @@
       <!-- Footer: feedback + version -->
       <section class="block rail-foot">
         <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-        <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.0</b></div>
+        <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.2</b></div>
       </section>
 
     </div>
@@ -530,7 +530,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "1.1";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "1.2";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={
@@ -765,7 +765,12 @@
     ws.onmessage=ev=>{ ev.data.split("\r\n").forEach(l=>{ if(!l) return;
       if(l.startsWith("PING")){ ws.send("PONG :tmi.twitch.tv"); return; }
       const m=parseIRC(l);
-      if(m.command==="001"){ state.bot.ready=true; setBotStatus("live","Bot ready — @"+name); if(state.channel) ws.send("JOIN #"+state.channel); }
+      if(m.command==="001"){ state.bot.ready=true;
+        const realLogin=((m.params||"").trim().split(/\s+/)[0]||name).toLowerCase();   // Twitch attributes messages to the TOKEN's account, not NICK — this is who chat sees
+        state.bot.login=realLogin;
+        if(realLogin && realLogin!==name){ setBotStatus("live","Posting as @"+realLogin+" (not @"+name+")"); toast("Heads up: this token belongs to @"+realLogin+", so messages post as @"+realLogin+". To post as @"+name+", generate the token while logged into that account."); }
+        else setBotStatus("live","Bot ready — @"+realLogin);
+        if(state.channel) ws.send("JOIN #"+state.channel); }
       else if(m.command==="NOTICE" && /authentication failed|Login unsuccessful|Improperly formatted auth/i.test(m.params||"")){ state.bot.ready=false; state.bot.reconnect=false; setBotStatus("error","Bad token — regenerate it"); }
     }); };
     ws.onclose=()=>{ state.bot.ready=false; if(state.bot.reconnect){ setBotStatus("connecting","Bot reconnecting…"); setTimeout(()=>{ if(state.bot.reconnect) connectBot(); },3000); } else setBotStatus("","Bot not connected"); };
