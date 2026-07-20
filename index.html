@@ -73,6 +73,13 @@
   .block{display:flex;flex-direction:column;gap:11px}
   .block>.label{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:8px}
   .block>.label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--stroke),transparent)}
+  /* collapsible sections */
+  .block.collapsible>.label{cursor:pointer;user-select:none;transition:color .15s}
+  .block.collapsible>.label:hover{color:var(--muted)}
+  .block.collapsible>.label::before{content:"▸";font-size:9px;color:var(--faint);display:inline-block;transition:transform .15s;transform-origin:45% 55%}
+  .block.collapsible:not(.collapsed)>.label::before{transform:rotate(90deg)}
+  .block.collapsed{gap:0}
+  .block.collapsed>*:not(.label){display:none!important}
 
   .field{display:flex;flex-direction:column;gap:6px}
   .field small{font-size:11px;color:var(--muted)}
@@ -314,7 +321,7 @@
       </section>
 
       <!-- Who can enter -->
-      <section class="block">
+      <section class="block collapsible collapsed" data-sec="roles">
         <div class="label">Who can enter</div>
         <label class="toggle"><input type="checkbox" id="reqSub"/><span class="track"></span>Subscribers</label>
         <label class="toggle"><input type="checkbox" id="reqVip"/><span class="track"></span>VIPs</label>
@@ -323,7 +330,7 @@
       </section>
 
       <!-- Chat announcements -->
-      <section class="block">
+      <section class="block collapsible collapsed" data-sec="chat">
         <div class="label">Chat announcements</div>
         <label class="toggle"><input type="checkbox" id="announce"/><span class="track"></span>Post event messages to chat</label>
         <div class="field">
@@ -353,7 +360,7 @@
       </section>
 
       <!-- Rewards -->
-      <section class="block">
+      <section class="block collapsible" data-sec="rewards">
         <div class="label">Rewards <span class="count-pill" id="rewardCount">0</span></div>
         <div class="list rewards" id="rewardList"><div class="empty">No rewards added.</div></div>
         <div class="row list-tools">
@@ -895,10 +902,28 @@
   document.addEventListener("keydown",e=>{ if(e.code==="Space"&&!/input|textarea/i.test(e.target.tagName)){ e.preventDefault(); if(el.winner.classList.contains("show"))return; requestSpin(); } if(e.key==="Escape"&&el.winner.classList.contains("show")) closeWinner(false); });
   addEventListener("resize",()=>{ if(el.confetti.classList.contains("show")) sizeConf(); });
 
+  /* ---------------- Collapsible sections (compact mode) ---------------- */
+  function initCollapsible(){
+    let ui={}; try{ ui=JSON.parse(localStorage.getItem("gw_ui")||"{}"); }catch(e){}
+    document.querySelectorAll(".block.collapsible").forEach(b=>{
+      const k=b.dataset.sec;
+      if(k && k in ui) b.classList.toggle("collapsed", !!ui[k]);   // restore saved state (else HTML default)
+      const lab=b.querySelector(".label");
+      if(lab && !lab.dataset.wired){ lab.dataset.wired="1";
+        lab.addEventListener("click",()=>{
+          const now=b.classList.toggle("collapsed");
+          let u={}; try{ u=JSON.parse(localStorage.getItem("gw_ui")||"{}"); }catch(e){}
+          u[k]=now; try{ localStorage.setItem("gw_ui",JSON.stringify(u)); }catch(e){}
+        });
+      }
+    });
+  }
+
   /* ---------------- Init ---------------- */
   document.querySelectorAll("canvas.wheel-canvas").forEach(fitCanvas);
   if(IS_CONTROLLER){ load(); reflectAll(); broadcastSync(); }   // publish initial snapshot for any stage
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
+  initCollapsible();
   renderWheels();
 })();
 </script>
