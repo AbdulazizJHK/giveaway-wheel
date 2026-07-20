@@ -392,7 +392,7 @@
           <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
           <button class="btn small" id="addReward">Add</button>
         </div>
-        <div class="hint-sm">🎁 In <b>Entrants</b> mode the winner is automatically given the <b>top reward</b> here — and it's named in the winner chat message (one message). Each spin uses the next reward.</div>
+        <div class="hint-sm">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the wheel picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>.</div>
       </section>
 
       <!-- After spin -->
@@ -825,8 +825,15 @@
     const jitter=Math.random()*0.5-0.25;                       // small offset so it doesn't stop dead-centre
     const dur=5200+Math.floor(Math.random()*900), mode=state.wheelMode;
     let reward=null;
-    if(mode==="users" && state.rewards.length) reward=state.rewards[0];   // auto-give the top reward to the winner
-    const payload={mode,segs:S,cells,winCell,jitter,dur,label:S[winnerIdx].label,color:S[winnerIdx].color,reward};
+    if(mode==="users" && state.rewards.length) reward=state.rewards[0];   // Entrants mode: auto-give the top reward
+    let winnerUser=null, winnerUserLogin=null;
+    if(mode==="rewards" && state.users.size){                             // Rewards mode: draw a random entrant to receive the prize
+      const ue=[...state.users.entries()], wtot=ue.reduce((a,e)=>a+(state.weighted?userWeight(e[1]):1),0);
+      let rr=Math.random()*wtot, wi=0;
+      for(let i=0;i<ue.length;i++){ rr-=(state.weighted?userWeight(ue[i][1]):1); if(rr<=0){ wi=i; break; } }
+      winnerUserLogin=ue[wi][0]; winnerUser=userName(ue[wi][1]);
+    }
+    const payload={mode,segs:S,cells,winCell,jitter,dur,label:S[winnerIdx].label,color:S[winnerIdx].color,reward,winnerUser,winnerUserLogin};
     sendCmd("spin",payload);
     runSpin(payload,true);
   }
@@ -844,17 +851,23 @@
   }
   function endSpin(p,authoritative){
     state.spinning=false; setSpinUI(false); state.renderSegs=null; state.spinCells=null;
-    showWinner(p.mode, p.label, p.mode==="users"?p.reward:null, p.color);
+    if(p.mode==="users") showWinner("users", p.label, p.reward, p.color);
+    else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color);   // rewards wheel + drawn entrant → Winner + prize
+    else showWinner("rewards", p.label, null, p.color);                          // no entrants → just the prize
     chime();
     if(authoritative){
       if(p.mode==="users"){
         if(p.reward){ const i=state.rewards.indexOf(p.reward); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
         if(state.removeWinner){ for(const [login,u] of state.users){ if(userName(u)===p.label){ state.users.delete(login); break; } } renderUsers(); }
+        botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
       } else {
-        if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
+        if(p.winnerUser) botSay(fillTpl(state.msgWin,{winner:p.winnerUser, reward:p.label, count:state.users.size}));
+        else botSay(fillTpl("🎁 The wheel landed on {reward}! 🎉",{reward:p.label}));
+        if(state.removeWinner){
+          const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); }
+          if(p.winnerUserLogin && state.users.has(p.winnerUserLogin)){ state.users.delete(p.winnerUserLogin); renderUsers(); }
+        }
       }
-      if(p.mode==="users") botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
-      else botSay(fillTpl("🎁 The wheel landed on {reward}! 🎉",{reward:p.label, winner:p.label}));   // rewards-mode: no user to name
       save(); broadcastSync();
     } else if(state.pendingSync){ state.pendingSync=false; reflectAll(); }
   }
