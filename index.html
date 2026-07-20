@@ -129,6 +129,9 @@
   .chip .cd.urgent{color:var(--bad);text-shadow:0 0 10px rgba(255,84,104,.6)}
   .wbadge{font-family:var(--mono);font-size:11px;color:var(--warn);background:rgba(255,176,32,.16);padding:2px 7px;border-radius:20px;flex:none;font-variant-numeric:tabular-nums}
   .hint-sm{font-size:11px;line-height:1.5;color:var(--muted)}
+  .tpl{display:flex;flex-direction:column;gap:4px}
+  .tpl-l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .tpl input{font-size:12.5px}
   .chip .lockbadge{color:var(--cyan);font-weight:650;font-size:12px;white-space:nowrap}
 
   .kw{display:flex;align-items:center;gap:8px}
@@ -321,6 +324,25 @@
         <div class="hint-sm">🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.</div>
       </section>
 
+      <!-- Chat announcements -->
+      <section class="block">
+        <div class="label">Chat announcements</div>
+        <label class="toggle"><input type="checkbox" id="announce"/><span class="track"></span>Post event messages to chat</label>
+        <div class="field">
+          <input id="botName" type="text" placeholder="Sender username (your channel or a bot)" autocomplete="off" spellcheck="false"/>
+          <input id="botToken" type="password" placeholder="OAuth token (chat:edit)" autocomplete="off" spellcheck="false"/>
+          <small>Sending chat needs a token — get one at <b>twitchtokengenerator.com</b> (scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.</small>
+        </div>
+        <div class="row"><button class="btn" id="botConnect">Connect bot</button></div>
+        <div class="status"><span class="dot" id="botDot"></span><span id="botStatus">Bot not connected</span></div>
+        <div class="field">
+          <div class="tpl"><span class="tpl-l">On open</span><input id="msgOpen" type="text" value="🎡 Giveaway is OPEN! Type {keyword} to enter!" autocomplete="off"/></div>
+          <div class="tpl"><span class="tpl-l">On close</span><input id="msgClose" type="text" value="🔒 Entries closed — {count} entered. Spinning the wheel now…" autocomplete="off"/></div>
+          <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 Winner: @{winner}{reward} — congrats! 🎉" autocomplete="off"/></div>
+          <div class="hint-sm">Placeholders: <b>{keyword} {count} {winner} {reward} {timer}</b></div>
+        </div>
+      </section>
+
       <!-- Entrants -->
       <section class="block">
         <div class="label">Entrants <span class="count-pill" id="userCount">0</span></div>
@@ -419,6 +441,11 @@
     weighted:false, autoReward:false, removeWinner:true, autoSpinEnd:false, beeps:true,
     lastTick:null,                                // last integer second we beeped for
     restrict:{sub:false, vip:false, mod:false},   // entry gating by chat badge (all false = everyone)
+    announce:false,                               // post event messages to chat (needs bot token)
+    bot:{name:"", token:"", ws:null, ready:false, reconnect:false},
+    msgOpen:"🎡 Giveaway is OPEN! Type {keyword} to enter!",
+    msgClose:"🔒 Entries closed — {count} entered. Spinning the wheel now…",
+    msgWin:"🏆 Winner: @{winner}{reward} — congrats! 🎉",
     users:new Map(),             // login -> {name, weight}
     rewards:[],
     entryDeadline:null,          // epoch ms when the entry timer ends (null = no timer)
@@ -430,7 +457,7 @@
 
   const $=id=>document.getElementById(id);
   const el={};
-  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
+  ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","reqSub","reqVip","reqMod","beeps","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","liveChip","openChip","topCount","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
 
@@ -500,7 +527,9 @@
       channel:state.channel, users:[...state.users.entries()], rewards:state.rewards,
       keyword:state.keyword, wheelMode:state.wheelMode, weighted:state.weighted,
       autoReward:state.autoReward, removeWinner:state.removeWinner, autoSpinEnd:state.autoSpinEnd,
-      restrict:state.restrict, beeps:state.beeps
+      restrict:state.restrict, beeps:state.beeps,
+      announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
+      msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin
     })); }catch(e){}
   }
   function load(){
@@ -517,6 +546,18 @@
       if(typeof s.autoSpinEnd==="boolean") state.autoSpinEnd=s.autoSpinEnd;
       if(s.restrict) state.restrict={sub:!!s.restrict.sub,vip:!!s.restrict.vip,mod:!!s.restrict.mod};
       if(typeof s.beeps==="boolean") state.beeps=s.beeps;
+      if(typeof s.announce==="boolean") state.announce=s.announce;
+      if(s.botName) state.bot.name=s.botName;
+      if(s.botToken) state.bot.token=s.botToken;
+      if(s.msgOpen) state.msgOpen=s.msgOpen;
+      if(s.msgClose) state.msgClose=s.msgClose;
+      if(s.msgWin) state.msgWin=s.msgWin;
+      if(el.announce) el.announce.checked=state.announce;
+      if(el.botName) el.botName.value=state.bot.name;
+      if(el.botToken) el.botToken.value=state.bot.token;
+      if(el.msgOpen) el.msgOpen.value=state.msgOpen;
+      if(el.msgClose) el.msgClose.value=state.msgClose;
+      if(el.msgWin) el.msgWin.value=state.msgWin;
       if(el.beeps) el.beeps.checked=state.beeps;
       if(el.weighted) el.weighted.checked=state.weighted;
       if(el.autoReward) el.autoReward.checked=state.autoReward;
@@ -561,7 +602,7 @@
   function handleIRC(line,ws){
     if(line.startsWith("PING")){ ws.send("PONG :tmi.twitch.tv"); return; }
     const m=parseIRC(line);
-    if(m.command==="366"){ state.connected=true; setConnectedUI(true); setStatus("live","Connected to #"+state.channel); broadcastSync(); return; }
+    if(m.command==="366"){ state.connected=true; setConnectedUI(true); setStatus("live","Connected to #"+state.channel); broadcastSync(); if(state.bot.ws&&state.bot.ready){ try{ state.bot.ws.send("JOIN #"+state.channel); }catch(e){} } return; }
     if(m.command==="NOTICE" && /authentication failed|improperly formatted/i.test(m.params||"")){ setStatus("error","Channel not found"); return; }
     if(m.command==="PRIVMSG"){
       const login=(m.prefix||"").split("!")[0];
@@ -599,6 +640,30 @@
   function disconnectWs(userInit){ state.reconnect=false; if(state.ws){ try{state.ws.close();}catch(e){} state.ws=null; } if(userInit){ state.connected=false; setConnectedUI(false); setStatus("","Not connected"); broadcastSync(); } }
   function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
 
+  /* ---------------- Chat bot (sending) ---------------- */
+  function setBotStatus(cls,text){ if(!el.botDot)return; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=text; }
+  function connectBot(){
+    const name=(el.botName.value||"").trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
+    let tok=(el.botToken.value||"").trim().replace(/^oauth:/i,"");
+    if(!name||!tok){ toast("Enter the sender username and OAuth token."); return; }
+    state.bot.name=name; state.bot.token=tok; save();
+    disconnectBot(); state.bot.reconnect=true; setBotStatus("connecting","Connecting bot…");
+    let ws; try{ ws=new WebSocket("wss://irc-ws.chat.twitch.tv:443"); }catch(e){ setBotStatus("error","Bot connect failed"); return; }
+    state.bot.ws=ws;
+    ws.onopen=()=>{ ws.send("PASS oauth:"+tok); ws.send("NICK "+name); ws.send("CAP REQ :twitch.tv/commands"); };
+    ws.onmessage=ev=>{ ev.data.split("\r\n").forEach(l=>{ if(!l) return;
+      if(l.startsWith("PING")){ ws.send("PONG :tmi.twitch.tv"); return; }
+      const m=parseIRC(l);
+      if(m.command==="001"){ state.bot.ready=true; setBotStatus("live","Bot ready — @"+name); if(state.channel) ws.send("JOIN #"+state.channel); }
+      else if(m.command==="NOTICE" && /authentication failed|Login unsuccessful|Improperly formatted auth/i.test(m.params||"")){ state.bot.ready=false; state.bot.reconnect=false; setBotStatus("error","Bad token — regenerate it"); }
+    }); };
+    ws.onclose=()=>{ state.bot.ready=false; if(state.bot.reconnect){ setBotStatus("connecting","Bot reconnecting…"); setTimeout(()=>{ if(state.bot.reconnect) connectBot(); },3000); } else setBotStatus("","Bot not connected"); };
+    ws.onerror=()=>setBotStatus("error","Bot connection error");
+  }
+  function disconnectBot(){ state.bot.reconnect=false; if(state.bot.ws){ try{state.bot.ws.close();}catch(e){} state.bot.ws=null; } state.bot.ready=false; }
+  function fillTpl(t,v){ return String(t||"").replace(/\{(\w+)\}/g,(m,k)=> (k in v && v[k]!=null) ? v[k] : ""); }
+  function botSay(msg){ if(!state.announce || !state.bot.ready || !state.bot.ws || !state.channel || !msg) return; try{ state.bot.ws.send("PRIVMSG #"+state.channel+" :"+msg.slice(0,480)); }catch(e){} }
+
   /* ---------------- Entries + countdown ---------------- */
   function openEntries(){
     if(!state.connected)return;
@@ -608,12 +673,15 @@
     state.entriesOpen=true;
     el.esStatus.textContent="Entries OPEN"; el.entryState.classList.add("open"); el.open.disabled=true; el.close.disabled=false;
     save(); broadcastSync(); reflectChips(); tickTimer();
+    botSay(fillTpl(state.msgOpen,{keyword:state.keyword,count:state.users.size,timer:dur>0?dur:""}));
     toast(`Entries open — viewers type <b>${esc(state.keyword)}</b>`+(dur>0?` · ${dur}s`:""));
   }
-  function closeEntries(){
+  function closeEntries(announce){
+    const wasOpen=state.entriesOpen;
     state.entriesOpen=false; state.entryDeadline=null;
     if(el.esStatus){ el.esStatus.textContent="Entries closed"; el.entryState.classList.remove("open"); el.open.disabled=!state.connected; el.close.disabled=true; }
     broadcastSync(); reflectChips(); tickTimer();
+    if(announce!==false && wasOpen) botSay(fillTpl(state.msgClose,{keyword:state.keyword,count:state.users.size}));
   }
   const fmtTime=s=>{ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
   function tickTimer(){
@@ -751,6 +819,7 @@
       } else {
         if(state.removeWinner){ const i=state.rewards.indexOf(p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); } }
       }
+      botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.mode==="users"&&p.reward)?(" ("+p.reward+")"):"", count:state.users.size}));
       save(); broadcastSync();
     } else if(state.pendingSync){ state.pendingSync=false; reflectAll(); }
   }
@@ -790,7 +859,7 @@
   /* ---------------- Wiring (controllers) ---------------- */
   if(IS_CONTROLLER){
     el.connect.onclick=connect;
-    el.disconnect.onclick=()=>{ disconnectWs(true); closeEntries(); };
+    el.disconnect.onclick=()=>{ disconnectWs(true); closeEntries(false); };
     el.channel.addEventListener("keydown",e=>{ if(e.key==="Enter") connect(); });
     el.open.onclick=openEntries; el.close.onclick=closeEntries;
     el.keyword.addEventListener("change",()=>{ state.keyword=el.keyword.value.trim()||"!join"; el.keyword.value=state.keyword; save(); broadcastSync(); reflectChips(); });
@@ -799,6 +868,13 @@
     el.beeps.onchange=()=>{ state.beeps=el.beeps.checked; save(); broadcastSync(); if(state.beeps) beep(880,0.13,0.22,"square"); };
     const onReq=()=>{ state.restrict={sub:el.reqSub.checked,vip:el.reqVip.checked,mod:el.reqMod.checked}; save(); broadcastSync(); reflectChips(); };
     el.reqSub.onchange=onReq; el.reqVip.onchange=onReq; el.reqMod.onchange=onReq;
+    el.announce.onchange=()=>{ state.announce=el.announce.checked; save(); if(state.announce && !state.bot.ready) toast("Connect the bot to actually post."); };
+    el.botConnect.onclick=connectBot;
+    el.botName.addEventListener("change",()=>{ state.bot.name=el.botName.value.trim(); save(); });
+    el.botToken.addEventListener("change",()=>{ state.bot.token=el.botToken.value.trim().replace(/^oauth:/i,""); save(); });
+    el.msgOpen.addEventListener("change",()=>{ state.msgOpen=el.msgOpen.value; save(); });
+    el.msgClose.addEventListener("change",()=>{ state.msgClose=el.msgClose.value; save(); });
+    el.msgWin.addEventListener("change",()=>{ state.msgWin=el.msgWin.value; save(); });
     el.autoReward.onchange=()=>{ state.autoReward=el.autoReward.checked; save(); };
     el.removeWinner.onchange=()=>{ state.removeWinner=el.removeWinner.checked; save(); };
     el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
