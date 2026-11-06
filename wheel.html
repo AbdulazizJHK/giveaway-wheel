@@ -429,7 +429,7 @@
     animation:rays 26s linear infinite}
   @keyframes rays{to{transform:rotate(360deg)}}
   .winner-card{position:relative}
-  .winner .winner-card .who{background:none;-webkit-background-clip:border-box;background-clip:border-box}
+  .winner .winner-card .who{background:none;-webkit-background-clip:border-box;background-clip:border-box;direction:ltr;unicode-bidi:isolate}   /* letters are separate boxes: keep them in typed order even in Arabic mode */
   .winner .winner-card .who .ch{display:inline-block;opacity:0;animation:chIn .5s cubic-bezier(.2,1.2,.4,1) forwards;
     background:linear-gradient(135deg,#fff 18%,var(--accent) 66%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
   @keyframes chIn{from{opacity:0;transform:translateY(.4em) scale(.7)}to{opacity:1;transform:none}}
@@ -688,7 +688,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.2</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.3</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -897,7 +897,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.2</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.3</b></div>
         </section>
       </div>
 
@@ -990,7 +990,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "3.2";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "3.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1782,7 +1782,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   /* one continuous gradient across the separately animated letters */
   function paintWinnerLetters(){ const w=el.winnerName; if(!w) return; requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const spans=[...w.querySelectorAll(".ch")]; if(!spans.length) return;
-    const left=spans[0].offsetLeft, total=spans[spans.length-1].offsetLeft+spans[spans.length-1].offsetWidth-left;
+    const left=Math.min(...spans.map(sp=>sp.offsetLeft)), total=Math.max(...spans.map(sp=>sp.offsetLeft+sp.offsetWidth))-left;   // real edges, whatever the direction
     spans.forEach(sp=>{ sp.style.backgroundSize=total+"px 100%"; sp.style.backgroundPosition=(-(sp.offsetLeft-left))+"px 0"; }); })); }
   function closeWinner(fromBus){ clearTimeout(state._acT); el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
 
