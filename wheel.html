@@ -34,6 +34,7 @@
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
+  html{background:#0E1015;color-scheme:dark}
   html,body{height:100%}
   body{
     font-family:var(--font);color:var(--ink);
@@ -114,9 +115,9 @@
   .dot.live{color:var(--good);filter:drop-shadow(0 0 4px rgba(52,211,153,.7))}
   .dot.connecting{color:var(--warn);animation:blink .8s infinite}
   .dot.error{color:var(--bad);filter:drop-shadow(0 0 4px rgba(242,109,109,.6))}
-  .status:has(.dot.live){border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07);box-shadow:inset 3px 0 0 var(--good)}
-  .status:has(.dot.connecting){border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.06);box-shadow:inset 3px 0 0 var(--warn)}
-  .status:has(.dot.error){border-color:rgba(242,109,109,.35);background:rgba(242,109,109,.06);box-shadow:inset 3px 0 0 var(--bad)}
+  .status[data-state="live"]{border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07);box-shadow:inset 3px 0 0 var(--good)}
+  .status[data-state="connecting"]{border-color:rgba(245,166,35,.35);background:rgba(245,166,35,.06);box-shadow:inset 3px 0 0 var(--warn)}
+  .status[data-state="error"]{border-color:rgba(242,109,109,.35);background:rgba(242,109,109,.06);box-shadow:inset 3px 0 0 var(--bad)}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(61,220,132,.55),0 0 10px var(--good)}70%{box-shadow:0 0 0 8px rgba(61,220,132,0),0 0 10px var(--good)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0),0 0 10px var(--good)}}
   @keyframes blink{50%{opacity:.35}}
   .status b{color:var(--ink);font-weight:650}
@@ -184,8 +185,8 @@
   .st-txt{display:flex;flex-direction:column;min-width:0;line-height:1.2}
   .st-k{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
   .hdr-status #statusText{font-size:11.5px;font-weight:650;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hdr-status:has(.dot.live) #statusText{color:var(--good)}
-  .hdr-status:has(.dot.error) #statusText{color:var(--bad)}
+  .hdr-status[data-state="live"] #statusText{color:var(--good)}
+  .hdr-status[data-state="error"] #statusText{color:var(--bad)}
   .live-top{display:flex;flex-direction:column;gap:12px}
   .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:4px;border:1px solid var(--stroke);border-radius:14px;background:rgba(9,10,14,.6)}
   .tab{appearance:none;border:none;background:transparent;color:var(--muted);font:inherit;cursor:pointer;border-radius:10px;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;transition:color .15s,background .15s}
@@ -212,7 +213,8 @@
   .action-bar .rail-spin{flex:1}
   .rail-foot{border-top:none;margin-top:0}
   body.role-dock .tabs{position:sticky;top:0;z-index:8;box-shadow:0 8px 18px -10px rgba(0,0,0,.8);background:#0F1117}
-  body.role-dock .action-bar{position:sticky;bottom:0;z-index:8;padding:10px 14px}
+  body.role-dock .action-bar{position:sticky;bottom:0;z-index:8;padding:10px 14px;background:#14161D}
+  body.role-dock *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   body.role-dock .rail-scroll{padding:14px}
   @media (max-width:340px){.tab .tl{font-size:9.5px}.tab .ti{font-size:15px}}
 
@@ -465,7 +467,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.7</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.8</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
     </div>
 
@@ -606,7 +608,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.7</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.8</b></div>
         </section>
       </div>
 
@@ -695,7 +697,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "1.7";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "1.8";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={
@@ -864,7 +866,8 @@
   function segs(){ return state.renderSegs!=null ? state.renderSegs : getSegments(); }
 
   /* ---------------- Twitch IRC (controller only) ---------------- */
-  function setStatus(cls,text){ if(!el.dot)return; el.dot.className="dot"+(cls?" "+cls:""); el.statusText.textContent=text; }
+  function setStatus(cls,text){ if(!el.dot)return; el.dot.className="dot"+(cls?" "+cls:""); el.statusText.textContent=text; markStatus(el.dot,cls); }
+  function markStatus(dot,cls){ const box=dot&&dot.closest(".status"); if(box) box.dataset.state=cls||""; }
   function connect(){
     const ch=el.channel.value.trim().toLowerCase().replace(/^#/,"").replace(/[^a-z0-9_]/g,"");
     if(!ch){ toast("Enter a Twitch channel name first."); el.channel.focus(); return; }
@@ -919,7 +922,7 @@
   function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
 
   /* ---------------- Chat bot (sending) ---------------- */
-  function setBotStatus(cls,text){ if(!el.botDot)return; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=text; }
+  function setBotStatus(cls,text){ if(!el.botDot)return; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=text; markStatus(el.botDot,cls); }
   function connectBot(){
     const name=(el.botName.value||"").trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
     let tok=(el.botToken.value||"").trim().replace(/^oauth:/i,"");
