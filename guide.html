@@ -171,6 +171,9 @@
     animation:rays 26s linear infinite}
   @keyframes rays{to{transform:rotate(360deg)}}
   .r-winner .winner-card{position:relative}
+  .r-winner .w-avatar{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--wcol,#7C5CFF);border:3px solid #fff;color:#fff;font-size:36px;font-weight:800;
+    box-shadow:0 0 0 6px rgba(255,255,255,.08),0 0 50px -4px var(--wcol,#7C5CFF);animation:avIn .6s cubic-bezier(.2,1.3,.4,1) both}
+  @keyframes avIn{from{opacity:0;transform:scale(.5) rotate(-12deg)}to{opacity:1;transform:none}}
   .r-winner .winner-card .who{background:none;-webkit-background-clip:border-box;background-clip:border-box}
   .r-winner .winner-card .who .ch{display:inline-block;opacity:0;animation:chIn .5s cubic-bezier(.2,1.2,.4,1) forwards;
     background:linear-gradient(135deg,#fff 18%,#7C5CFF 66%,var(--r-pink));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -334,7 +337,7 @@
     .hero h1 .w,.hero h1 .w.grad,.hin{opacity:1;transform:none;animation:none}
     .mini,.step.act .mini{clip-path:none;animation:none}
     .strip-glow.winpulse{animation:none;opacity:.7}
-    .w-rays,.r-banner,.eb-join-item,.r-winner .winner-card .prize{animation:none}
+    .w-rays,.r-banner,.eb-join-item,.r-winner .winner-card .prize,.r-winner .w-avatar{animation:none}
     .r-winner .winner-card .who .ch{animation:none;opacity:1}
     .btn:hover,.feat .f:hover{transform:none}
     .tl-num,.tl-num::before,nav{transition:none}
@@ -365,7 +368,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v2.3</span>
+      Giveaway Roulette <span class="ver" id="ver">v2.4</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -423,6 +426,7 @@
                 <div class="w-tint"></div>
                 <div class="w-rays"></div>
                 <div class="winner-card">
+                  <div class="w-avatar" id="demoAvatar"></div>
                   <div class="eyebrow-w">Winner</div>
                   <div class="who" id="demoWho">—</div>
                   <div class="prize"><span class="pi">🎁</span><span class="pt"><span class="pl">Reward</span><span class="pv" id="demoPrize">—</span></span></div>
@@ -481,6 +485,7 @@
       <div class="f stg"><div class="ico a">🛡️</div><h3>Mod chat control</h3><p>You and your mods run it from chat: !gw open, close, spin.</p></div>
       <div class="f stg"><div class="ico d">🚫</div><h3>Fair rotation</h3><p>Optionally block the last 5 winners from re-joining.</p></div>
       <div class="f stg"><div class="ico e">📡</div><h3>Overlay check</h3><p>The dock tells you if the on-stream source is live.</p></div>
+      <div class="f stg"><div class="ico c">🖼️</div><h3>Profile pictures</h3><p>Each viewer's Twitch picture on their card and the winner screen.</p></div>
     </div>
   </section>
 
@@ -511,7 +516,7 @@
               <li>In your scene, <b>Sources → ➕ Browser</b> → paste the <b>On stream</b> URL → set <b>1920 × 1080</b> → uncheck “Shutdown source when not visible”. It’s transparent, so it sits over your scene.</li>
               <li>Top menu <b>Docks → Custom Browser Docks…</b> → name it “Giveaway” → paste the <b>Your controls</b> URL → <b>Apply</b>. Dock it wherever you like — only you see this.</li>
             </ol>
-            <div class="note"><span class="ni">💡</span><div>Seeing an old version after an update? Grab a fresh <b>On stream</b> URL with the <b>🔗 Copy source URL</b> button in your dock’s <b>⚙️ Settings</b> tab — it stamps the current version (e.g. <code>&amp;v=2.3</code>) so pasting it forces a clean load. You can also right-click the source → Refresh, or bump the <code>&amp;v=</code> number yourself.</div></div>
+            <div class="note"><span class="ni">💡</span><div>Seeing an old version after an update? Grab a fresh <b>On stream</b> URL with the <b>🔗 Copy source URL</b> button in your dock’s <b>⚙️ Settings</b> tab — it stamps the current version (e.g. <code>&amp;v=2.4</code>) so pasting it forces a clean load. You can also right-click the source → Refresh, or bump the <code>&amp;v=</code> number yourself.</div></div>
           </div>
         </div>
 
@@ -561,6 +566,7 @@
               <li><b>Overlay size</b> — Small, Medium or Large, to suit your layout.</li>
               <li><b>Theme colour</b> — pick a preset or any custom colour to match your channel.</li>
               <li><b>Twitch colours &amp; badges</b> — cells use each viewer’s chat colour and show MOD, VIP and SUB tags.</li>
+              <li><b>Profile pictures</b> — each viewer’s Twitch picture on their card and the winner screen (an initial if they have none).</li>
               <li><b>Winner screen</b> — close it automatically after 10, 20 or 30 seconds.</li>
               <li><b>Sound</b> — volume slider for the beeps, ticks and win chime.</li>
             </ul>
@@ -583,7 +589,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Giveaway Roulette · <b id="ver2">v2.3</b> · made for Twitch streamers</span>
+    <span>Giveaway Roulette · <b id="ver2">v2.4</b> · made for Twitch streamers</span>
     <span><a href="https://github.com/AbdulazizJHK/giveaway-wheel" target="_blank" rel="noopener">GitHub</a> · <a href="#setup">Setup</a> · <a href="#top">Back to top ↑</a></span>
   </div>
 </footer>
@@ -674,11 +680,12 @@
       const pad=3, r=9, vp=o?o.vp:pad, lift=o?o.lift:0, land=o?o.land:0;
       c.save();
       if(o&&o.alpha!=null) c.globalAlpha=o.alpha;
-      const s=1+lift*0.07+land*0.06;
+      const s=1+lift*0.16+land*0.04;
       if(s!==1){ const cx=x+CW/2, cy=H/2; c.translate(cx,cy); c.scale(s,s); c.translate(-cx,-cy); }
       if(land>0){ c.shadowColor=seg.color; c.shadowBlur=36*land; }
+      else if(lift>0.05 && o && o.alpha==null){ c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=30*lift; c.shadowOffsetY=12*lift; }
       rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fillStyle=seg.color; c.fill();
-      c.shadowBlur=0;
+      c.shadowBlur=0; c.shadowOffsetY=0;
       const g=c.createLinearGradient(0,vp,0,H-vp); g.addColorStop(0,"rgba(255,255,255,.15)"); g.addColorStop(.5,"rgba(255,255,255,0)"); g.addColorStop(1,"rgba(0,0,0,.18)");
       rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fillStyle=g; c.fill();
       if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.06+land*0.08)+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); }
@@ -686,7 +693,12 @@
       if(o&&o.noText){ c.restore(); return; }
       const fs=Math.max(11,Math.min((H-vp*2)*0.17,32));
       const role=ROLE[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
-      const nameY=role?H/2-(chipH+gap)/2:H/2;
+      const inner=H-vp*2, A=Math.round(inner*0.34), avGap=Math.round(inner*0.06);
+      const top=H/2-(A+avGap+fs+(role?gap+chipH:0))/2, nameY=top+A+avGap+fs/2;
+      { const ax=x+CW/2, ay=top+A/2;                                // initial in a circle, like a viewer without a profile picture
+        c.save(); c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.fillStyle="rgba(0,0,0,.22)"; c.fill();
+        c.fillStyle=ink(seg.color); c.font="800 "+Math.round(A*0.46)+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillText(([...seg.label][0]||"?").toUpperCase(),ax,ay+1); c.restore();
+        c.lineWidth=Math.max(2,Math.round(A*0.05)); c.strokeStyle="rgba(255,255,255,.9)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke(); }
       c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
       c.font="700 "+fs+"px "+FONT;
       let t=seg.label; const maxw=CW-28;
@@ -700,9 +712,11 @@
         c.fillStyle="#fff"; c.textAlign="left"; c.fillText(role.t,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
         if("letterSpacing" in c) c.letterSpacing="0px";
       }
+      if(o && o.alpha==null){ const dim=(1-lift)*(1-land)*0.24; if(dim>0.01){ c.fillStyle="rgba(8,9,14,"+dim+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); } }
       c.restore();
     }
-    function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; return d<1?1-d:0; }
+    function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; if(d>=1) return 0; const t=1-d; return t*t*(3-2*t); }
+    function drawOrdered(c,list,CW,H){ list.sort((a,b)=>(a.o.lift+a.o.land)-(b.o.lift+b.o.land)).forEach(e=>drawCell(c,e.x,CW,H,e.s,e.o)); }
     function markerFlash(){ const m=el.marker; if(!m||!m.animate) return;
       m.animate([{filter:"brightness(1.8)",boxShadow:"0 0 0 1px rgba(124,92,255,.9),0 0 30px 8px rgba(124,92,255,.95)"},{filter:"none"}],{duration:140,easing:"ease-out"}); }
     const LAND_MS=800;
@@ -723,15 +737,18 @@
         const i0=Math.floor(offset/CW)-1, i1=Math.floor((offset+W)/CW)+1;
         const v=state._lastOffset!=null?Math.abs(offset-state._lastOffset):0; state._lastOffset=offset;
         const centerI=Math.round((offset+W/2-CW/2)/CW);
+        const list=[];
         for(let i=i0;i<=i1;i++){ const ci=((i%cells.length)+cells.length)%cells.length, s=S[cells[ci]];
-          if(s) drawCell(c,i*CW-offset,CW,H,s,opt(i*CW-offset,{land:(state.landT!=null&&i===centerI)?landEase(state.landT):0})); }
+          if(s) list.push({x:i*CW-offset,s,o:opt(i*CW-offset,{land:(state.landT!=null&&i===centerI)?landEase(state.landT):0})}); }
+        drawOrdered(c,list,CW,H);
         if(v>9 && !REDUCED){ const trail=Math.min(v*1.1,CW*0.7);
           for(let k=1;k<=2;k++) for(let i=i0;i<=i1;i++){ const ci=((i%cells.length)+cells.length)%cells.length, s=S[cells[ci]]; if(s) drawCell(c,i*CW-offset+trail*k/2,CW,H,s,{vp,lift:0,land:0,noText:true,alpha:k===1?0.3:0.15}); } }
         const cc=((centerI%cells.length)+cells.length)%cells.length, s=S[cells[cc]]; if(s) state._centerColor=s.color;
         if(cc!==state.spinLastCC){ if(state.spinLastCC!==null){ tick(); markerFlash(); } state.spinLastCC=cc; }
       } else {
         const i1=Math.floor(W/CW)+1;
-        for(let i=-1;i<=i1;i++){ const idx=((i%n)+n)%n; drawCell(c,i*CW,CW,H,S[idx],opt(i*CW)); }
+        const list=[]; for(let i=-1;i<=i1;i++){ const idx=((i%n)+n)%n; list.push({x:i*CW,s:S[idx],o:opt(i*CW)}); }
+        drawOrdered(c,list,CW,H);
         const cc=((Math.round((W/2-CW/2)/CW)%n)+n)%n; state._centerColor=S[cc].color;
       }
     }
@@ -820,6 +837,7 @@
       state.spinning=false; btn.disabled=false; state.renderSegs=null; state.spinCells=null;
       state._lastOffset=null;
       el.winner.style.setProperty("--wcol",p.color);
+      const av=document.getElementById("demoAvatar"); if(av) av.textContent=([...p.label][0]||"?").toUpperCase();
       el.who.textContent=""; const chars=[...p.label], step=Math.min(45,520/Math.max(1,chars.length));
       chars.forEach((ch,i)=>{ const sp=document.createElement("span"); sp.className="ch"; sp.textContent=ch; sp.style.animationDelay=(120+i*step)+"ms"; el.who.appendChild(sp); });
       el.prize.textContent=p.reward; state.rewardIdx++;

@@ -477,6 +477,16 @@
   .presets button.active{color:#fff;background:rgba(var(--acc-rgb),.25);border-color:rgba(var(--acc-rgb),.6)}
   .hist-tools{display:flex;align-items:center;gap:10px;justify-content:space-between}
   .hist-tools .btn.small{flex:none}
+  .w-avatar{display:none;width:150px;height:150px;margin:0 auto 18px;border-radius:50%;place-items:center;overflow:hidden;position:relative;
+    background:var(--wcol,var(--accent));border:4px solid #fff;color:#fff;font-size:64px;font-weight:800;
+    box-shadow:0 0 0 8px rgba(255,255,255,.08),0 0 70px -4px var(--wcol,var(--accent)),0 24px 50px -20px rgba(0,0,0,.9);animation:avIn .6s cubic-bezier(.2,1.3,.4,1) both}
+  .w-avatar.on{display:grid}
+  .w-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+  @keyframes avIn{from{opacity:0;transform:scale(.5) rotate(-12deg)}to{opacity:1;transform:none}}
+  body.role-dock .w-avatar{width:72px;height:72px;font-size:30px;margin-bottom:10px;border-width:3px}
+  .u-av{width:20px;height:20px;border-radius:50%;flex:none;overflow:hidden;box-shadow:0 0 0 2px var(--c)}
+  .u-av img{width:100%;height:100%;object-fit:cover;display:block}
+  .jf-av{width:24px;height:24px;border-radius:50%;object-fit:cover;flex:none;margin-left:-4px;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
   .w-stat{margin-top:10px;font-size:17px;font-weight:600;color:var(--muted);letter-spacing:.02em}
   .w-stat:empty{display:none}
   body.role-dock .w-stat{font-size:12px;margin-top:6px}
@@ -496,7 +506,7 @@
   body.role-dock .winner .winner-card .prize .pt{padding:10px 20px 10px 14px;min-width:0}
   body.role-dock .winner .winner-card .prize .pv{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
   body.role-dock .winner-actions{margin-top:20px}
-  body.role-dock .winner .winner-card,body.role-dock .winner .winner-card .who .ch,body.role-dock .winner .winner-card .prize,body.role-dock .winner .winner-img{animation:none!important;opacity:1!important;transform:none!important}
+  body.role-dock .winner .w-avatar,body.role-dock .winner .winner-card,body.role-dock .winner .winner-card .who .ch,body.role-dock .winner .winner-card .prize,body.role-dock .winner .winner-img{animation:none!important;opacity:1!important;transform:none!important}
 
   #confetti{position:fixed;inset:0;z-index:21;pointer-events:none;display:none}
   #confetti.show{display:block}
@@ -566,7 +576,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.3</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.4</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -724,6 +734,7 @@
           </div>
           <label class="toggle"><input type="checkbox" id="chatColors" checked/><span class="track"></span>Use viewers' Twitch name colours on cells</label>
           <label class="toggle"><input type="checkbox" id="showBadges" checked/><span class="track"></span>Show sub / VIP / mod badges on cells</label>
+          <label class="toggle"><input type="checkbox" id="avatars" checked/><span class="track"></span>Show viewers' Twitch profile pictures</label>
         </section>
         <section class="block group">
           <div class="label">On stream</div>
@@ -761,7 +772,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.3</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.4</b></div>
         </section>
       </div>
 
@@ -820,6 +831,7 @@
   <div class="w-tint"></div>
   <div class="w-rays"></div>
   <div class="winner-card">
+    <div class="w-avatar" id="winnerAvatar"></div>
     <div class="eyebrow" id="winnerEyebrow">Winner</div>
     <div class="who" id="winnerName">—</div>
     <div class="w-role" id="winnerRole"></div>
@@ -853,7 +865,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "2.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -877,7 +889,7 @@
     spinP:0, spinCells:null, spinWinCell:0, spinJitter:0, spinLastCC:null,  // strip-roulette animation state
     _centerColor:"#7C5CFF",
     pendingSync:null,
-    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false,
+    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false, avatars:true,
     history:[],                  // last 5 winners: {name, reward, img, mode, t, rerolled}
   };
   const SEG=["#7C5CFF","#4C93FF","#22C3A6","#F5A623","#F2685E","#9B6BF0","#38BDF8","#3DD68C","#FB923C","#EC6AA6"];
@@ -885,7 +897,7 @@
   const $=id=>document.getElementById(id);
   const el={};
   ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","hideUntilSpin","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","entryBanner","ebKeyword","ebCount","ebTimer","ebLock","stageTop","posGrid","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
-  ["ebBar","ebFeed","ebCol","bigCount","stripMarker","sizeSeg","accentSwatches","accentPick","chatColors","showBadges","autoCloseSeg","volume","volVal","volIco","volTest","historyList","winTimer","ovStatus","ovText","timerPresets","copyWinners","userSearch","blockRecent","chatControl","winnerStat"].forEach(k=>el[k]=$(k));
+  ["ebBar","ebFeed","ebCol","bigCount","stripMarker","sizeSeg","accentSwatches","accentPick","chatColors","showBadges","autoCloseSeg","volume","volVal","volIco","volTest","historyList","winTimer","ovStatus","ovText","timerPresets","copyWinners","userSearch","blockRecent","chatControl","winnerStat","avatars","winnerAvatar"].forEach(k=>el[k]=$(k));
   const REDUCED_MOTION=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
@@ -937,7 +949,7 @@
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos,
-      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume
+      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars
     });
   }
   function applySync(d){
@@ -959,6 +971,7 @@
     if(typeof d.showBadges==="boolean") state.showBadges=d.showBadges;
     if(typeof d.autoClose==="number") state.autoClose=d.autoClose;
     if(typeof d.volume==="number") state.volume=d.volume;
+    if(typeof d.avatars==="boolean") state.avatars=d.avatars;
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
     if(state.spinning){ state.pendingSync=true; return; }
@@ -976,7 +989,7 @@
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin,
       size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, history:state.history,
-      chatControl:state.chatControl, blockRecent:state.blockRecent
+      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars
     })); }catch(e){}
   }
   function load(){
@@ -1025,6 +1038,7 @@
       if(Array.isArray(s.history)) state.history=s.history.slice(0,5);
       if(typeof s.chatControl==="boolean") state.chatControl=s.chatControl;
       if(typeof s.blockRecent==="boolean") state.blockRecent=s.blockRecent;
+      if(typeof s.avatars==="boolean") state.avatars=s.avatars;
       if(el.chatControl) el.chatControl.checked=state.chatControl;
       if(el.blockRecent) el.blockRecent.checked=state.blockRecent;
     }catch(e){}
@@ -1033,7 +1047,7 @@
 
   /* ---------------- Helpers ---------------- */
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  function toast(html){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=html; $("toast-wrap").appendChild(t); setTimeout(()=>t.remove(),2600); }
+  function toast(html){ const w=$("toast-wrap"), t=document.createElement("div"); t.className="toast"; t.innerHTML=html; w.appendChild(t); while(w.children.length>2) w.firstChild.remove(); setTimeout(()=>t.remove(),2600); }
   const userName=u=>typeof u==="string"?u:u.name;
   const userWeight=u=>(typeof u==="object"&&u.weight)?u.weight:1;
   const rewardName=r=>typeof r==="string"?r:(r&&r.name)||"";
@@ -1042,7 +1056,7 @@
   function getSegments(){
     if(state.wheelMode==="users"){
       const out=[]; let i=0;
-      for(const [,u] of state.users){ out.push({label:userName(u), weight: state.weighted?userWeight(u):1, color:(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length], badge:state.showBadges?(u.badge||""):""}); i++; }
+      for(const [,u] of state.users){ out.push({label:userName(u), weight: state.weighted?userWeight(u):1, color:(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length], badge:state.showBadges?(u.badge||""):"", avatar:state.avatars?(u.avatar||""):null}); i++; }
       return out;
     }
     return state.rewards.map((r,i)=>({label:rewardName(r), weight:1, color:SEG[i%SEG.length]}));
@@ -1100,6 +1114,45 @@
     if(lum<110){ const k=Math.min(.48,(110-lum)/190+.2); r=Math.round(r+(255-r)*k); g=Math.round(g+(255-g)*k); b=Math.round(b+(255-b)*k); }
     return "#"+[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase();
   }
+  /* ---------------- Viewer profile pictures ----------------
+     Twitch chat doesn't carry avatars, so the dock looks each new entrant up by username via public
+     services (DecAPI, then unavatar.io) — no login or API key needed. Results are cached for 7 days and
+     the URL rides along in the entrant record, so the on-stream overlay shows the same picture.
+     If nothing is found (or the lookup is blocked), the viewer gets an initial in a coloured circle. */
+  const AV_IMG={};
+  function avImg(url){ if(!url) return null; let im=AV_IMG[url];
+    if(!im){ im=new Image(); im.decoding="async"; im.referrerPolicy="no-referrer"; im.onload=()=>{ im._ok=true; avRepaint(); }; im.onerror=()=>{ im._bad=true; }; im.src=url; AV_IMG[url]=im; }
+    return im._ok?im:null; }
+  let avRepaintT=null;
+  function avRepaint(){ if(avRepaintT) return; avRepaintT=setTimeout(()=>{ avRepaintT=null; if(!state.spinning) renderWheels(); renderUsers(); },150); }
+  const initialOf=n=>([...String(n||"?").trim()][0]||"?").toUpperCase();
+  let avCache={}; try{ avCache=JSON.parse(localStorage.getItem("gw_av")||"{}"); }catch(e){}
+  const avQueue=[]; let avBusy=0, avSyncT=null;
+  function avSync(){ clearTimeout(avSyncT); avSyncT=setTimeout(()=>{ save(); broadcastSync(); },600); }
+  function resolveAvatar(login){
+    const viaDecapi=()=>fetch("https://decapi.me/twitch/avatar/"+encodeURIComponent(login)).then(r=>r.ok?r.text():"")
+      .then(t=>{ t=String(t||"").trim(); return /^https:\/\/static-cdn\.jtvnw\.net\/\S+$/i.test(t)?t:""; });
+    const viaUnavatar=()=>new Promise(res=>{ const url="https://unavatar.io/twitch/"+encodeURIComponent(login)+"?fallback=false", im=new Image();
+      const t=setTimeout(()=>res(""),8000); im.onload=()=>{ clearTimeout(t); res(url); }; im.onerror=()=>{ clearTimeout(t); res(""); }; im.src=url; });
+    return viaDecapi().catch(()=>"").then(u=>u||viaUnavatar());
+  }
+  function avPump(){
+    while(avBusy<3 && avQueue.length){ const login=avQueue.shift(); avBusy++;
+      resolveAvatar(login).then(url=>{
+        avCache[login]={u:url||"",t:Date.now()};
+        const keys=Object.keys(avCache); if(keys.length>600) keys.sort((a,b)=>avCache[a].t-avCache[b].t).slice(0,keys.length-600).forEach(k=>delete avCache[k]);
+        try{ localStorage.setItem("gw_av",JSON.stringify(avCache)); }catch(e){}
+        const u=state.users.get(login); if(u){ u.avatar=url||""; if(url) avImg(url); avRepaint(); avSync(); }
+      }).catch(()=>{}).then(()=>{ avBusy--; setTimeout(avPump,120); });
+    }
+  }
+  function wantAvatar(login){
+    if(!IS_CONTROLLER || !state.avatars || !login) return;
+    const u=state.users.get(login); if(!u || u.avatar!==undefined) return;
+    const c=avCache[login]; if(c && Date.now()-c.t<7*864e5){ u.avatar=c.u||""; avRepaint(); avSync(); return; }
+    if(!avQueue.includes(login)) avQueue.push(login); avPump();
+  }
+  function wantAllAvatars(){ for(const [login] of state.users) wantAvatar(login); }
   function onChat(login,disp,text,roles,color){
     /* !gw open | close | spin — broadcaster and mods only, when Chat control is on */
     const cmd=text.trim().toLowerCase().split(/\s+/);
@@ -1122,7 +1175,7 @@
       if(state.weighted){ u.weight=(u.weight||1)+1; renderUsers(); renderWheels(); save(); broadcastSync(); }
       return;
     }
-    state.users.set(login,Object.assign({name:disp,weight:1},extra)); renderUsers(); renderWheels(); save(); broadcastSync(); toast(`<b>${esc(disp)}</b> joined!`);
+    state.users.set(login,Object.assign({name:disp,weight:1},extra)); wantAvatar(login); renderUsers(); renderWheels(); save(); broadcastSync(); toast(`<b>${esc(disp)}</b> joined!`);
   }
   function disconnectWs(userInit){ state.reconnect=false; if(state.ws){ try{state.ws.close();}catch(e){} state.ws=null; } if(userInit){ state.connected=false; setConnectedUI(false); setStatus("","Not connected"); broadcastSync(); } }
   function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
@@ -1236,23 +1289,29 @@
     /* the first list seen after entries open is the baseline — only names that arrive after it are announced */
     if(!state.entriesOpen || !el.ebFeed || state.spinning || !feedLive){ feedSeen=new Set(names); feedLive=state.entriesOpen&&!!el.ebFeed&&!state.spinning; return; }
     const fresh=names.filter(nm=>!feedSeen.has(nm)); fresh.forEach(nm=>feedSeen.add(nm));
-    fresh.slice(-3).forEach(nm=>{ const d=document.createElement("div"); d.className="eb-join-item"; d.innerHTML="<i>+</i> "; d.appendChild(document.createTextNode(nm+" joined"));
+    fresh.slice(-3).forEach(nm=>{ const d=document.createElement("div"); d.className="eb-join-item";
+      const uu=[...state.users.values()].find(x=>userName(x)===nm), av=state.avatars&&uu&&uu.avatar;
+      if(av){ d.classList.add("has-av"); const im=document.createElement("img"); im.className="jf-av"; im.alt=""; im.referrerPolicy="no-referrer"; im.src=av; im.onerror=()=>im.remove(); d.appendChild(im); }
+      d.dataset.name=nm; d.insertAdjacentHTML("beforeend","<i>+</i> "); d.appendChild(document.createTextNode(nm+" joined"));
       el.ebFeed.appendChild(d); setTimeout(()=>d.remove(),3100); });
     while(el.ebFeed.children.length>3) el.ebFeed.firstChild.remove();
   }
+  function fillFeedAvatars(){ if(!el.ebFeed||!state.avatars) return;
+    el.ebFeed.querySelectorAll(".eb-join-item:not(.has-av)").forEach(d=>{ const uu=[...state.users.values()].find(x=>userName(x)===d.dataset.name);
+      if(uu&&uu.avatar){ d.classList.add("has-av"); const im=document.createElement("img"); im.className="jf-av"; im.alt=""; im.referrerPolicy="no-referrer"; im.src=uu.avatar; im.onerror=()=>im.remove(); d.prepend(im); } }); }
   function renderUsers(){
     const n=state.users.size;
     if(el.userCount) el.userCount.textContent=n;
     if(el.esCount) el.esCount.textContent=n;
     if(el.ebCount){ const prev=+el.ebCount.textContent||0; el.ebCount.textContent=n;
       if(n>prev && state.entriesOpen){ el.ebCount.classList.remove("bump"); void el.ebCount.offsetWidth; el.ebCount.classList.add("bump"); } }
-    joinFeed();
+    joinFeed(); fillFeedAvatars();
     if(!el.userList) return;
     if(n===0){ el.userList.innerHTML='<div class="empty">No entrants yet.</div>'; return; }
     const totalW=[...state.users.values()].reduce((a,u)=>a+(state.weighted?userWeight(u):1),0)||1;
     if(el.userSearch) el.userSearch.style.display = n>=6 ? "block" : "none";
     const q=(el.userSearch&&n>=6?el.userSearch.value:"").trim().toLowerCase();
-    let h="",i=0; for(const [login,u] of state.users){ if(q && !userName(u).toLowerCase().includes(q)){ i++; continue; } const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(userName(u))}${roleTag(u.badge)}</span>${badge}<span class="odds" title="Chance to win">${(((state.weighted?w:1)/totalW)*100).toFixed(((state.weighted?w:1)/totalW)*100<10?1:0)}%</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
+    let h="",i=0; for(const [login,u] of state.users){ if(q && !userName(u).toLowerCase().includes(q)){ i++; continue; } const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span>${state.avatars&&u.avatar?`<span class="u-av" style="--c:${c}"><img src="${esc(u.avatar)}" alt="" referrerpolicy="no-referrer"/></span>`:`<span class="swatch" style="background:${c};color:${c}"></span>`}<span class="name">${esc(userName(u))}${roleTag(u.badge)}</span>${badge}<span class="odds" title="Chance to win">${(((state.weighted?w:1)/totalW)*100).toFixed(((state.weighted?w:1)/totalW)*100<10?1:0)}%</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
     el.userList.innerHTML=h||'<div class="empty">No entrants match.</div>';
     el.userList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.users.delete(x.dataset.login); renderUsers(); renderWheels(); save(); broadcastSync(); });
   }
@@ -1305,11 +1364,12 @@
     const pad=3, r=9, vp=o?o.vp:pad, lift=o?o.lift:0, land=o?o.land:0;
     c.save();
     if(o&&o.alpha!=null) c.globalAlpha=o.alpha;
-    const s=1+lift*0.07+land*0.06;
+    const s=1+lift*0.16+land*0.04;                                  // the card under the arrow comes forward
     if(s!==1){ const cx=x+CW/2, cy=H/2; c.translate(cx,cy); c.scale(s,s); c.translate(-cx,-cy); }
     if(land>0){ c.shadowColor=seg.color; c.shadowBlur=36*land; }
+    else if(lift>0.05 && o && o.alpha==null){ c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=30*lift; c.shadowOffsetY=12*lift; }   // depth shadow
     rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fillStyle=seg.color; c.fill();
-    c.shadowBlur=0;
+    c.shadowBlur=0; c.shadowOffsetY=0;
     const g=c.createLinearGradient(0,vp,0,H-vp); g.addColorStop(0,"rgba(255,255,255,.15)"); g.addColorStop(.5,"rgba(255,255,255,0)"); g.addColorStop(1,"rgba(0,0,0,.18)");
     rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fillStyle=g; c.fill();
     if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.06+land*0.08)+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); }
@@ -1317,7 +1377,16 @@
     if(o&&o.noText){ c.restore(); return; }
     const fs=Math.max(11,o?Math.min((H-vp*2)*0.17,40):Math.min((H-vp*2)*0.2,22));   // stage strip gets bigger names
     const role=o&&ROLE_TAG[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
-    const nameY = role ? H/2-(chipH+gap)/2 : H/2;
+    const showAv = o && seg.avatar!=null, inner=H-vp*2, A=showAv?Math.round(inner*0.34):0, avGap=showAv?Math.round(inner*0.06):0;
+    const top = H/2-(A+avGap+fs+(role?gap+chipH:0))/2, nameY = top+A+avGap+fs/2;
+    if(showAv){                                                     // profile picture (or initial) above the name
+      const ax=x+CW/2, ay=top+A/2, im=avImg(seg.avatar);
+      c.save(); c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.closePath();
+      if(im){ c.clip(); c.drawImage(im,ax-A/2,ay-A/2,A,A); }
+      else { c.fillStyle="rgba(0,0,0,.22)"; c.fill(); c.fillStyle=ink(seg.color); c.font="800 "+Math.round(A*0.46)+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillText(initialOf(seg.label),ax,ay+1); }
+      c.restore();
+      c.lineWidth=Math.max(2,Math.round(A*0.05)); c.strokeStyle="rgba(255,255,255,.9)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
+    }
     c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
     c.font="700 "+fs+"px "+FONT;
     let t=seg.label; const maxw=CW-(o?28:14);
@@ -1331,10 +1400,13 @@
       c.fillStyle="#fff"; c.textAlign="left"; c.fillText(role.t,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
       if("letterSpacing" in c) c.letterSpacing="0px";
     }
+    if(o && o.alpha==null){ const dim=(1-lift)*(1-land)*0.24; if(dim>0.01){ c.fillStyle="rgba(8,9,14,"+dim+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); } }   // side cards step back
     c.restore();
   }
-  /* cell nearer the marker lifts (stage strip only) */
-  function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; return d<1?1-d:0; }
+  /* cell nearer the marker lifts (stage strip only), eased so it swells smoothly under the arrow */
+  function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; if(d>=1) return 0; const t=1-d; return t*t*(3-2*t); }
+  /* draw farthest-from-centre first so the front card always sits on top of its neighbours */
+  function drawOrdered(c,list,CW,H){ list.sort((a,b)=>(a.o?a.o.lift+a.o.land:0)-(b.o?b.o.lift+b.o.land:0)).forEach(e=>drawCell(c,e.x,CW,H,e.s,e.o)); }
   function markerFlash(){ const m=el.stripMarker; if(!m||!m.animate) return;
     m.animate([{filter:"brightness(1.8)",boxShadow:"0 0 0 1px rgba("+accRGB()+",.9),0 0 30px 8px rgba("+accRGB()+",.95)"},{filter:"none"}],{duration:140,easing:"ease-out"}); }
   function drawStrip(cv){
@@ -1356,15 +1428,18 @@
       /* motion blur: faint trailing copies while the strip moves fast */
       const v=main&&state._lastOffset!=null?Math.abs(offset-state._lastOffset):0; if(main) state._lastOffset=offset;
       const centerI=Math.round((offset+W/2-CW/2)/CW);
+      const list=[];
       for(let i=i0;i<=i1;i++){ const ci=((i%cells.length)+cells.length)%cells.length, s=S[cells[ci]];
-        if(s) drawCell(c,i*CW-offset,CW,H,s,opt(i*CW-offset,{land:(main&&state.landT!=null&&i===centerI)?landEase(state.landT):0})); }
+        if(s) list.push({x:i*CW-offset,s,o:opt(i*CW-offset,{land:(main&&state.landT!=null&&i===centerI)?landEase(state.landT):0})}); }
+      drawOrdered(c,list,CW,H);
       if(v>9 && !REDUCED_MOTION){ const trail=Math.min(v*1.1,CW*0.7);   // smear drawn over the cells, trailing the motion
         for(let k=1;k<=2;k++) for(let i=i0;i<=i1;i++){ const ci=((i%cells.length)+cells.length)%cells.length, s=S[cells[ci]]; if(s) drawCell(c,i*CW-offset+trail*k/2,CW,H,s,{vp,lift:0,land:0,noText:true,alpha:k===1?0.3:0.15}); } }
       if(main){ const cc=((centerI%cells.length)+cells.length)%cells.length, s=S[cells[cc]]; if(s) state._centerColor=s.color;
         if(cc!==state.spinLastCC){ if(state.spinLastCC!==null){ tick(); markerFlash(); } state.spinLastCC=cc; } }
     } else {
       const i1=Math.floor(W/CW)+1;
-      for(let i=-1;i<=i1;i++){ const idx=((i%n)+n)%n; drawCell(c,i*CW,CW,H,S[idx],opt(i*CW)); }
+      const list=[]; for(let i=-1;i<=i1;i++){ const idx=((i%n)+n)%n; list.push({x:i*CW,s:S[idx],o:opt(i*CW)}); }
+      drawOrdered(c,list,CW,H);
       if(main){ const cc=((Math.round((W/2-CW/2)/CW)%n)+n)%n; state._centerColor=S[cc].color; }
     }
   }
@@ -1427,6 +1502,11 @@
   function endSpin(p,authoritative){
     state.spinning=false; state._lastOffset=null; setSpinUI(false); state.renderSegs=null; state.spinCells=null;
     if(el.winnerStat){ const st=p.stat; el.winnerStat.textContent = st&&st.n>1 ? "1 of "+st.n+" entrants · "+(st.pct<10?st.pct.toFixed(1):Math.round(st.pct))+"% chance" : ""; }
+    const avatarFor=name=>{ const sg=(p.segs||[]).find(x=>x.label===name); if(sg&&sg.avatar!=null) return sg.avatar; for(const [,u] of state.users) if(userName(u)===name) return u.avatar||""; return ""; };
+    if(el.winnerAvatar){ const who=p.mode==="users"?p.label:p.winnerUser, A=el.winnerAvatar;
+      A.innerHTML=""; A.classList.toggle("on", !!(state.avatars && who));
+      if(state.avatars && who){ A.textContent=initialOf(who); const url=avatarFor(who);
+        if(url){ const im=document.createElement("img"); im.alt=""; im.referrerPolicy="no-referrer"; im.onload=()=>{ A.textContent=""; A.appendChild(im); }; im.src=url; } } }
     const badgeFor=name=>{ const sg=(p.segs||[]).find(x=>x.label===name); if(sg&&sg.badge) return sg.badge; for(const [,u] of state.users) if(userName(u)===name) return u.badge||""; return ""; };
     if(p.mode==="users") showWinner("users", p.label, p.reward, p.color, p.rewardImg, badgeFor(p.label));
     else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color, p.rewardImg, badgeFor(p.winnerUser));   // rewards wheel + drawn entrant → Winner + prize
@@ -1577,6 +1657,7 @@
     if(el.accentPick) el.accentPick.oninput=()=>{ state.accent=el.accentPick.value.toUpperCase(); lookChanged(); };
     if(el.chatColors) el.chatColors.onchange=()=>{ state.chatColors=el.chatColors.checked; lookChanged(); };
     if(el.showBadges) el.showBadges.onchange=()=>{ state.showBadges=el.showBadges.checked; lookChanged(); };
+    if(el.avatars) el.avatars.onchange=()=>{ state.avatars=el.avatars.checked; lookChanged(); if(state.avatars) wantAllAvatars(); };
     if(el.autoCloseSeg) el.autoCloseSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.autoClose=+b.dataset.s; reflectExtras(); save(); broadcastSync(); });
     if(el.volume) el.volume.oninput=()=>{ state.volume=+el.volume.value; reflectExtras(); save(); broadcastSync(); };
     if(el.volTest) el.volTest.onclick=()=>{ chime(); };
@@ -1600,7 +1681,7 @@
     if(ROLE==="dock"){ setTimeout(ovCheck,2500); setInterval(ovCheck,2000); }
     el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
 
-    const addU=()=>{ const v=el.manualUser.value.trim(); if(!v)return; const login=v.toLowerCase().replace(/[^a-z0-9_]/g,"")||("guest"+state.users.size); if(state.users.has(login)){ if(state.weighted){ const u=state.users.get(login); u.weight=(u.weight||1)+1; } } else state.users.set(login,{name:v,weight:1}); renderUsers(); renderWheels(); save(); broadcastSync(); el.manualUser.value=""; el.manualUser.focus(); };
+    const addU=()=>{ const v=el.manualUser.value.trim(); if(!v)return; const login=v.toLowerCase().replace(/[^a-z0-9_]/g,"")||("guest"+state.users.size); if(state.users.has(login)){ if(state.weighted){ const u=state.users.get(login); u.weight=(u.weight||1)+1; } } else { state.users.set(login,{name:v,weight:1}); if(/^[a-z0-9_]{3,25}$/i.test(v)) wantAvatar(login); } renderUsers(); renderWheels(); save(); broadcastSync(); el.manualUser.value=""; el.manualUser.focus(); };
     el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
     el.clearUsers.onclick=()=>{ if(!state.users.size) return;                 // two-step: first click arms, second clears (no browser dialogs inside OBS)
       const b=el.clearUsers;
@@ -1671,6 +1752,7 @@
     applyTheme(); applySize();
     if(el.chatColors) el.chatColors.checked=state.chatColors;
     if(el.showBadges) el.showBadges.checked=state.showBadges;
+    if(el.avatars) el.avatars.checked=state.avatars;
     if(el.autoCloseSeg) el.autoCloseSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("active",+b.dataset.s===(state.autoClose||0)));
     if(el.volume){ el.volume.value=state.volume; el.volVal.textContent=state.volume+"%"; el.volIco.textContent=state.volume==0?"🔇":state.volume<50?"🔉":"🔊"; }
     renderHistory();
@@ -1705,7 +1787,7 @@
   function fitAll(){ document.querySelectorAll(".strip-canvas").forEach(fitCanvas); }
   fitAll();
   addEventListener("resize",()=>{ fitAll(); applyBannerPos(); if(!state.spinning) renderWheels(); });
-  if(IS_CONTROLLER){ load(); reflectAll(); broadcastSync(); }   // publish initial snapshot for any stage
+  if(IS_CONTROLLER){ load(); reflectAll(); broadcastSync(); wantAllAvatars(); }   // publish initial snapshot for any stage; look up missing pictures
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
   initCollapsible();
   initTabs();
