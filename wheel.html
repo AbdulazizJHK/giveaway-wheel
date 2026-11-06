@@ -319,8 +319,8 @@
   .icon-btn.active{color:var(--cyan);border-color:rgba(46,230,214,.55);box-shadow:0 0 18px -6px var(--glow-c)}
 
   /* ---------- Overlay polish: strip plate, marker, banner extras, countdown, winner ---------- */
-  .strip-wrap{position:relative;z-index:5;width:min(1320px,94%);padding:18px 0;display:flex;justify-content:center}
-  .strip-wrap .strip-stage{width:100%;height:176px;z-index:2}
+  .strip-wrap{position:relative;z-index:5;width:min(1640px,96%);padding:20px 0;display:flex;justify-content:center}
+  .strip-wrap .strip-stage{width:100%;height:228px;z-index:2}
   .strip-plate{position:absolute;inset:0 2%;z-index:1;border-radius:22px;
     background:linear-gradient(180deg,rgba(22,24,33,.74),rgba(11,12,17,.66));border:1px solid rgba(255,255,255,.09);
     backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
@@ -401,6 +401,34 @@
   .winner-card .prize .pv{font-size:22px;font-weight:700;color:var(--ink);padding:10px 26px;border-radius:10px;border:1px solid var(--stroke-strong);background:rgba(124,92,255,.14)}
   .winner-actions{margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
+  /* winner card scale for a 1080p stream */
+  .winner .winner-card{padding:40px 56px;max-width:min(1400px,94vw)}
+  .winner .winner-card .eyebrow{font-size:24px;margin-bottom:14px}
+  .winner .winner-card .eyebrow::before,.winner .winner-card .eyebrow::after{width:80px;height:3px}
+  .winner .winner-card .who{font-size:clamp(64px,11vw,156px)}
+  .winner .winner-img{max-width:min(520px,80vw);max-height:340px;margin:22px auto 0;border-radius:18px;border:2px solid rgba(255,255,255,.18);
+    box-shadow:0 0 0 6px rgba(0,0,0,.25),0 0 60px -10px var(--wcol,#7C5CFF),0 24px 60px -20px rgba(0,0,0,.9);animation:prizeIn .5s cubic-bezier(.2,1.2,.4,1) .3s both}
+  .winner .winner-card .prize{margin-top:30px}
+  .winner .winner-card .prize .pi{font-size:38px;padding:0 24px 0 30px}
+  .winner .winner-card .prize .pt{padding:16px 36px 16px 24px;gap:4px}
+  .winner .winner-card .prize .pl{font-size:14px}
+  .winner .winner-card .prize .pv{font-size:34px}
+
+  /* in the OBS dock: an opaque, compact winner panel instead of a see-through overlay */
+  body.role-dock .winner{background:#0E1015;overflow-y:auto;align-items:start;padding:28px 0}
+  body.role-dock .w-rays{display:none}
+  body.role-dock .w-tint{opacity:.28}
+  body.role-dock .winner .winner-card{padding:12px 16px;max-width:100%;width:100%}
+  body.role-dock .winner .winner-card .eyebrow{font-size:14px;margin-bottom:6px}
+  body.role-dock .winner .winner-card .eyebrow::before,body.role-dock .winner .winner-card .eyebrow::after{width:36px;height:2px}
+  body.role-dock .winner .winner-card .who{font-size:clamp(30px,13vw,54px)}
+  body.role-dock .winner .winner-img{max-width:100%;max-height:170px;margin-top:12px;border-radius:12px}
+  body.role-dock .winner .winner-card .prize{margin-top:16px;max-width:100%}
+  body.role-dock .winner .winner-card .prize .pi{font-size:24px;padding:0 14px 0 18px}
+  body.role-dock .winner .winner-card .prize .pt{padding:10px 20px 10px 14px;min-width:0}
+  body.role-dock .winner .winner-card .prize .pv{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  body.role-dock .winner-actions{margin-top:20px}
+
   #confetti{position:fixed;inset:0;z-index:21;pointer-events:none;display:none}
   #confetti.show{display:block}
 
@@ -467,7 +495,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.8</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.9</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
     </div>
 
@@ -608,7 +636,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.8</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.9</b></div>
         </section>
       </div>
 
@@ -697,7 +725,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "1.8";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "1.9";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={
@@ -1107,8 +1135,8 @@
     if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,x+pad+1.5,vp+1.5,CW-pad*2-3,H-vp*2-3,r); c.stroke(); }
     if(o&&o.noText){ c.restore(); return; }
     c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
-    c.font="700 "+Math.max(11,Math.min((H-vp*2)*0.2,22))+"px "+FONT;
-    let t=seg.label; const maxw=CW-14;
+    c.font="700 "+Math.max(11,o?Math.min((H-vp*2)*0.17,32):Math.min((H-vp*2)*0.2,22))+"px "+FONT;   // stage strip gets bigger names
+    let t=seg.label; const maxw=CW-(o?28:14);
     if(c.measureText(t).width>maxw){ while(t.length>1&&c.measureText(t+"…").width>maxw) t=t.slice(0,-1); t+="…"; }
     c.fillText(t, x+CW/2, H/2); c.restore();
   }
