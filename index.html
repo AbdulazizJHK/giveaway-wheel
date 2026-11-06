@@ -482,6 +482,7 @@
   body.role-dock .winner .winner-card .prize .pt{padding:10px 20px 10px 14px;min-width:0}
   body.role-dock .winner .winner-card .prize .pv{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
   body.role-dock .winner-actions{margin-top:20px}
+  body.role-dock .winner .winner-card,body.role-dock .winner .winner-card .who .ch,body.role-dock .winner .winner-card .prize,body.role-dock .winner .winner-img{animation:none!important;opacity:1!important;transform:none!important}
 
   #confetti{position:fixed;inset:0;z-index:21;pointer-events:none;display:none}
   #confetti.show{display:block}
@@ -551,7 +552,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.1</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.2</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
     </div>
 
@@ -737,7 +738,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.1</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.2</b></div>
         </section>
       </div>
 
@@ -828,7 +829,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.1";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "2.2";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -883,18 +884,24 @@
     if(BUS) BUS.postMessage({kind:"sync",v,src:MYID,data});
   }
   function sendCmd(cmd,payload){
-    const id=MYID+":"+Date.now()+":"+Math.random().toString(36).slice(2); lastCmdId=id;
-    try{ localStorage.setItem("gw_cmd", JSON.stringify({id,src:MYID,cmd,payload})); }catch(e){}
-    if(BUS) BUS.postMessage({kind:"cmd",id,src:MYID,cmd,payload});
+    const id=MYID+":"+Date.now()+":"+Math.random().toString(36).slice(2), at=Date.now(); lastCmdId=id;
+    try{ localStorage.setItem("gw_cmd", JSON.stringify({id,src:MYID,cmd,payload,at})); }catch(e){}
+    if(BUS) BUS.postMessage({kind:"cmd",id,src:MYID,cmd,payload,at});
   }
-  function handleSync(v,src,data){ if(src===MYID||v<=lastSeenVer) return; lastSeenVer=v; applySync(data); }
-  function handleCmd(id,src,cmd,payload){ if(src===MYID||id===lastCmdId) return; lastCmdId=id;
+  /* Ignore anything left in storage by an earlier session: a controller (dock) never adopts a snapshot
+     from before it started, and nobody replays a command from before they loaded (or older than 15s).
+     Without this, every dock reload replayed the last spin and covered the dock with a winner panel. */
+  const BOOT_T=Date.now();
+  try{ const c=JSON.parse(localStorage.getItem("gw_cmd")||"null"); if(c&&c.id) lastCmdId=c.id; }catch(e){}
+  function handleSync(v,src,data){ if(src===MYID||v<=lastSeenVer) return; if(IS_CONTROLLER && v<BOOT_T) return; lastSeenVer=v; applySync(data); }
+  function handleCmd(id,src,cmd,payload,at){ if(src===MYID||id===lastCmdId) return; lastCmdId=id;
+    if(!at || at<BOOT_T-2000 || Date.now()-at>15000) return;
     if(cmd==="spin") runSpin(payload,false); else if(cmd==="winner-close") closeWinner(true); }
 
-  if(BUS) BUS.onmessage=e=>{ const m=e.data; if(!m) return; if(m.kind==="sync") handleSync(m.v,m.src,m.data); else if(m.kind==="cmd") handleCmd(m.id,m.src,m.cmd,m.payload); };
+  if(BUS) BUS.onmessage=e=>{ const m=e.data; if(!m) return; if(m.kind==="sync") handleSync(m.v,m.src,m.data); else if(m.kind==="cmd") handleCmd(m.id,m.src,m.cmd,m.payload,m.at); };
   function pollBus(){
     try{ const s=localStorage.getItem("gw_shared"); if(s){ const m=JSON.parse(s); handleSync(m.v,m.src,m.data); } }catch(e){}
-    try{ const c=localStorage.getItem("gw_cmd"); if(c){ const m=JSON.parse(c); handleCmd(m.id,m.src,m.cmd,m.payload); } }catch(e){}
+    try{ const c=localStorage.getItem("gw_cmd"); if(c){ const m=JSON.parse(c); handleCmd(m.id,m.src,m.cmd,m.payload,m.at); } }catch(e){}
   }
   window.addEventListener("storage",pollBus);
   setInterval(pollBus,250);
