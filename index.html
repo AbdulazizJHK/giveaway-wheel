@@ -6,6 +6,8 @@
 <title>Giveaway Roulette · Twitch</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <script>
+  /* the on-stream view must be fully transparent in OBS: flag it before anything paints */
+  if(/[?&]view=stage(&|$)/i.test(location.search)) document.documentElement.classList.add("is-stage");
   /* start-up guard: collect errors; if the app hasn't started after 6s, show what went wrong instead of a blank dock */
   window.__gwErr=[];
   addEventListener("error",function(e){ __gwErr.push((e.message||"error")+(e.lineno?" (line "+e.lineno+")":"")); });
@@ -44,6 +46,7 @@
 
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:#0E1015;color-scheme:dark}
+  html.is-stage{background:transparent!important;color-scheme:normal}   /* never paint behind the on-stream overlay */
   html,body{height:100%}
   body{
     font-family:var(--font);color:var(--ink);
@@ -597,7 +600,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.8</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.9</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -799,7 +802,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.8</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.9</b></div>
         </section>
       </div>
 
@@ -892,7 +895,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.8";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "2.9";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
