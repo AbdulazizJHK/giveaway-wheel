@@ -1,6 +1,6 @@
 <p align="center"><img src="icon.svg" alt="Giveaway Roulette" width="88"></p>
 
-# 🎡 Giveaway Roulette — for Twitch (v2.4)
+# 🎡 Giveaway Roulette — for Twitch (v2.5)
 
 A live giveaway picker for Twitch streams. Viewers type **`!join`** in chat and a sideways‑scrolling roulette picks the winner — with rewards, prize images, weighted odds, a countdown, an "Entries Open" banner, and automatic chat announcements.
 
@@ -14,12 +14,12 @@ Add two browser sources in OBS (same page, two views):
 
 | | URL |
 |---|---|
-| **On stream** (Browser Source, 1920×1080) | `https://abdulazizjhk.github.io/giveaway-wheel/wheel.html?view=stage` |
-| **Your controls** (Docks → Custom Browser Docks) | `https://abdulazizjhk.github.io/giveaway-wheel/wheel.html?view=dock` |
+| **On stream** (Browser Source, 1920×1080) | `https://abdulazizjhk.github.io/giveaway-wheel/overlay.html` |
+| **Your controls** (Docks → Custom Browser Docks) | `https://abdulazizjhk.github.io/giveaway-wheel/dock.html` |
 
 Then in the dock: enter your channel → **Connect** → set a timer → **Open Entries**. Viewers `!join`; when the timer ends it auto‑spins and reveals the winner.
 
-> **Stuck on an old version?** Re-copy the **On stream** URL with the **🔗 Copy source URL** button in the dock — it stamps the current version (e.g. `?view=stage&v=1.1`) so the pasted URL bypasses OBS's cache. You can also right‑click the source → Refresh, or manually bump the `&v=` number.
+> **Set the links once.** `dock.html` and `overlay.html` never change: they always open the newest version, and a running dock or source updates itself between giveaways.
 
 ## Features
 - `!join` chat entries (anonymous read — no login) · weighted odds · sub/VIP/mod‑only gating

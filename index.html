@@ -466,6 +466,10 @@
   .w-role .role-tag::before{width:10px;height:10px}
   body.role-dock .w-role .role-tag{font-size:11px;padding:3px 9px}
   .kbd-hint{font-size:11px;color:var(--faint)}
+  .wrong-view{position:fixed;left:16px;right:16px;top:50%;transform:translateY(-50%);z-index:99;background:#14161D;border:1px solid var(--stroke-strong);border-radius:14px;padding:20px;color:var(--muted);font-size:13px;text-align:center;box-shadow:0 20px 50px -20px #000}
+  .wrong-view b{color:var(--ink)}
+  .wrong-view p{margin:8px 0 14px}
+  .wrong-view a{display:inline-block;color:#fff;background:var(--accent);text-decoration:none;font-weight:600;border-radius:9px;padding:10px 16px}
   .ov-status{flex-basis:100%;display:none;align-items:center;gap:8px;margin-top:-4px;font-size:11px;color:var(--faint)}
   body.role-dock .ov-status{display:flex}
   .ov-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
@@ -576,7 +580,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.4</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.5</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -768,11 +772,11 @@
         <section class="block group dock-only" style="flex-direction:column">
           <div class="label">OBS</div>
           <button class="btn small" id="copyUrl" style="width:100%;flex:none">🔗 Copy source URL (for OBS)</button>
-          <div class="hint-sm">Paste it into your Browser Source after an update to force the newest version.</div>
+          <div class="hint-sm">Paste it into your Browser Source once — it always opens the newest version, so you never need a new link. Your dock link: <b>…/giveaway-wheel/dock.html</b></div>
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.4</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.5</b></div>
         </section>
       </div>
 
@@ -865,7 +869,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "2.5";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1693,7 +1697,7 @@
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
     if(el.railSpin) el.railSpin.onclick=requestSpin;
     if(el.copyUrl) el.copyUrl.onclick=()=>{
-      const url=location.origin+location.pathname+"?view=stage&v="+APP_VERSION;   // &v tracks APP_VERSION → auto cache-bust in OBS on every release
+      const url=location.origin+location.pathname.replace(/[^/]*$/,"")+"overlay.html";   // permanent link: always opens the newest build
       const done=()=>{ toast("Source URL copied — paste into an OBS Browser Source"); el.copyUrl.textContent="✅ Copied!"; setTimeout(()=>{ el.copyUrl.textContent="🔗 Copy source URL (for OBS)"; },1600); };
       const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — URL: "+url); } document.body.removeChild(ta); };
       if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback); else fallback();
@@ -1793,6 +1797,14 @@
   initTabs();
   renderWheels();
   window.__gwReady=true; const boot=$("boot"); if(boot) boot.remove();
+  if(ROLE==="stage"){                        // the overlay link pasted into a dock by mistake → say so (never triggers at stream sizes)
+    const wrong=()=>{ let w=$("wrongView"); const narrow=innerWidth<520 && innerHeight>innerWidth*1.2;
+      if(narrow && !w){ w=document.createElement("div"); w.id="wrongView"; w.className="wrong-view";
+        w.innerHTML='<b>This is the on-stream overlay link</b><p>It belongs in an OBS <b>Browser Source</b>. For your controls dock, use <b>dock.html</b>.</p><a href="dock.html">Open the controls here</a>';
+        document.body.appendChild(w); }
+      else if(!narrow && w) w.remove(); };
+    wrong(); addEventListener("resize",wrong);
+  }
   if(ROLE!=="dock"){ const hb=()=>{ try{ localStorage.setItem("gw_hb",String(Date.now())); }catch(e){} }; hb(); setInterval(hb,2000); }   // heartbeat for the dock's overlay status
 
   /* ---------------- Auto-update ----------------

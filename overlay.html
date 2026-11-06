@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Giveaway Roulette · Overlay</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<style>html,body{margin:0;height:100%;background:transparent;color:transparent;font:13px "Segoe UI",system-ui,sans-serif}body{display:grid;place-items:center}</style>
+</head>
+<body>
+
+<script>
+  /* Permanent link for the OBS Browser Source (on stream). This page never changes, so it is safe for OBS to cache it:
+     it asks version.json (never cached) for the newest build and opens that, every time. */
+  (function(){
+    var done=false;
+    function go(v){ if(done) return; done=true; location.replace("wheel.html?view=stage&"+(v?"v="+encodeURIComponent(v):"t="+Date.now())); }
+    setTimeout(function(){ go(""); },4000);
+    fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.json(); }).then(function(j){ go(j&&j.v); }).catch(function(){ go(""); });
+  })();
+</script>
+</body>
+</html>
