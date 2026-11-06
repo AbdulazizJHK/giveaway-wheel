@@ -480,6 +480,9 @@
   .w-role .role-tag::before{width:10px;height:10px}
   body.role-dock .w-role .role-tag{font-size:11px;padding:3px 9px}
   .kbd-hint{font-size:11px;color:var(--faint)}
+  .obs-link{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center}
+  .obs-link .ol-k{grid-column:1/-1;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .obs-link code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--stroke);border-radius:7px;padding:7px 9px}
   .wrong-view{position:fixed;left:16px;right:16px;top:50%;transform:translateY(-50%);z-index:99;background:#14161D;border:1px solid var(--stroke-strong);border-radius:14px;padding:20px;color:var(--muted);font-size:13px;text-align:center;box-shadow:0 20px 50px -20px #000}
   .wrong-view b{color:var(--ink)}
   .wrong-view p{margin:8px 0 14px}
@@ -594,7 +597,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.7</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.8</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -790,12 +793,13 @@
         </section>
         <section class="block group dock-only" style="flex-direction:column">
           <div class="label">OBS</div>
-          <button class="btn small" id="copyUrl" style="width:100%;flex:none">🔗 Copy source URL (for OBS)</button>
-          <div class="hint-sm">Paste it into your Browser Source once — it always opens the newest version, so you never need a new link. Your dock link: <b>…/giveaway-wheel/dock.html</b></div>
+          <div class="hint-sm">These links <b>always open the newest version</b> and update themselves — paste each one once and never again.</div>
+          <div class="obs-link"><span class="ol-k">On stream · Browser Source</span><code id="ovLink">…/overlay.html</code><button class="btn small" id="copyUrl">🔗 Copy</button></div>
+          <div class="obs-link"><span class="ol-k">Controls · Custom Browser Dock</span><code id="dkLink">…/dock.html</code><button class="btn small" id="copyDock">🔗 Copy</button></div>
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.7</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.8</b></div>
         </section>
       </div>
 
@@ -888,7 +892,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.7";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "2.8";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1724,12 +1728,17 @@
     if(el.rewardImgInput) el.rewardImgInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f && _rewardImgIdx>=0 && state.rewards[_rewardImgIdx]){ compressImage(f,360,url=>{ if(url && state.rewards[_rewardImgIdx]){ state.rewards[_rewardImgIdx].img=url; renderRewards(); save(); broadcastSync(); toast("Reward image added"); } else toast("Couldn't read that image."); }); } e.target.value=""; };
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
     if(el.railSpin) el.railSpin.onclick=requestSpin;
-    if(el.copyUrl) el.copyUrl.onclick=()=>{
-      const url=location.origin+location.pathname.replace(/[^/]*$/,"")+"overlay.html";   // permanent link: always opens the newest build
-      const done=()=>{ toast("Source URL copied — paste into an OBS Browser Source"); el.copyUrl.textContent="✅ Copied!"; setTimeout(()=>{ el.copyUrl.textContent="🔗 Copy source URL (for OBS)"; },1600); };
-      const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — URL: "+url); } document.body.removeChild(ta); };
+    /* permanent OBS links: dock.html / overlay.html always open the newest build (see those files) */
+    const linkBase=location.origin+location.pathname.replace(/[^/]*$/,"");
+    const copyLink=(btn,url,what)=>{
+      const done=()=>{ toast(what+" link copied — it always opens the newest version"); btn.textContent="✅ Copied"; setTimeout(()=>{ btn.textContent="🔗 Copy"; },1600); };
+      const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — link: "+url); } ta.remove(); };
       if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback); else fallback();
     };
+    if($("ovLink")) $("ovLink").textContent=linkBase+"overlay.html";
+    if($("dkLink")) $("dkLink").textContent=linkBase+"dock.html";
+    if(el.copyUrl) el.copyUrl.onclick=()=>copyLink(el.copyUrl,linkBase+"overlay.html","Overlay");
+    if($("copyDock")) $("copyDock").onclick=()=>copyLink($("copyDock"),linkBase+"dock.html","Dock");
   }
 
   /* Wiring (all) */
