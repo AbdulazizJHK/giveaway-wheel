@@ -365,7 +365,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v2.0</span>
+      Giveaway Roulette <span class="ver" id="ver">v2.1</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -476,7 +476,7 @@
       <div class="f stg"><div class="ico c">📍</div><h3>Movable banner</h3><p>Place the “Entries open” banner anywhere.</p></div>
       <div class="f stg"><div class="ico d">✨</div><h3>Colour glow</h3><p>A glow that pulses when the winner lands.</p></div>
       <div class="f stg"><div class="ico e">🎨</div><h3>Your colours</h3><p>Theme colour, size presets, and each viewer's own Twitch colour.</p></div>
-      <div class="f stg"><div class="ico b">💎</div><h3>Role badges</h3><p>⚔️ Mods, 💎 VIPs and ⭐ subs show on their cells.</p></div>
+      <div class="f stg"><div class="ico b">🏷️</div><h3>Role tags</h3><p>MOD, VIP and SUB tags show on their cells and the winner screen.</p></div>
       <div class="f stg"><div class="ico c">↻</div><h3>History &amp; re-roll</h3><p>Last 5 winners, one-tap re-roll if nobody claims it.</p></div>
     </div>
   </section>
@@ -508,7 +508,7 @@
               <li>In your scene, <b>Sources → ➕ Browser</b> → paste the <b>On stream</b> URL → set <b>1920 × 1080</b> → uncheck “Shutdown source when not visible”. It’s transparent, so it sits over your scene.</li>
               <li>Top menu <b>Docks → Custom Browser Docks…</b> → name it “Giveaway” → paste the <b>Your controls</b> URL → <b>Apply</b>. Dock it wherever you like — only you see this.</li>
             </ol>
-            <div class="note"><span class="ni">💡</span><div>Seeing an old version after an update? Grab a fresh <b>On stream</b> URL with the <b>🔗 Copy source URL</b> button in your dock’s <b>⚙️ Settings</b> tab — it stamps the current version (e.g. <code>&amp;v=2.0</code>) so pasting it forces a clean load. You can also right-click the source → Refresh, or bump the <code>&amp;v=</code> number yourself.</div></div>
+            <div class="note"><span class="ni">💡</span><div>Seeing an old version after an update? Grab a fresh <b>On stream</b> URL with the <b>🔗 Copy source URL</b> button in your dock’s <b>⚙️ Settings</b> tab — it stamps the current version (e.g. <code>&amp;v=2.1</code>) so pasting it forces a clean load. You can also right-click the source → Refresh, or bump the <code>&amp;v=</code> number yourself.</div></div>
           </div>
         </div>
 
@@ -556,11 +556,11 @@
             <ul>
               <li><b>Overlay size</b> — Small, Medium or Large, to suit your layout.</li>
               <li><b>Theme colour</b> — pick a preset or any custom colour to match your channel.</li>
-              <li><b>Twitch colours &amp; badges</b> — cells use each viewer’s chat colour and show ⚔️ mod, 💎 VIP and ⭐ sub badges.</li>
+              <li><b>Twitch colours &amp; badges</b> — cells use each viewer’s chat colour and show MOD, VIP and SUB tags.</li>
               <li><b>Winner screen</b> — close it automatically after 10, 20 or 30 seconds.</li>
               <li><b>Sound</b> — volume slider for the beeps, ticks and win chime.</li>
             </ul>
-            <div class="note"><span class="ni">↻</span><div>Winner didn’t claim it? The <b>🎡 Giveaway</b> tab lists the last 5 winners — <b>Re-roll</b> puts the reward back and spins again.</div></div>
+            <div class="note"><span class="ni">⟳</span><div>Updates install themselves — the dock and the on-stream source reload onto a new version between giveaways. Winner didn’t claim it? The <b>🎡 Giveaway</b> tab lists the last 5 winners — <b>Re-roll</b> puts the reward back and spins again.</div></div>
           </div>
         </div>
       </div>
@@ -579,7 +579,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Giveaway Roulette · <b id="ver2">v2.0</b> · made for Twitch streamers</span>
+    <span>Giveaway Roulette · <b id="ver2">v2.1</b> · made for Twitch streamers</span>
     <span><a href="https://github.com/AbdulazizJHK/giveaway-wheel" target="_blank" rel="noopener">GitHub</a> · <a href="#setup">Setup</a> · <a href="#top">Back to top ↑</a></span>
   </div>
 </footer>
@@ -654,7 +654,8 @@
     const REWARDS=["Steam gift card","Game key","Channel merch"];
     const state={users:[],spinning:false,renderSegs:null,spinCells:null,spinWinCell:0,spinJitter:0,spinP:0,spinLastCC:null,_centerColor:"#7C5CFF",rewardIdx:0};
     let demoVisible=false;
-    const BADGES={GG_wizard:"mod",QueenBee:"vip",pixel_queen:"sub",lucky_7:"sub"}, BADGE_ICON={broadcaster:"🎥",mod:"⚔️",vip:"💎",sub:"⭐"};
+    const BADGES={GG_wizard:"mod",QueenBee:"vip",pixel_queen:"sub",lucky_7:"sub"};
+    const ROLE={broadcaster:{t:"HOST",c:"#F04B4B"},mod:{t:"MOD",c:"#00C853"},vip:{t:"VIP",c:"#F43FB7"},sub:{t:"SUB",c:"#A970FF"}};
     const getSegments=()=>state.users.map((u,i)=>({label:u,weight:1,color:SEG[i%SEG.length],badge:BADGES[u]||""}));
     const segs=()=>state.renderSegs!=null?state.renderSegs:getSegments();
 
@@ -679,16 +680,23 @@
       if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.06+land*0.08)+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); }
       if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,x+pad+1.5,vp+1.5,CW-pad*2-3,H-vp*2-3,r); c.stroke(); }
       if(o&&o.noText){ c.restore(); return; }
-      if(seg.badge && BADGE_ICON[seg.badge]){
-        const bs=Math.max(14,Math.round((H-vp*2)*0.2)), bx=x+pad+8, by=vp+8;
-        c.fillStyle="rgba(0,0,0,.28)"; rr(c,bx,by,bs+8,bs+8,7); c.fill();
-        c.font=bs+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillStyle="#fff"; c.fillText(BADGE_ICON[seg.badge],bx+(bs+8)/2,by+(bs+8)/2+1);
-      }
+      const fs=Math.max(11,Math.min((H-vp*2)*0.17,32));
+      const role=ROLE[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
+      const nameY=role?H/2-(chipH+gap)/2:H/2;
       c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
-      c.font="700 "+Math.max(11,Math.min((H-vp*2)*0.17,32))+"px "+FONT;
+      c.font="700 "+fs+"px "+FONT;
       let t=seg.label; const maxw=CW-28;
       if(c.measureText(t).width>maxw){ while(t.length>1&&c.measureText(t+"…").width>maxw) t=t.slice(0,-1); t+="…"; }
-      c.fillText(t, x+CW/2, H/2); c.restore();
+      c.fillText(t, x+CW/2, nameY);
+      if(role){
+        c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=Math.round(ts*0.14)+"px";
+        const tw=c.measureText(role.t).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=nameY+fs*0.5+gap*0.6;
+        c.fillStyle="rgba(10,10,16,.42)"; rr(c,cx,cy,cw,chipH,5); c.fill();
+        c.fillStyle=role.c; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
+        c.fillStyle="#fff"; c.textAlign="left"; c.fillText(role.t,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
+        if("letterSpacing" in c) c.letterSpacing="0px";
+      }
+      c.restore();
     }
     function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; return d<1?1-d:0; }
     function markerFlash(){ const m=el.marker; if(!m||!m.animate) return;

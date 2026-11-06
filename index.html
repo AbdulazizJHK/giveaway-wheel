@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Giveaway Roulette · Twitch</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
+<script>
+  /* start-up guard: collect errors; if the app hasn't started after 6s, show what went wrong instead of a blank dock */
+  window.__gwErr=[];
+  addEventListener("error",function(e){ __gwErr.push((e.message||"error")+(e.lineno?" (line "+e.lineno+")":"")); });
+  addEventListener("unhandledrejection",function(e){ __gwErr.push(String(e.reason)); });
+  setTimeout(function(){ if(window.__gwReady) return; var b=document.getElementById("boot"); if(!b) return;
+    b.innerHTML='<div style="max-width:300px;text-align:center"><b style="color:#E8EAF0;font-size:15px">The dock didn\'t start</b><p style="margin:8px 0 14px">'+(__gwErr.length?"Error: "+__gwErr.slice(0,3).join(" | ").replace(/</g,"&lt;"):"It is taking too long to load.")+'</p><button onclick="location.reload()" style="font:inherit;font-weight:600;color:#fff;background:#7C5CFF;border:none;border-radius:9px;padding:10px 18px;cursor:pointer">Reload</button></div>'; },6000);
+</script>
 <style>
   :root{
     --bg:#0E1015;
@@ -449,7 +457,16 @@
   .h-item.rerolled .h-name{text-decoration:line-through;color:var(--faint)}
   .h-item .h-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
   .h-item .btn.small{padding:6px 10px;font-size:12px}
-  .role-ico{margin-left:4px;font-size:12px}
+  .role-tag{display:inline-flex;align-items:center;gap:4px;margin-left:7px;padding:1px 6px;border-radius:4px;font-size:9.5px;font-weight:800;letter-spacing:.08em;color:#E8EAF0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);vertical-align:2px}
+  .role-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--rc)}
+  .item .odds{font-family:var(--mono);font-size:11px;color:var(--faint);flex:none;font-variant-numeric:tabular-nums}
+  .w-role{display:none;margin:6px auto 0;width:max-content}
+  .w-role.on{display:block}
+  .w-role .role-tag{margin:0;font-size:15px;padding:5px 12px;gap:8px;background:rgba(0,0,0,.35);border-color:rgba(255,255,255,.14)}
+  .w-role .role-tag::before{width:10px;height:10px}
+  body.role-dock .w-role .role-tag{font-size:11px;padding:3px 9px}
+  .kbd-hint{font-size:11px;color:var(--faint)}
+  .kbd-hint kbd{font-family:var(--mono);font-size:10.5px;background:rgba(255,255,255,.07);border:1px solid var(--stroke);border-radius:4px;padding:0 5px;color:var(--muted)}
 
   /* in the OBS dock: an opaque, compact winner panel instead of a see-through overlay */
   body.role-dock .winner{background:#0E1015;overflow-y:auto;align-items:start;padding:28px 0}
@@ -508,6 +525,8 @@
 </style>
 </head>
 <body>
+<div id="boot" style="position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#0E1015;color:#949AA6;font:13px 'Segoe UI',system-ui,sans-serif;padding:20px">Loading Giveaway Roulette…</div>
+<script>if(/[?&]view=stage(&|$)/i.test(location.search)){ var _b=document.getElementById("boot"); if(_b) _b.remove(); }   /* never cover the stream */</script>
 <div class="app" id="app">
 
   <!-- ============ CONTROL RAIL ============ -->
@@ -532,7 +551,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.0</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.1</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
     </div>
 
@@ -587,6 +606,7 @@
           </div>
           <div class="hint-sm">Timer <b>0</b> = no countdown. Use <b>Open Entries</b> below to start.</div>
           <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
+          <div class="kbd-hint">Shortcuts: <kbd>O</kbd> open · <kbd>C</kbd> close · <kbd>Space</kbd> spin · <kbd>Esc</kbd> close winner</div>
         </section>
         <section class="block group">
           <div class="label">Recent winners</div>
@@ -717,7 +737,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.0</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.1</b></div>
         </section>
       </div>
 
@@ -778,6 +798,7 @@
   <div class="winner-card">
     <div class="eyebrow" id="winnerEyebrow">Winner</div>
     <div class="who" id="winnerName">—</div>
+    <div class="w-role" id="winnerRole"></div>
     <img class="winner-img" id="winnerImg" alt="" style="display:none"/>
     <div class="prize" id="winnerPrize" style="display:none">
       <span class="pi">🎁</span><span class="pt"><span class="pl">Reward</span><span class="pv" id="winnerPrizeVal">—</span></span>
@@ -807,7 +828,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.0";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "2.1";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1033,7 +1054,8 @@
     if(r[0]===":"){ const sp=r.indexOf(" "); o.prefix=r.slice(1,sp); r=r.slice(sp+1); }
     const sp=r.indexOf(" "); if(sp===-1) o.command=r; else { o.command=r.slice(0,sp); o.params=r.slice(sp+1); } return o; }
   const badgeOf=r=>!r?"":r.broadcaster?"broadcaster":r.mod?"mod":r.vip?"vip":r.sub?"sub":"";
-  const BADGE_ICON={broadcaster:"🎥",mod:"⚔️",vip:"💎",sub:"⭐"};
+  const ROLE_TAG={broadcaster:{t:"HOST",c:"#F04B4B"},mod:{t:"MOD",c:"#00C853"},vip:{t:"VIP",c:"#F43FB7"},sub:{t:"SUB",c:"#A970FF"}};   // Twitch-style role colours
+  const roleTag=b=>ROLE_TAG[b]?`<span class="role-tag" style="--rc:${ROLE_TAG[b].c}">${ROLE_TAG[b].t}</span>`:"";
   /* a viewer's Twitch colour, lifted if it's too dark to read on the overlay */
   function viewerColor(hex){
     if(!/^#[0-9a-f]{6}$/i.test(hex||"")) return null;
@@ -1182,7 +1204,8 @@
     joinFeed();
     if(!el.userList) return;
     if(n===0){ el.userList.innerHTML='<div class="empty">No entrants yet.</div>'; return; }
-    let h="",i=0; for(const [login,u] of state.users){ const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(userName(u))}${u.badge?`<span class="role-ico" title="${u.badge}">${BADGE_ICON[u.badge]||""}</span>`:""}</span>${badge}<span class="x" data-login="${esc(login)}">×</span></div>`; }
+    const totalW=[...state.users.values()].reduce((a,u)=>a+(state.weighted?userWeight(u):1),0)||1;
+    let h="",i=0; for(const [login,u] of state.users){ const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span><span class="swatch" style="background:${c};color:${c}"></span><span class="name">${esc(userName(u))}${roleTag(u.badge)}</span>${badge}<span class="odds" title="Chance to win">${(((state.weighted?w:1)/totalW)*100).toFixed(((state.weighted?w:1)/totalW)*100<10?1:0)}%</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
     el.userList.innerHTML=h;
     el.userList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.users.delete(x.dataset.login); renderUsers(); renderWheels(); save(); broadcastSync(); });
   }
@@ -1245,16 +1268,23 @@
     if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.06+land*0.08)+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); }
     if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,x+pad+1.5,vp+1.5,CW-pad*2-3,H-vp*2-3,r); c.stroke(); }
     if(o&&o.noText){ c.restore(); return; }
-    if(o && seg.badge && BADGE_ICON[seg.badge]){                  // role badge in the cell's top-left corner (stage strip only)
-      const bs=Math.max(14,Math.round((H-vp*2)*0.2)), bx=x+pad+8, by=vp+8;
-      c.fillStyle="rgba(0,0,0,.28)"; rr(c,bx,by,bs+8,bs+8,7); c.fill();
-      c.font=bs+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillStyle="#fff"; c.fillText(BADGE_ICON[seg.badge],bx+(bs+8)/2,by+(bs+8)/2+1);
-    }
+    const fs=Math.max(11,o?Math.min((H-vp*2)*0.17,40):Math.min((H-vp*2)*0.2,22));   // stage strip gets bigger names
+    const role=o&&ROLE_TAG[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
+    const nameY = role ? H/2-(chipH+gap)/2 : H/2;
     c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
-    c.font="700 "+Math.max(11,o?Math.min((H-vp*2)*0.17,40):Math.min((H-vp*2)*0.2,22))+"px "+FONT;   // stage strip gets bigger names
+    c.font="700 "+fs+"px "+FONT;
     let t=seg.label; const maxw=CW-(o?28:14);
     if(c.measureText(t).width>maxw){ while(t.length>1&&c.measureText(t+"…").width>maxw) t=t.slice(0,-1); t+="…"; }
-    c.fillText(t, x+CW/2, H/2); c.restore();
+    c.fillText(t, x+CW/2, nameY);
+    if(role){                                                       // role tag under the name: dark chip, coloured dot, MOD / VIP / SUB / HOST
+      c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=Math.round(ts*0.14)+"px";
+      const tw=c.measureText(role.t).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=nameY+fs*0.5+gap*0.6;
+      c.fillStyle="rgba(10,10,16,.42)"; rr(c,cx,cy,cw,chipH,5); c.fill();
+      c.fillStyle=role.c; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
+      c.fillStyle="#fff"; c.textAlign="left"; c.fillText(role.t,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
+      if("letterSpacing" in c) c.letterSpacing="0px";
+    }
+    c.restore();
   }
   /* cell nearer the marker lifts (stage strip only) */
   function liftOf(x,CW,W){ const d=Math.abs(x+CW/2-W/2)/CW; return d<1?1-d:0; }
@@ -1346,8 +1376,9 @@
   }
   function endSpin(p,authoritative){
     state.spinning=false; state._lastOffset=null; setSpinUI(false); state.renderSegs=null; state.spinCells=null;
-    if(p.mode==="users") showWinner("users", p.label, p.reward, p.color, p.rewardImg);
-    else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color, p.rewardImg);   // rewards wheel + drawn entrant → Winner + prize
+    const badgeFor=name=>{ const sg=(p.segs||[]).find(x=>x.label===name); if(sg&&sg.badge) return sg.badge; for(const [,u] of state.users) if(userName(u)===name) return u.badge||""; return ""; };
+    if(p.mode==="users") showWinner("users", p.label, p.reward, p.color, p.rewardImg, badgeFor(p.label));
+    else if(p.winnerUser) showWinner("users", p.winnerUser, p.label, p.color, p.rewardImg, badgeFor(p.winnerUser));   // rewards wheel + drawn entrant → Winner + prize
     else showWinner("rewards", p.label, null, p.color, p.rewardImg);                          // no entrants → just the prize
     chime();
     if(authoritative){
@@ -1393,7 +1424,8 @@
   function setSpinUI(on){ [el.spinBtn,el.railSpin].forEach(b=>{ if(b) b.disabled=on; }); if(el.hub) el.hub.classList.toggle("disabled",on); }
 
   /* ---------------- Winner ---------------- */
-  function showWinner(mode,label,reward,color,img){
+  function showWinner(mode,label,reward,color,img,badge){
+    const wr=$("winnerRole"); if(wr){ wr.innerHTML=roleTag(state.showBadges?badge:""); wr.classList.toggle("on",!!wr.innerHTML); }
     if(el.winnerEyebrow) el.winnerEyebrow.textContent = mode==="users" ? "Winner" : "Prize";
     el.winner.style.setProperty("--wcol", color||"#7C5CFF");
     el.winnerName.textContent="";
@@ -1502,7 +1534,11 @@
 
     const addU=()=>{ const v=el.manualUser.value.trim(); if(!v)return; const login=v.toLowerCase().replace(/[^a-z0-9_]/g,"")||("guest"+state.users.size); if(state.users.has(login)){ if(state.weighted){ const u=state.users.get(login); u.weight=(u.weight||1)+1; } } else state.users.set(login,{name:v,weight:1}); renderUsers(); renderWheels(); save(); broadcastSync(); el.manualUser.value=""; el.manualUser.focus(); };
     el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
-    el.clearUsers.onclick=()=>{ if(state.users.size){ state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); } };
+    el.clearUsers.onclick=()=>{ if(!state.users.size) return;                 // two-step: first click arms, second clears (no browser dialogs inside OBS)
+      const b=el.clearUsers;
+      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent="Click again to clear "+state.users.size+" entrants"; clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent="Clear entrants"; },3000); return; }
+      delete b.dataset.armed; clearTimeout(b._t); b.textContent="Clear entrants";
+      state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); toast("Entrants cleared"); };
     const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push({name:v,img:null}); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
     if(el.rewardImgInput) el.rewardImgInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f && _rewardImgIdx>=0 && state.rewards[_rewardImgIdx]){ compressImage(f,360,url=>{ if(url && state.rewards[_rewardImgIdx]){ state.rewards[_rewardImgIdx].img=url; renderRewards(); save(); broadcastSync(); toast("Reward image added"); } else toast("Couldn't read that image."); }); } e.target.value=""; };
     el.addRewardBtn.onclick=addR; el.rewardInput.addEventListener("keydown",e=>{ if(e.key==="Enter") addR(); });
@@ -1522,6 +1558,12 @@
   el.winAgain.onclick=()=>{ closeWinner(false); setTimeout(requestSpin,250); };
   if(el.streamBtn) el.streamBtn.onclick=toggleStream;
   if(el.fsBtn) el.fsBtn.onclick=toggleFs;
+  document.addEventListener("keydown",e=>{                         // O = open entries, C = close entries (controllers, not while typing)
+    if(!IS_CONTROLLER || e.ctrlKey||e.metaKey||e.altKey || /input|textarea|select/i.test(e.target.tagName)) return;
+    const k=e.key.toLowerCase();
+    if(k==="o" && el.open && !el.open.disabled){ e.preventDefault(); el.open.click(); }
+    else if(k==="c" && el.close && !el.close.disabled){ e.preventDefault(); el.close.click(); }
+  });
   document.addEventListener("keydown",e=>{ if(e.code==="Space"&&!/input|textarea/i.test(e.target.tagName)){ e.preventDefault(); if(el.winner.classList.contains("show"))return; requestSpin(); } if(e.key==="Escape"&&el.winner.classList.contains("show")) closeWinner(false); });
   addEventListener("resize",()=>{ if(el.confetti.classList.contains("show")) sizeConf(); });
 
@@ -1600,6 +1642,22 @@
   initCollapsible();
   initTabs();
   renderWheels();
+  window.__gwReady=true; const boot=$("boot"); if(boot) boot.remove();
+
+  /* ---------------- Auto-update ----------------
+     OBS keeps cached copies of the page; check version.json (never cached) and reload onto the new
+     build when one is published — but never mid-spin or while the winner is on screen. */
+  function checkUpdate(){
+    fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
+      const v=j&&String(j.v||""); if(!v||v===APP_VERSION) return;
+      if(state.spinning || el.winner.classList.contains("show") || state.entriesOpen) return;   // wait for a quiet moment
+      let tried={}; try{ tried=JSON.parse(sessionStorage.getItem("gw_upd")||"{}"); }catch(e){}
+      if(tried.v===v && Date.now()-tried.t<10*60000) return;                                  // don't loop if the CDN is still serving the old page
+      try{ sessionStorage.setItem("gw_upd",JSON.stringify({v,t:Date.now()})); }catch(e){}
+      const u=new URL(location.href); u.searchParams.set("v",v); location.replace(u.toString());
+    }).catch(()=>{});
+  }
+  if(location.protocol.startsWith("http")){ setTimeout(checkUpdate,8000); setInterval(checkUpdate,90000); }
 })();
 </script>
 </body>
