@@ -368,7 +368,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v3.6</span>
+      Giveaway Roulette <span class="ver" id="ver">v3.7</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -591,7 +591,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Giveaway Roulette · <b id="ver2">v3.6</b> · made for Twitch streamers</span>
+    <span>Giveaway Roulette · <b id="ver2">v3.7</b> · made for Twitch streamers</span>
     <span><a href="https://github.com/AbdulazizJHK/giveaway-wheel" target="_blank" rel="noopener">GitHub</a> · <a href="#setup">Setup</a> · <a href="#top">Back to top ↑</a></span>
   </div>
 </footer>
@@ -684,14 +684,14 @@
     function shade(hex,amt){ const v=/^#[0-9a-f]{6}$/i.test(hex||"")?hexRGB(hex):[124,92,255]; const f=x=>Math.round(amt<0?x*(1+amt):x+(255-x)*amt); return "rgb("+f(v[0])+","+f(v[1])+","+f(v[2])+")"; }
     function drawCell(c,x,CW,H,seg,o){
       const pad=3, vp=o.vp, lift=o.lift, land=o.land, bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, R=Math.max(10,Math.round(bh*0.075));
-      const role=ROLE[seg.badge], footH=Math.round(bh*(role?0.44:0.36)), topH=bh-footH, fy=by+topH;
+      const role=ROLE[seg.badge], col=role?role.c:seg.color, footH=Math.round(bh*0.36), topH=bh-footH, fy=by+topH;   // role cards are painted in the role colour — one colour per card, no frame
       c.save();
       if(o.alpha!=null) c.globalAlpha=o.alpha;
       const sc=1+lift*0.16+land*0.04;
       if(sc!==1){ const cx=x+CW/2, cy=H/2; c.translate(cx,cy); c.scale(sc,sc); c.translate(-cx,-cy); }
-      if(land>0){ c.shadowColor=seg.color; c.shadowBlur=36*land; }
+      if(land>0){ c.shadowColor=col; c.shadowBlur=36*land; }
       else if(lift>0.05 && o.alpha==null){ c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=30*lift; c.shadowOffsetY=12*lift; }
-      const base=c.createLinearGradient(0,by,0,by+bh); base.addColorStop(0,shade(seg.color,.18)); base.addColorStop(.5,seg.color); base.addColorStop(1,shade(seg.color,-.28));
+      const base=c.createLinearGradient(0,by,0,by+bh); base.addColorStop(0,shade(col,.18)); base.addColorStop(.5,col); base.addColorStop(1,shade(col,-.28));
       rr(c,bx,by,bw,bh,R); c.fillStyle=base; c.fill();
       c.shadowBlur=0; c.shadowOffsetY=0;
       if(o.noText){ c.restore(); return; }                             // motion-blur copies stop here
@@ -708,42 +708,43 @@
       c.fillStyle="rgba(255,255,255,.14)"; c.fillRect(bx,fy,bw,1);
       c.restore();
       c.lineWidth=1; c.strokeStyle="rgba(255,255,255,.22)"; rr(c,bx+.5,by+.5,bw-1,bh-1,R); c.stroke();   // rim light
-      if(role){ const host=seg.badge==="broadcaster", band=Math.max(5,Math.round(bh*(host?0.085:0.055)));
+      if(role){                                                         // role cards: foil finish + corner ribbon (no frame)
         c.save(); rr(c,bx,by,bw,bh,R); c.clip();
-        const tint=c.createLinearGradient(0,by,0,by+topH); tint.addColorStop(0,role.c+"4d"); tint.addColorStop(1,role.c+"00"); c.fillStyle=tint; c.fillRect(bx,by,bw,topH);
-        if(seg.badge==="vip"){ const vs=c.createLinearGradient(bx,by,bx+bw,by+bh); vs.addColorStop(.32,"rgba(255,255,255,0)"); vs.addColorStop(.48,"rgba(255,255,255,.2)"); vs.addColorStop(.52,"rgba(255,255,255,.2)"); vs.addColorStop(.68,"rgba(255,255,255,0)"); c.fillStyle=vs; c.fillRect(bx,by,bw,bh); }
-        c.fillStyle=role.c; c.fillRect(bx,by,bw,band); c.fillStyle="rgba(255,255,255,.3)"; c.fillRect(bx,by+band-1,bw,1);
+        const foil=c.createLinearGradient(bx,by,bx+bw,by+bh);
+        [[.18,0],[.26,.16],[.3,0],[.58,0],[.64,.1],[.68,0]].forEach(([p,a])=>foil.addColorStop(p,"rgba(255,255,255,"+a+")"));
+        c.fillStyle=foil; c.fillRect(bx,by,bw,bh);
+        if(seg.badge==="vip"){ const vs=c.createLinearGradient(bx+bw,by,bx,by+bh); vs.addColorStop(.4,"rgba(255,255,255,0)"); vs.addColorStop(.5,"rgba(255,255,255,.14)"); vs.addColorStop(.6,"rgba(255,255,255,0)"); c.fillStyle=vs; c.fillRect(bx,by,bw,bh); }
+        const rt=role.t, rs=Math.max(9,Math.round(bh*0.072)), rw=Math.round(Math.max(bh*0.17,rs*1.9));   // ribbon across the top-right corner
+        c.translate(bx+bw,by); c.rotate(Math.PI/4);
+        const off=Math.round(Math.min(bw,bh)*0.2);
+        c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=6; c.shadowOffsetY=2;
+        c.fillStyle=shade(role.c,-.38); c.fillRect(-bw,off,bw*2,rw);
+        c.shadowBlur=0; c.shadowOffsetY=0;
+        c.fillStyle="rgba(255,255,255,.22)"; c.fillRect(-bw,off,bw*2,1); c.fillRect(-bw,off+rw-1,bw*2,1);
+        c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.font="900 "+rs+"px "+FONT;
+        if("letterSpacing" in c) c.letterSpacing=Math.round(rs*0.16)+"px";
+        c.fillText(rt,0,off+rw/2+1); if("letterSpacing" in c) c.letterSpacing="0px";
         c.restore();
-        c.save(); c.shadowColor=role.c+"aa"; c.shadowBlur=12; c.lineWidth=Math.max(2.5,Math.round(bh*0.022)); c.strokeStyle=role.c; rr(c,bx+1.25,by+1.25,bw-2.5,bh-2.5,R); c.stroke(); c.restore();
-        if(host){ c.lineWidth=1; c.strokeStyle="rgba(255,255,255,.3)"; rr(c,bx+6,by+band+4,bw-12,bh-band-10,Math.max(4,R-4)); c.stroke(); } }
+      }
       if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.05+land*0.07)+")"; rr(c,bx,by,bw,bh,R); c.fill(); }
       if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,bx+1.5,by+1.5,bw-3,bh-3,R); c.stroke(); }
       if(seg.avatar!=null){                                             // picture (or initial) in a glowing ring
-        const A=Math.round(Math.min(topH*0.6,bw*0.4)), ax=bx+bw/2, ay=by+topH*(role?0.58:0.55), im=null;
-        c.save(); c.shadowColor="rgba(0,0,0,.45)"; c.shadowBlur=14; c.shadowOffsetY=4; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.fillStyle=shade(seg.color,-.35); c.fill(); c.restore();
+        const A=Math.round(Math.min(topH*0.6,bw*0.4)), ax=bx+bw/2, ay=by+topH*0.55, im=null;
+        c.save(); c.shadowColor="rgba(0,0,0,.45)"; c.shadowBlur=14; c.shadowOffsetY=4; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.fillStyle=shade(col,-.35); c.fill(); c.restore();
         c.save(); c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.clip();
         if(im) c.drawImage(im,ax-A/2,ay-A/2,A,A);
-        else { const ig=c.createLinearGradient(0,ay-A/2,0,ay+A/2); ig.addColorStop(0,shade(seg.color,-.15)); ig.addColorStop(1,shade(seg.color,-.45)); c.fillStyle=ig; c.fillRect(ax-A/2,ay-A/2,A,A);
+        else { const ig=c.createLinearGradient(0,ay-A/2,0,ay+A/2); ig.addColorStop(0,shade(col,-.15)); ig.addColorStop(1,shade(col,-.45)); c.fillStyle=ig; c.fillRect(ax-A/2,ay-A/2,A,A);
           c.fillStyle="#fff"; c.font="800 "+Math.round(A*0.46)+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillText(initialOf(seg.label),ax,ay+1); }
         c.restore();
         c.lineWidth=Math.max(2.5,Math.round(A*0.06)); c.strokeStyle="rgba(255,255,255,.95)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
         c.lineWidth=1.5; c.strokeStyle="rgba(255,255,255,.28)"; c.beginPath(); c.arc(ax,ay,A/2+Math.max(4,A*0.07),0,6.283); c.stroke();
       }
-      const fs=Math.max(12,Math.min(footH*(role?0.34:0.44),40)), ts=Math.max(10,Math.round(fs*0.46)), chipH=ts+9;
-      const nameY = role ? fy+footH*0.34 : fy+footH*0.5;
+      const fs=Math.max(12,Math.min(footH*0.44,40)), nameY=fy+footH*0.5;
       c.save(); c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=6; c.shadowOffsetY=2;
       c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.font="800 "+fs+"px "+FONT;
       let lbl=seg.label; const maxw=bw-24;
       if(c.measureText(lbl).width>maxw){ while(lbl.length>1&&c.measureText(lbl+"…").width>maxw) lbl=lbl.slice(0,-1); lbl+="…"; }
       c.fillText(lbl,x+CW/2,nameY); c.restore();
-      if(role){                                                         // solid role tag under the name
-        const rt=role.t; c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=Math.round(ts*0.14)+"px";
-        const tw=c.measureText(rt).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=fy+footH*0.62;
-        c.save(); c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=8; c.shadowOffsetY=2; c.fillStyle=role.c; rr(c,cx,cy,cw,chipH,5); c.fill(); c.restore();
-        c.fillStyle="#fff"; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
-        c.textAlign="left"; c.textBaseline="middle"; c.fillText(rt,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
-        if("letterSpacing" in c) c.letterSpacing="0px";
-      }
       if(o.alpha==null){ const dim=(1-lift)*(1-land)*0.24; if(dim>0.01){ c.fillStyle="rgba(8,9,14,"+dim+")"; rr(c,bx,by,bw,bh,R); c.fill(); } }   // side cards step back
       c.restore();
     }
