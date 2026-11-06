@@ -465,7 +465,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.6</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v1.7</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
     </div>
 
@@ -606,7 +606,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.6</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v1.7</b></div>
         </section>
       </div>
 
@@ -695,7 +695,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "1.6";   // ← bump this on every update; shows in the dock + tab title
+  const APP_VERSION = "1.7";   // ← bump this on every update; shows in the dock + tab title
 
   /* ---------------- State ---------------- */
   const state={
@@ -993,13 +993,22 @@
   function applyBannerPos(){
     const t=el.stageTop; if(!t) return;
     const [v,h]=(state.bannerPos||"top-center").split("-");
-    t.style.top = v==="top" ? "22px" : (v==="mid" ? "50%" : "auto");
-    t.style.bottom = v==="bottom" ? "22px" : "auto";
-    t.style.transform = v==="mid" ? "translateY(-50%)" : "none";
+    t.style.transform="none";
     t.style.justifyContent = h==="left" ? "flex-start" : (h==="right" ? "flex-end" : "center");
-    t.style.paddingLeft = h==="left" ? "26px" : "0";
-    t.style.paddingRight = h==="right" ? "26px" : "0";
-    if(el.ebCol){ el.ebCol.style.alignItems = h==="left" ? "flex-start" : (h==="right" ? "flex-end" : "center"); el.ebCol.style.flexDirection = v==="bottom" ? "column-reverse" : "column"; }
+    const strip=document.getElementById("stripStage"), stage=el.stage||document.getElementById("stage");
+    if(v==="mid" && strip && stage && stage.clientHeight){
+      /* middle = sit just above the strip (never on top of it), lined up with the strip plate's edges */
+      const plateInset=strip.offsetWidth*0.02, sideL=strip.offsetLeft+plateInset, sideR=stage.clientWidth-(strip.offsetLeft+strip.offsetWidth)+plateInset;
+      t.style.top="auto"; t.style.bottom=(stage.clientHeight-strip.offsetTop+14)+"px";
+      t.style.paddingLeft = h==="left" ? sideL+"px" : "0";
+      t.style.paddingRight = h==="right" ? sideR+"px" : "0";
+    } else {
+      t.style.top = v==="top" ? "22px" : "auto";
+      t.style.bottom = v==="bottom" ? "22px" : "auto";
+      t.style.paddingLeft = h==="left" ? "26px" : "0";
+      t.style.paddingRight = h==="right" ? "26px" : "0";
+    }
+    if(el.ebCol){ el.ebCol.style.alignItems = h==="left" ? "flex-start" : (h==="right" ? "flex-end" : "center"); el.ebCol.style.flexDirection = v==="top" ? "column" : "column-reverse"; }   // feed grows away from the strip
   }
   function reflectPosGrid(){ if(!el.posGrid) return; el.posGrid.querySelectorAll("button").forEach(b=>b.classList.toggle("active", b.dataset.pos===state.bannerPos)); }
   function reflectChips(){
@@ -1377,7 +1386,7 @@
   try{ document.title="Giveaway Roulette v"+APP_VERSION+" · Twitch"; }catch(e){}
   function fitAll(){ document.querySelectorAll(".strip-canvas").forEach(fitCanvas); }
   fitAll();
-  addEventListener("resize",()=>{ fitAll(); if(!state.spinning) renderWheels(); });
+  addEventListener("resize",()=>{ fitAll(); applyBannerPos(); if(!state.spinning) renderWheels(); });
   if(IS_CONTROLLER){ load(); reflectAll(); broadcastSync(); }   // publish initial snapshot for any stage
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
   initCollapsible();
