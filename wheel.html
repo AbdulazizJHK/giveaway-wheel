@@ -6,6 +6,10 @@
 <title>Giveaway Roulette · Twitch</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <script>
+  /* language: pick it up from saved state before anything paints, so Arabic loads right-to-left with no flash */
+  (function(){ try{ var st=/[?&]view=stage(&|$)/i.test(location.search);
+    var s=st?(JSON.parse(localStorage.getItem("gw_shared")||"{}").data||{}):JSON.parse(localStorage.getItem("gw_state")||"{}");
+    if(s && s.lang==="ar"){ document.documentElement.lang="ar"; document.documentElement.dir="rtl"; } }catch(e){} })();
   /* the on-stream view must be fully transparent in OBS: flag it before anything paints */
   if(/[?&]view=stage(&|$)/i.test(location.search)) document.documentElement.classList.add("is-stage");
   /* start-up guard: collect errors; if the app hasn't started after 6s, show what went wrong instead of a blank dock */
@@ -13,7 +17,8 @@
   addEventListener("error",function(e){ __gwErr.push((e.message||"error")+(e.lineno?" (line "+e.lineno+")":"")); });
   addEventListener("unhandledrejection",function(e){ __gwErr.push(String(e.reason)); });
   setTimeout(function(){ if(window.__gwReady) return; var b=document.getElementById("boot"); if(!b) return;
-    b.innerHTML='<div style="max-width:300px;text-align:center"><b style="color:#E8EAF0;font-size:15px">The dock didn\'t start</b><p style="margin:8px 0 14px">'+(__gwErr.length?"Error: "+__gwErr.slice(0,3).join(" | ").replace(/</g,"&lt;"):"It is taking too long to load.")+'</p><button onclick="location.reload()" style="font:inherit;font-weight:600;color:#fff;background:#7C5CFF;border:none;border-radius:9px;padding:10px 18px;cursor:pointer">Reload</button></div>'; },6000);
+    var ar=document.documentElement.lang==="ar";
+    b.innerHTML='<div style="max-width:300px;text-align:center"><b style="color:#E8EAF0;font-size:15px">'+(ar?"لم تبدأ لوحة التحكم":"The dock didn\'t start")+'</b><p style="margin:8px 0 14px">'+(__gwErr.length?(ar?"خطأ: ":"Error: ")+__gwErr.slice(0,3).join(" | ").replace(/</g,"&lt;"):(ar?"يستغرق التحميل وقتًا طويلًا.":"It is taking too long to load."))+'</p><button onclick="location.reload()" style="font:inherit;font-weight:600;color:#fff;background:#7C5CFF;border:none;border-radius:9px;padding:10px 18px;cursor:pointer">'+(ar?"إعادة التحميل":"Reload")+'</button></div>'; },6000);
 </script>
 <style>
   :root{
@@ -47,6 +52,33 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:#0E1015;color-scheme:dark}
   html.is-stage{background:transparent!important;color-scheme:normal}   /* never paint behind the on-stream overlay */
+  /* ---------- Arabic / right-to-left ---------- */
+  html[lang="ar"]{--font:"Segoe UI","Tahoma","Noto Sans Arabic","Noto Naskh Arabic",system-ui,sans-serif}
+  html[lang="ar"] body{font-family:var(--font)}
+  html[lang="ar"] *{letter-spacing:0!important}                       /* spacing breaks Arabic letter joining */
+  html[dir="rtl"] .hdr-status{box-shadow:inset -3px 0 0 var(--faint)}
+  html[dir="rtl"] .status[data-state="live"]{box-shadow:inset -3px 0 0 var(--good)}
+  html[dir="rtl"] .status[data-state="connecting"]{box-shadow:inset -3px 0 0 var(--warn)}
+  html[dir="rtl"] .status[data-state="error"]{box-shadow:inset -3px 0 0 var(--bad)}
+  html[dir="rtl"] .tbadge{right:auto;left:-15px}
+  html[dir="rtl"] .entry-state.timed .es-timer{padding-left:0;border-left:none;padding-right:14px;border-right:1px solid var(--stroke)}
+  html[dir="rtl"] .es-bar,html[dir="rtl"] .eb-bar,html[dir="rtl"] .w-timer i{transform-origin:right}
+  html[dir="rtl"] .toggle .track::after{left:auto;right:2px}
+  html[dir="rtl"] .toggle input:checked+.track::after{transform:translateX(-16px)}
+  html[dir="rtl"] .role-tag{margin-left:0;margin-right:7px}
+  html[dir="rtl"] .jf-av{margin-left:0;margin-right:-4px}
+  html[dir="rtl"] .vol-val{text-align:left}
+  html[dir="rtl"] .entry-banner{direction:rtl;padding:16px 32px 18px 30px;box-shadow:inset -4px 0 0 var(--good),0 12px 36px -14px rgba(0,0,0,.7),0 0 28px -10px var(--glow-a)}
+  html[dir="rtl"] .eb-join-item{direction:rtl;box-shadow:inset -3px 0 0 var(--accent),0 8px 22px -12px rgba(0,0,0,.8)}
+  html[dir="rtl"] .winner .winner-card .prize .pi{border-right:none;border-left:2px dashed rgba(255,255,255,.18);padding:0 30px 0 24px}
+  html[dir="rtl"] .winner .winner-card .prize .pt{padding:16px 24px 16px 36px}
+  html[dir="rtl"] .item .x,html[dir="rtl"] .item .odds{direction:ltr}
+  /* things that map to the screen or are code stay left-to-right */
+  #ebKeyword,.eb-join b,.hint-sm b,small b{unicode-bidi:isolate}
+  #ebKeyword,[data-ltr]{direction:ltr}
+  .stage-top,.pos-grid,.strip-canvas,.obs-link code,#channel,#keyword,#timerDur,.eb-timer,.es-timer,.es-count,.eb-count b,kbd,.big-count{direction:ltr}
+  .obs-link code{text-align:left}
+  #msgOpen,#msgClose,#msgWin,#manualUser,#rewardInput,#userSearch{direction:inherit;unicode-bidi:plaintext}
   html,body{height:100%}
   body{
     font-family:var(--font);color:var(--ink);
@@ -575,7 +607,8 @@
 </head>
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#0E1015;color:#949AA6;font:13px 'Segoe UI',system-ui,sans-serif;padding:20px">Loading Giveaway Roulette…</div>
-<script>if(/[?&]view=stage(&|$)/i.test(location.search)){ var _b=document.getElementById("boot"); if(_b) _b.remove(); }   /* never cover the stream */</script>
+<script>if(/[?&]view=stage(&|$)/i.test(location.search)){ var _b=document.getElementById("boot"); if(_b) _b.remove(); }   /* never cover the stream */
+else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("boot"); if(_b2) _b2.textContent="جارٍ تحميل Giveaway Roulette…"; }</script>
 <div class="app" id="app">
 
   <!-- ============ CONTROL RAIL ============ -->
@@ -600,7 +633,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v2.9</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.0</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -703,7 +736,7 @@
             <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
             <button class="btn small" id="addReward">Add</button>
           </div>
-          <div class="hint-sm">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the roulette picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>. Click 🖼️ to attach a prize image.</div>
+          <div class="hint-sm" id="rwHint">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the roulette picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>. Click 🖼️ to attach a prize image.</div>
         </section>
       </div>
 
@@ -739,6 +772,10 @@
       <div class="panel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" hidden>
         <section class="block group">
           <div class="label">Look</div>
+          <div class="field">
+            <span class="fl-l">Language</span>
+            <div class="seg" id="langSeg"><button data-lang="en" class="active">English</button><button data-lang="ar">العربية</button></div>
+          </div>
           <div class="field">
             <span class="fl-l">Overlay size</span>
             <div class="seg" id="sizeSeg"><button data-size="s">Small</button><button data-size="m" class="active">Medium</button><button data-size="l">Large</button></div>
@@ -802,7 +839,7 @@
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v2.9</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.0</b></div>
         </section>
       </div>
 
@@ -895,7 +932,7 @@
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "2.9";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "3.0";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -919,9 +956,49 @@
     spinP:0, spinCells:null, spinWinCell:0, spinJitter:0, spinLastCC:null,  // strip-roulette animation state
     _centerColor:"#7C5CFF",
     pendingSync:null,
-    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false, avatars:true, plate:"soft",
+    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false, avatars:true, plate:"soft", lang:"en",
     history:[],                  // last 5 winners: {name, reward, img, mode, t, rerolled}
   };
+  /* ---------------- Language (English / العربية) ----------------
+     Static text is translated in place by matching each text node / placeholder / title against the
+     table below (originals are kept, so switching back is exact); runtime text goes through t(). */
+  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون (VIP)", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: chat:edit و chat:read). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركين", "VIPs ": "المميزين", "Mods": "المشرفين", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (chat:edit)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة"};
+  const ISO=x=>"\u2068"+x+"\u2069";                          // keep usernames/codes in their own direction inside Arabic text
+  function t(en,vars){ let s=(state&&state.lang==="ar"&&AR[en])||en; if(vars) s=s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m); return s; }
+  const hasArabic=x=>/[\u0600-\u06FF\u0750-\u08FF]/.test(String(x||""));
+  const I18N_SKIP="#userList,#rewardList,#historyList,#winnerName,#winnerPrizeVal,#ebFeed,#toast-wrap,#esStatus,#esCount,#esTimer,#ebCount,#ebTimer,#ebKeyword,#ebLock,#closeBtn,#clearUsers,#volVal,#winnerStat,#winnerRole,#winnerEyebrow,#verTag,#verTag2,#ovLink,#dkLink,#copyUrl,#copyDock,#boot,script,style";
+  const i18nOrig=new WeakMap();
+  function applyLang(){
+    const ar=state.lang==="ar", root=document.documentElement;
+    root.lang=ar?"ar":"en"; root.dir=ar?"rtl":"ltr";
+    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); let n;
+    while((n=w.nextNode())){ const par=n.parentNode; if(!par||par.closest(I18N_SKIP)) continue;
+      if(!i18nOrig.has(n)) i18nOrig.set(n,n.nodeValue);
+      const o=i18nOrig.get(n), k=o.trim(); if(!k) continue;
+      n.nodeValue = ar&&AR[k] ? o.replace(k,AR[k]) : o; }
+    document.querySelectorAll("[placeholder],[title],[aria-label]").forEach(e=>{ if(e.closest("#userList,#rewardList,#historyList")) return;
+      ["placeholder","title","aria-label"].forEach(a=>{ if(!e.hasAttribute(a)) return; const key="i18n"+a.replace("-",""); if(e.dataset[key]==null) e.dataset[key]=e.getAttribute(a);
+        const o=e.dataset[key]; e.setAttribute(a, ar&&AR[o]?AR[o]:o); }); });
+    document.querySelectorAll(".hint-sm b,small b,b.k").forEach(b=>{ if(/^[!{@]|\.(com|net)$/.test(b.textContent.trim())) b.setAttribute("data-ltr",""); });   // commands, placeholders, sites stay LTR
+    const rh=$("rwHint"); if(rh){ if(rh.dataset.en==null) rh.dataset.en=rh.innerHTML; rh.innerHTML = ar ? AR_RW_HINT : rh.dataset.en; }
+    if($("langSeg")) $("langSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.lang===(state.lang||"en")));
+    /* refresh everything that writes its own text */
+    if(state._st) setStatus(...state._st); if(state._bst) setBotStatus(...state._bst);
+    if(el.clearUsers && !el.clearUsers.dataset.armed) el.clearUsers.textContent=t("Clear entrants");
+    ["copyUrl","copyDock"].forEach(id=>{ const b=$(id); if(b) b.textContent=t("🔗 Copy"); });
+    if(typeof tickTimer==="function") tickTimer();
+  }
+  const AR_RW_HINT='🎁 في وضع <b>المشاركين</b> يحصل الفائز على <b>أعلى جائزة</b> هنا. في وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي. في الحالتين تُرسل رسالة واحدة في الدردشة بالفائز وجائزته. اضغط 🖼️ لإرفاق صورة للجائزة.';
+  const MSG_DEF={ en:{open:"🎡 Giveaway is OPEN! Type {keyword} to enter!",close:"🔒 Entries closed — {count} entered. Spinning now…",win:"🏆 @{winner} won {reward} — congrats! 🎉",landed:"🎁 The roulette landed on {reward}! 🎉"},
+    ar:{open:"🎡 السحب مفتوح! اكتب {keyword} للمشاركة!",close:"🔒 أُغلق باب المشاركة — شارك {count}. السحب الآن…",win:"🏆 مبروك @{winner}! فزت بـ {reward} 🎉",landed:"🎁 توقفت العجلة على {reward}! 🎉"} };
+  function setLang(lang){
+    const prev=MSG_DEF[state.lang||"en"], next=MSG_DEF[lang]||MSG_DEF.en;
+    if(state.msgOpen===prev.open) state.msgOpen=next.open;            // swap the chat messages only if they're still the defaults
+    if(state.msgClose===prev.close) state.msgClose=next.close;
+    if(state.msgWin===prev.win) state.msgWin=next.win;
+    if(el.msgOpen){ el.msgOpen.value=state.msgOpen; el.msgClose.value=state.msgClose; el.msgWin.value=state.msgWin; }
+    state.lang=lang; applyLang(); reflectAll(); renderWheels();
+  }
   const SEG=["#7C5CFF","#4C93FF","#22C3A6","#F5A623","#F2685E","#9B6BF0","#38BDF8","#3DD68C","#FB923C","#EC6AA6"];
 
   const $=id=>document.getElementById(id);
@@ -979,7 +1056,7 @@
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos,
-      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate
+      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate, lang:state.lang
     });
   }
   function applySync(d){
@@ -1003,6 +1080,7 @@
     if(typeof d.volume==="number") state.volume=d.volume;
     if(typeof d.avatars==="boolean") state.avatars=d.avatars;
     if(["soft","panel","none"].includes(d.plate)) state.plate=d.plate;
+    if((d.lang==="ar"||d.lang==="en") && d.lang!==state.lang){ state.lang=d.lang; applyLang(); }
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
     if(state.spinning){ state.pendingSync=true; return; }
@@ -1020,7 +1098,7 @@
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin,
       size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, history:state.history,
-      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate
+      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate, lang:state.lang
     })); }catch(e){}
   }
   function load(){
@@ -1071,6 +1149,7 @@
       if(typeof s.blockRecent==="boolean") state.blockRecent=s.blockRecent;
       if(typeof s.avatars==="boolean") state.avatars=s.avatars;
       if(["soft","panel","none"].includes(s.plate)) state.plate=s.plate;
+      if(s.lang==="ar"||s.lang==="en") state.lang=s.lang;
       if(el.chatControl) el.chatControl.checked=state.chatControl;
       if(el.blockRecent) el.blockRecent.checked=state.blockRecent;
     }catch(e){}
@@ -1079,7 +1158,7 @@
 
   /* ---------------- Helpers ---------------- */
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  function toast(html){ const w=$("toast-wrap"), t=document.createElement("div"); t.className="toast"; t.innerHTML=html; w.appendChild(t); while(w.children.length>2) w.firstChild.remove(); setTimeout(()=>t.remove(),2600); }
+  function toast(html){ html=t(html); const w=$("toast-wrap"), box=document.createElement("div"); box.className="toast"; box.innerHTML=html; w.appendChild(box); while(w.children.length>2) w.firstChild.remove(); setTimeout(()=>box.remove(),2600); }
   const userName=u=>typeof u==="string"?u:u.name;
   const userWeight=u=>(typeof u==="object"&&u.weight)?u.weight:1;
   const rewardName=r=>typeof r==="string"?r:(r&&r.name)||"";
@@ -1096,7 +1175,7 @@
   function segs(){ return state.renderSegs!=null ? state.renderSegs : getSegments(); }
 
   /* ---------------- Twitch IRC (controller only) ---------------- */
-  function setStatus(cls,text){ if(!el.dot)return; el.dot.className="dot"+(cls?" "+cls:""); el.statusText.textContent=text; markStatus(el.dot,cls); }
+  function setStatus(cls,text,vars){ if(!el.dot)return; state._st=[cls,text,vars]; el.dot.className="dot"+(cls?" "+cls:""); el.statusText.textContent=t(text,vars); markStatus(el.dot,cls); }
   function markStatus(dot,cls){ const box=dot&&dot.closest(".status"); if(box) box.dataset.state=cls||""; }
   function connect(){
     const ch=el.channel.value.trim().toLowerCase().replace(/^#/,"").replace(/[^a-z0-9_]/g,"");
@@ -1113,7 +1192,7 @@
   function handleIRC(line,ws){
     if(line.startsWith("PING")){ ws.send("PONG :tmi.twitch.tv"); return; }
     const m=parseIRC(line);
-    if(m.command==="366"){ state.connected=true; setConnectedUI(true); setStatus("live","Connected to #"+state.channel); broadcastSync(); if(state.bot.ws&&state.bot.ready){ try{ state.bot.ws.send("JOIN #"+state.channel); }catch(e){} } return; }
+    if(m.command==="366"){ state.connected=true; setConnectedUI(true); setStatus("live","Connected to #{c}",{c:ISO(state.channel)}); broadcastSync(); if(state.bot.ws&&state.bot.ready){ try{ state.bot.ws.send("JOIN #"+state.channel); }catch(e){} } return; }
     if(m.command==="NOTICE" && /authentication failed|improperly formatted/i.test(m.params||"")){ setStatus("error","Channel not found"); return; }
     if(m.command==="PRIVMSG"){
       const login=(m.prefix||"").split("!")[0];
@@ -1137,7 +1216,7 @@
     const sp=r.indexOf(" "); if(sp===-1) o.command=r; else { o.command=r.slice(0,sp); o.params=r.slice(sp+1); } return o; }
   const badgeOf=r=>!r?"":r.broadcaster?"broadcaster":r.mod?"mod":r.vip?"vip":r.sub?"sub":"";
   const ROLE_TAG={broadcaster:{t:"HOST",c:"#F04B4B"},mod:{t:"MOD",c:"#00C853"},vip:{t:"VIP",c:"#F43FB7"},sub:{t:"SUB",c:"#A970FF"}};   // Twitch-style role colours
-  const roleTag=b=>ROLE_TAG[b]?`<span class="role-tag" style="--rc:${ROLE_TAG[b].c}">${ROLE_TAG[b].t}</span>`:"";
+  const roleTag=b=>ROLE_TAG[b]?`<span class="role-tag" style="--rc:${ROLE_TAG[b].c}">${t(ROLE_TAG[b].t)}</span>`:"";
   /* a viewer's Twitch colour, lifted if it's too dark to read on the overlay */
   function viewerColor(hex){
     if(!/^#[0-9a-f]{6}$/i.test(hex||"")) return null;
@@ -1207,13 +1286,13 @@
       if(state.weighted){ u.weight=(u.weight||1)+1; renderUsers(); renderWheels(); save(); broadcastSync(); }
       return;
     }
-    state.users.set(login,Object.assign({name:disp,weight:1},extra)); wantAvatar(login); renderUsers(); renderWheels(); save(); broadcastSync(); toast(`<b>${esc(disp)}</b> joined!`);
+    state.users.set(login,Object.assign({name:disp,weight:1},extra)); wantAvatar(login); renderUsers(); renderWheels(); save(); broadcastSync(); toast(t("{name} joined!",{name:`<b><bdi>${esc(disp)}</bdi></b>`}));
   }
   function disconnectWs(userInit){ state.reconnect=false; if(state.ws){ try{state.ws.close();}catch(e){} state.ws=null; } if(userInit){ state.connected=false; setConnectedUI(false); setStatus("","Not connected"); broadcastSync(); } }
   function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
 
   /* ---------------- Chat bot (sending) ---------------- */
-  function setBotStatus(cls,text){ if(!el.botDot)return; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=text; markStatus(el.botDot,cls); }
+  function setBotStatus(cls,text,vars){ if(!el.botDot)return; state._bst=[cls,text,vars]; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=t(text,vars); markStatus(el.botDot,cls); }
   function connectBot(){
     const name=(el.botName.value||"").trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
     let tok=(el.botToken.value||"").trim().replace(/^oauth:/i,"");
@@ -1229,8 +1308,8 @@
       if(m.command==="001"){ state.bot.ready=true;
         const realLogin=((m.params||"").trim().split(/\s+/)[0]||name).toLowerCase();   // Twitch attributes messages to the TOKEN's account, not NICK — this is who chat sees
         state.bot.login=realLogin;
-        if(realLogin && realLogin!==name){ setBotStatus("live","Posting as @"+realLogin+" (not @"+name+")"); toast("Heads up: this token belongs to @"+realLogin+", so messages post as @"+realLogin+". To post as @"+name+", generate the token while logged into that account."); }
-        else setBotStatus("live","Bot ready — @"+realLogin);
+        if(realLogin && realLogin!==name){ setBotStatus("live","Posting as @{a} (not @{b})",{a:ISO(realLogin),b:ISO(name)}); toast(t("Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.",{a:ISO(esc(realLogin)),b:ISO(esc(name))})); }
+        else setBotStatus("live","Bot ready — @{n}",{n:ISO(realLogin)});
         if(state.channel) ws.send("JOIN #"+state.channel); }
       else if(m.command==="NOTICE" && /authentication failed|Login unsuccessful|Improperly formatted auth/i.test(m.params||"")){ state.bot.ready=false; state.bot.reconnect=false; setBotStatus("error","Bad token — regenerate it"); }
     }); };
@@ -1248,15 +1327,15 @@
     let dur=parseInt(el.timerDur&&el.timerDur.value,10); if(isNaN(dur)||dur<0) dur=0;
     state.entryDeadline = dur>0 ? Date.now()+dur*1000 : null;
     state.entriesOpen=true;
-    el.esStatus.textContent="Entries OPEN"; el.entryState.classList.add("open"); el.open.disabled=true; el.close.disabled=false;
+    el.esStatus.textContent=t("Entries OPEN"); el.entryState.classList.add("open"); el.open.disabled=true; el.close.disabled=false;
     save(); broadcastSync(); reflectChips(); tickTimer();
     botSay(fillTpl(state.msgOpen,{keyword:state.keyword,count:state.users.size,timer:dur>0?dur:""}));
-    toast(`Entries open — viewers type <b>${esc(state.keyword)}</b>`+(dur>0?` · ${dur}s`:""));
+    toast(t("Entries open — viewers type {kw}",{kw:`<b><bdi>${esc(state.keyword)}</bdi></b>`})+(dur>0?` · <bdi>${dur}s</bdi>`:""));
   }
   function closeEntries(announce){
     const wasOpen=state.entriesOpen;
     state.entriesOpen=false; state.entryDeadline=null;
-    if(el.esStatus){ el.esStatus.textContent="Entries closed"; el.entryState.classList.remove("open"); el.open.disabled=!state.connected; el.close.disabled=true; }
+    if(el.esStatus){ el.esStatus.textContent=t("Entries closed"); el.entryState.classList.remove("open"); el.open.disabled=!state.connected; el.close.disabled=true; }
     broadcastSync(); reflectChips(); tickTimer();
     if(announce!==false && wasOpen) botSay(fillTpl(state.msgClose,{keyword:state.keyword,count:state.users.size}));
   }
@@ -1270,7 +1349,7 @@
     if(esBar){ if(active){ if(state.entryDeadline!==state._esDeadline){ state._esDeadline=state.entryDeadline; state._esTotal=Math.max(1,remain); }
         esBar.style.setProperty("--left",Math.max(0,Math.min(1,remain/state._esTotal)).toFixed(4)); esBar.classList.toggle("urgent",remain<=10); }
       esBar.classList.toggle("on",active); if(!active) state._esDeadline=null; }
-    if(el.close && IS_CONTROLLER){ const lbl=active?"■ Close · "+fmtTime(remain):"■ Close"; if(el.close.textContent!==lbl) el.close.textContent=lbl; }
+    if(el.close && IS_CONTROLLER){ const lbl=active?t("■ Close · {t}",{t:fmtTime(remain)}):t("■ Close"); if(el.close.textContent!==lbl) el.close.textContent=lbl; }
     if(el.ebTimer){ el.ebTimer.style.display=active?"inline-block":"none"; if(active){ el.ebTimer.textContent=fmtTime(remain); el.ebTimer.classList.toggle("urgent",remain<=10); } }
     if(el.ebBar){ if(active){ if(state.entryDeadline!==state._barDeadline){ state._barDeadline=state.entryDeadline; state._barTotal=Math.max(1,remain); }
         el.ebBar.style.setProperty("--left",Math.max(0,Math.min(1,remain/state._barTotal)).toFixed(4)); el.ebBar.classList.toggle("urgent",remain<=10); }
@@ -1289,7 +1368,7 @@
   setInterval(tickTimer,250);
 
   /* ---------------- Rendering ---------------- */
-  function restrictLabel(){ const R=state.restrict, p=[]; if(R.sub)p.push("Subs"); if(R.vip)p.push("VIPs"); if(R.mod)p.push("Mods"); return p.join("/"); }
+  function restrictLabel(){ const R=state.restrict, p=[], ar=state.lang==="ar"; if(R.sub)p.push(ar?"المشتركين":"Subs"); if(R.vip)p.push(ar?"المميزين":"VIPs"); if(R.mod)p.push(ar?"المشرفين":"Mods"); return p.join("/"); }
   function applyBannerPos(){
     const t=el.stageTop; if(!t) return;
     const [v,h]=(state.bannerPos||"top-center").split("-");
@@ -1318,7 +1397,7 @@
     else if(shown && !b.classList.contains("out")){ b.classList.add("out"); b._hide=setTimeout(()=>{ b.style.display="none"; b.classList.remove("out"); if(el.ebFeed) el.ebFeed.innerHTML=""; },300); }
     if(el.ebKeyword) el.ebKeyword.textContent = state.keyword;
     const rl=restrictLabel();
-    if(el.ebLock){ el.ebLock.style.display = rl?"inline-flex":"none"; el.ebLock.textContent = "🔒 "+rl+" only"; }
+    if(el.ebLock){ el.ebLock.style.display = rl?"inline-flex":"none"; el.ebLock.textContent = t("🔒 {r} only",{r:rl}); }
   }
   /* "+ name joined" feed under the on-stream banner (new names only, max 3 visible) */
   let feedSeen=new Set(), feedLive=false;
@@ -1330,7 +1409,7 @@
     fresh.slice(-3).forEach(nm=>{ const d=document.createElement("div"); d.className="eb-join-item";
       const uu=[...state.users.values()].find(x=>userName(x)===nm), av=state.avatars&&uu&&uu.avatar;
       if(av){ d.classList.add("has-av"); const im=document.createElement("img"); im.className="jf-av"; im.alt=""; im.referrerPolicy="no-referrer"; im.src=av; im.onerror=()=>im.remove(); d.appendChild(im); }
-      d.dataset.name=nm; d.insertAdjacentHTML("beforeend","<i>+</i> "); d.appendChild(document.createTextNode(nm+" joined"));
+      d.dataset.name=nm; d.insertAdjacentHTML("beforeend","<i>+</i> "+t("{name} joined",{name:"<bdi>"+esc(nm)+"</bdi>"}));
       el.ebFeed.appendChild(d); setTimeout(()=>d.remove(),3100); });
     while(el.ebFeed.children.length>3) el.ebFeed.firstChild.remove();
   }
@@ -1345,21 +1424,21 @@
       if(n>prev && state.entriesOpen){ el.ebCount.classList.remove("bump"); void el.ebCount.offsetWidth; el.ebCount.classList.add("bump"); } }
     joinFeed(); fillFeedAvatars();
     if(!el.userList) return;
-    if(n===0){ el.userList.innerHTML='<div class="empty">No entrants yet.</div>'; return; }
+    if(n===0){ el.userList.innerHTML='<div class="empty">'+t("No entrants yet.")+'</div>'; return; }
     const totalW=[...state.users.values()].reduce((a,u)=>a+(state.weighted?userWeight(u):1),0)||1;
     if(el.userSearch) el.userSearch.style.display = n>=6 ? "block" : "none";
     const q=(el.userSearch&&n>=6?el.userSearch.value:"").trim().toLowerCase();
-    let h="",i=0; for(const [login,u] of state.users){ if(q && !userName(u).toLowerCase().includes(q)){ i++; continue; } const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span>${state.avatars&&u.avatar?`<span class="u-av" style="--c:${c}"><img src="${esc(u.avatar)}" alt="" referrerpolicy="no-referrer"/></span>`:`<span class="swatch" style="background:${c};color:${c}"></span>`}<span class="name">${esc(userName(u))}${roleTag(u.badge)}</span>${badge}<span class="odds" title="Chance to win">${(((state.weighted?w:1)/totalW)*100).toFixed(((state.weighted?w:1)/totalW)*100<10?1:0)}%</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
-    el.userList.innerHTML=h||'<div class="empty">No entrants match.</div>';
+    let h="",i=0; for(const [login,u] of state.users){ if(q && !userName(u).toLowerCase().includes(q)){ i++; continue; } const c=(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length]; const w=userWeight(u); const badge=(state.weighted&&w>1)?`<span class="wbadge">×${w}</span>`:""; h+=`<div class="item"><span class="idx">${++i}</span>${state.avatars&&u.avatar?`<span class="u-av" style="--c:${c}"><img src="${esc(u.avatar)}" alt="" referrerpolicy="no-referrer"/></span>`:`<span class="swatch" style="background:${c};color:${c}"></span>`}<span class="name"><bdi>${esc(userName(u))}</bdi>${roleTag(u.badge)}</span>${badge}<span class="odds" title="Chance to win">${(((state.weighted?w:1)/totalW)*100).toFixed(((state.weighted?w:1)/totalW)*100<10?1:0)}%</span><span class="x" data-login="${esc(login)}">×</span></div>`; }
+    el.userList.innerHTML=h||'<div class="empty">'+t("No entrants match.")+'</div>';
     el.userList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.users.delete(x.dataset.login); renderUsers(); renderWheels(); save(); broadcastSync(); });
   }
   function renderRewards(){
     if(el.rewardCount) el.rewardCount.textContent=state.rewards.length;
     if(!el.rewardList) return;
-    if(state.rewards.length===0){ el.rewardList.innerHTML='<div class="empty">No rewards added.</div>'; return; }
+    if(state.rewards.length===0){ el.rewardList.innerHTML='<div class="empty">'+t("No rewards added.")+'</div>'; return; }
     let h=""; state.rewards.forEach((r,i)=>{ const c=SEG[i%SEG.length]; const img=rewardImgOf(r);
       const lead = img ? `<img class="rw-thumb" src="${img}" alt=""/>` : `<span class="swatch" style="background:${c};color:${c}"></span>`;
-      h+=`<div class="item">${lead}<span class="name">${esc(rewardName(r))}</span><span class="rw-img${img?" has":""}" data-i="${i}" title="${img?"Change / remove image":"Add reveal image"}">🖼️</span><span class="x" data-i="${i}">×</span></div>`; });
+      h+=`<div class="item">${lead}<span class="name"><bdi>${esc(rewardName(r))}</bdi></span><span class="rw-img${img?" has":""}" data-i="${i}" title="${t(img?"Change / remove image":"Add reveal image")}">🖼️</span><span class="x" data-i="${i}">×</span></div>`; });
     el.rewardList.innerHTML=h;
     el.rewardList.querySelectorAll(".x").forEach(x=>x.onclick=()=>{ state.rewards.splice(+x.dataset.i,1); renderRewards(); renderWheels(); save(); broadcastSync(); });
     el.rewardList.querySelectorAll(".rw-img").forEach(b=>b.onclick=()=>{
@@ -1378,7 +1457,7 @@
     const fr=new FileReader(); fr.onload=e=>{ img.src=e.target.result; }; fr.onerror=()=>cb(null); fr.readAsDataURL(file);
   }
   function reflectMode(){ if(!el.modeSeg)return; el.modeSeg.querySelectorAll("button").forEach(b=>{ const on=b.dataset.mode===state.wheelMode; b.classList.toggle("active",on); b.classList.toggle("rw",on&&b.dataset.mode==="rewards"); }); }
-  function reflectAll(){ reflectExtras(); reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=state.entriesOpen?"Entries OPEN":"Entries closed"; el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); updateStripVisibility(); applyBannerPos(); reflectPosGrid(); }
+  function reflectAll(){ reflectExtras(); reflectMode(); renderUsers(); renderRewards(); reflectChips(); if(el.esStatus){ el.esStatus.textContent=t(state.entriesOpen?"Entries OPEN":"Entries closed"); el.entryState.classList.toggle("open",state.entriesOpen); } if(el.keyword) el.keyword.value=state.keyword; renderWheels(); updateStripVisibility(); applyBannerPos(); reflectPosGrid(); }
 
   /* ---------------- Wheel drawing ---------------- */
   const DPR=Math.min(window.devicePixelRatio||1,2);
@@ -1427,15 +1506,15 @@
     }
     c.fillStyle=ink(seg.color); c.textAlign="center"; c.textBaseline="middle";
     c.font="700 "+fs+"px "+FONT;
-    let t=seg.label; const maxw=CW-(o?28:14);
-    if(c.measureText(t).width>maxw){ while(t.length>1&&c.measureText(t+"…").width>maxw) t=t.slice(0,-1); t+="…"; }
-    c.fillText(t, x+CW/2, nameY);
+    let lbl=seg.label; const maxw=CW-(o?28:14);
+    if(c.measureText(lbl).width>maxw){ while(lbl.length>1&&c.measureText(lbl+"…").width>maxw) lbl=lbl.slice(0,-1); lbl+="…"; }
+    c.fillText(lbl, x+CW/2, nameY);
     if(role){                                                       // role tag under the name: dark chip, coloured dot, MOD / VIP / SUB / HOST
-      c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=Math.round(ts*0.14)+"px";
-      const tw=c.measureText(role.t).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=nameY+fs*0.5+gap*0.6;
+      const rt=t(role.t); c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=hasArabic(rt)?"0px":Math.round(ts*0.14)+"px";
+      const tw=c.measureText(rt).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=nameY+fs*0.5+gap*0.6;
       c.fillStyle="rgba(10,10,16,.42)"; rr(c,cx,cy,cw,chipH,5); c.fill();
       c.fillStyle=role.c; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
-      c.fillStyle="#fff"; c.textAlign="left"; c.fillText(role.t,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
+      c.fillStyle="#fff"; c.textAlign="left"; c.fillText(rt,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
       if("letterSpacing" in c) c.letterSpacing="0px";
     }
     if(o && o.alpha==null){ const dim=(1-lift)*(1-land)*0.24; if(dim>0.01){ c.fillStyle="rgba(8,9,14,"+dim+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); } }   // side cards step back
@@ -1454,7 +1533,7 @@
     if(n===0){
       rr(c,0,0,W,H,12); c.fillStyle="#191C24"; c.fill();
       c.fillStyle="#7A808E"; c.textAlign="center"; c.textBaseline="middle"; c.font="600 "+Math.max(12,Math.min(H*0.2,18))+"px "+FONT;
-      c.fillText(state.wheelMode==="users"?"Waiting for entrants…":"Add rewards…", W/2, H/2);
+      c.fillText(t(state.wheelMode==="users"?"Waiting for entrants…":"Add rewards…"), W/2, H/2);
       if(cv.id==="strip") state._centerColor="#7C5CFF";
       return;
     }
@@ -1488,7 +1567,7 @@
     if(ROLE==="stage") return;              // stage never initiates
     if(state.spinning) return;
     const S=getSegments(), n=S.length;
-    if(n===0){ toast(state.wheelMode==="users"?"No entrants yet.":"Add some rewards first."); return; }
+    if(n===0){ toast(t(state.wheelMode==="users"?"No entrants yet.":"Add some rewards first.")); return; }
     const total=S.reduce((a,s)=>a+(s.weight||1),0);
     const pick=()=>{ let r=Math.random()*total; for(let i=0;i<n;i++){ r-=(S[i].weight||1); if(r<=0) return i; } return n-1; };
     const winnerIdx=pick();                                   // weighted winner
@@ -1539,7 +1618,7 @@
   }
   function endSpin(p,authoritative){
     state.spinning=false; state._lastOffset=null; setSpinUI(false); state.renderSegs=null; state.spinCells=null;
-    if(el.winnerStat){ const st=p.stat; el.winnerStat.textContent = st&&st.n>1 ? "1 of "+st.n+" entrants · "+(st.pct<10?st.pct.toFixed(1):Math.round(st.pct))+"% chance" : ""; }
+    if(el.winnerStat){ const st=p.stat; el.winnerStat.textContent = st&&st.n>1 ? t("1 of {n} entrants · {p}% chance",{n:st.n,p:(st.pct<10?st.pct.toFixed(1):Math.round(st.pct))}) : ""; }
     const avatarFor=name=>{ const sg=(p.segs||[]).find(x=>x.label===name); if(sg&&sg.avatar!=null) return sg.avatar; for(const [,u] of state.users) if(userName(u)===name) return u.avatar||""; return ""; };
     if(el.winnerAvatar){ const who=p.mode==="users"?p.label:p.winnerUser, A=el.winnerAvatar;
       A.innerHTML=""; A.classList.toggle("on", !!(state.avatars && who));
@@ -1554,10 +1633,10 @@
       if(p.mode==="users"){
         if(p.reward){ state.rewards.shift(); renderRewards(); }                   // the top reward was given → remove it
         if(state.removeWinner){ for(const [login,u] of state.users){ if(userName(u)===p.label){ state.users.delete(login); break; } } renderUsers(); }
-        botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||"the giveaway"), count:state.users.size}));
+        botSay(fillTpl(state.msgWin,{winner:p.label, reward:(p.reward||t("the giveaway")), count:state.users.size}));
       } else {
         if(p.winnerUser) botSay(fillTpl(state.msgWin,{winner:p.winnerUser, reward:p.label, count:state.users.size}));
-        else botSay(fillTpl("🎁 The roulette landed on {reward}! 🎉",{reward:p.label}));
+        else botSay(fillTpl((MSG_DEF[state.lang]||MSG_DEF.en).landed,{reward:p.label}));
         if(state.removeWinner){
           const i=state.rewards.findIndex(r=>rewardName(r)===p.label); if(i>=0){ state.rewards.splice(i,1); renderRewards(); }
           if(p.winnerUserLogin && state.users.has(p.winnerUserLogin)){ state.users.delete(p.winnerUserLogin); renderUsers(); }
@@ -1575,10 +1654,10 @@
   function renderHistory(){
     const L=el.historyList; if(!L) return;
     const H=state.history||[];
-    if(!H.length){ L.innerHTML='<div class="empty">No winners yet.</div>'; return; }
-    const ago=t=>{ const m=Math.round((Date.now()-t)/60000); return m<1?"just now":m<60?m+" min ago":Math.round(m/60)+" h ago"; };
-    L.innerHTML=H.map((h,i)=>`<div class="h-item${h.rerolled?" rerolled":""}"><div class="h-main"><span class="h-name">🏆 ${esc(h.name)}</span><span class="h-sub">${h.reward?esc(h.reward)+" · ":""}${ago(h.t)}</span></div>${
-      i===0&&!h.rerolled?`<button class="btn small" data-reroll="0" title="Put the reward back and spin again">↻ Re-roll</button>`:(h.rerolled?'<span class="h-tag">re-rolled</span>':"")}</div>`).join("");
+    if(!H.length){ L.innerHTML='<div class="empty">'+t("No winners yet.")+'</div>'; return; }
+    const ago=ts=>{ const m=Math.round((Date.now()-ts)/60000); return m<1?t("just now"):m<60?t("{m} min ago",{m}):t("{h} h ago",{h:Math.round(m/60)}); };
+    L.innerHTML=H.map((h,i)=>`<div class="h-item${h.rerolled?" rerolled":""}"><div class="h-main"><span class="h-name">🏆 <bdi>${esc(h.name)}</bdi></span><span class="h-sub">${h.reward?"<bdi>"+esc(h.reward)+"</bdi> · ":""}${ago(h.t)}</span></div>${
+      i===0&&!h.rerolled?`<button class="btn small" data-reroll="0" title="${t("Put the reward back and spin again")}">${t("↻ Re-roll")}</button>`:(h.rerolled?'<span class="h-tag">'+t("re-rolled")+'</span>':"")}</div>`).join("");
     const b=L.querySelector("[data-reroll]"); if(b) b.onclick=reroll;
   }
   function reroll(){
@@ -1595,10 +1674,10 @@
   /* ---------------- Winner ---------------- */
   function showWinner(mode,label,reward,color,img,badge){
     const wr=$("winnerRole"); if(wr){ wr.innerHTML=roleTag(state.showBadges?badge:""); wr.classList.toggle("on",!!wr.innerHTML); }
-    if(el.winnerEyebrow) el.winnerEyebrow.textContent = mode==="users" ? "Winner" : "Prize";
+    if(el.winnerEyebrow) el.winnerEyebrow.textContent = t(mode==="users" ? "Winner" : "Prize");
     el.winner.style.setProperty("--wcol", color||"#7C5CFF");
     el.winnerName.textContent="";
-    const chars=[...label], step=Math.min(45, 520/Math.max(1,chars.length));
+    const chars=hasArabic(label)?[label]:[...label], step=Math.min(45, 520/Math.max(1,chars.length));   // Arabic animates as one word so its letters stay joined
     chars.forEach((ch,i)=>{ const sp=document.createElement("span"); sp.className="ch"; sp.textContent=ch===" "?"\u00A0":ch; sp.style.animationDelay=(120+i*step)+"ms"; el.winnerName.appendChild(sp); });
     if(el.winnerImg){ if(img){ el.winnerImg.src=img; el.winnerImg.style.display="block"; } else { el.winnerImg.style.display="none"; el.winnerImg.removeAttribute("src"); } }
     if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
@@ -1682,9 +1761,7 @@
     el.msgClose.addEventListener("change",()=>{ state.msgClose=el.msgClose.value; save(); });
     el.msgWin.addEventListener("change",()=>{ state.msgWin=el.msgWin.value; save(); });
     if(el.resetMsgs) el.resetMsgs.onclick=()=>{
-      state.msgOpen="🎡 Giveaway is OPEN! Type {keyword} to enter!";
-      state.msgClose="🔒 Entries closed — {count} entered. Spinning now…";
-      state.msgWin="🏆 @{winner} won {reward} — congrats! 🎉";
+      const D=MSG_DEF[state.lang]||MSG_DEF.en; state.msgOpen=D.open; state.msgClose=D.close; state.msgWin=D.win;
       el.msgOpen.value=state.msgOpen; el.msgClose.value=state.msgClose; el.msgWin.value=state.msgWin;
       save(); toast("Messages reset to default");
     };
@@ -1692,6 +1769,7 @@
     const lookChanged=()=>{ reflectExtras(); renderUsers(); renderWheels(); save(); broadcastSync(); };
     if(el.sizeSeg) el.sizeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.size=b.dataset.size; lookChanged(); });
     if(el.plateSeg) el.plateSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.plate=b.dataset.plate; lookChanged(); });
+    if($("langSeg")) $("langSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.lang===state.lang) return; setLang(b.dataset.lang); save(); broadcastSync(); });
     if(el.accentSwatches) el.accentSwatches.querySelectorAll(".sw[data-c]").forEach(b=>b.onclick=()=>{ state.accent=b.dataset.c; lookChanged(); });
     if(el.accentPick) el.accentPick.oninput=()=>{ state.accent=el.accentPick.value.toUpperCase(); lookChanged(); };
     if(el.chatColors) el.chatColors.onchange=()=>{ state.chatColors=el.chatColors.checked; lookChanged(); };
@@ -1708,15 +1786,15 @@
     if(el.timerPresets){ el.timerPresets.querySelectorAll("button").forEach(b=>b.onclick=()=>{ el.timerDur.value=b.dataset.t; markPreset(); }); el.timerDur.addEventListener("input",markPreset); markPreset(); }
     if(el.copyWinners) el.copyWinners.onclick=()=>{
       const H=state.history||[]; if(!H.length){ toast("No winners yet."); return; }
-      const txt=H.map(h=>"🏆 "+h.name+(h.reward?" — "+h.reward:"")+(h.rerolled?" (re-rolled)":"")+" · "+new Date(h.t).toLocaleString()).join("\n");
+      const txt=H.map(h=>"🏆 "+h.name+(h.reward?" — "+h.reward:"")+(h.rerolled?t(" (re-rolled)"):"")+" · "+new Date(h.t).toLocaleString()).join("\n");
       const done=()=>toast("Winners list copied");
       const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Couldn't copy"); } ta.remove(); };
       if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,fallback); else fallback();
     };
     /* is the on-stream overlay running? (it writes a heartbeat every 2s) */
-    const ovCheck=()=>{ if(!el.ovStatus) return; let t=0; try{ t=+localStorage.getItem("gw_hb")||0; }catch(e){}
-      const live=Date.now()-t<6000; el.ovStatus.classList.toggle("live",live); el.ovStatus.classList.toggle("missing",!live);
-      el.ovText.textContent = live ? "On-stream overlay is live" : "On-stream overlay not found — add the Browser Source in OBS"; };
+    const ovCheck=()=>{ if(!el.ovStatus) return; let hbT=0; try{ hbT=+localStorage.getItem("gw_hb")||0; }catch(e){}
+      const live=Date.now()-hbT<6000; el.ovStatus.classList.toggle("live",live); el.ovStatus.classList.toggle("missing",!live);
+      el.ovText.textContent = t(live ? "On-stream overlay is live" : "On-stream overlay not found — add the Browser Source in OBS"); };
     if(ROLE==="dock"){ setTimeout(ovCheck,2500); setInterval(ovCheck,2000); }
     el.modeSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wheelMode=b.dataset.mode; reflectMode(); renderWheels(); save(); broadcastSync(); });
 
@@ -1724,8 +1802,8 @@
     el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
     el.clearUsers.onclick=()=>{ if(!state.users.size) return;                 // two-step: first click arms, second clears (no browser dialogs inside OBS)
       const b=el.clearUsers;
-      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent="Click again to clear "+state.users.size+" entrants"; clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent="Clear entrants"; },3000); return; }
-      delete b.dataset.armed; clearTimeout(b._t); b.textContent="Clear entrants";
+      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent=t("Click again to clear {n} entrants",{n:state.users.size}); clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent=t("Clear entrants"); },3000); return; }
+      delete b.dataset.armed; clearTimeout(b._t); b.textContent=t("Clear entrants");
       state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); toast("Entrants cleared"); };
     const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push({name:v,img:null}); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
     if(el.rewardImgInput) el.rewardImgInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f && _rewardImgIdx>=0 && state.rewards[_rewardImgIdx]){ compressImage(f,360,url=>{ if(url && state.rewards[_rewardImgIdx]){ state.rewards[_rewardImgIdx].img=url; renderRewards(); save(); broadcastSync(); toast("Reward image added"); } else toast("Couldn't read that image."); }); } e.target.value=""; };
@@ -1734,8 +1812,8 @@
     /* permanent OBS links: dock.html / overlay.html always open the newest build (see those files) */
     const linkBase=location.origin+location.pathname.replace(/[^/]*$/,"");
     const copyLink=(btn,url,what)=>{
-      const done=()=>{ toast(what+" link copied — it always opens the newest version"); btn.textContent="✅ Copied"; setTimeout(()=>{ btn.textContent="🔗 Copy"; },1600); };
-      const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("Copy failed — link: "+url); } ta.remove(); };
+      const done=()=>{ toast(t("{what} link copied — it always opens the newest version",{what:t(what)})); btn.textContent=t("✅ Copied"); setTimeout(()=>{ btn.textContent=t("🔗 Copy"); },1600); };
+      const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast(t("Copy failed — link: {u}",{u:url})); } ta.remove(); };
       if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback); else fallback();
     };
     if($("ovLink")) $("ovLink").textContent=linkBase+"overlay.html";
@@ -1837,12 +1915,13 @@
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
   initCollapsible();
   initTabs();
+  applyLang();
   renderWheels();
   window.__gwReady=true; const boot=$("boot"); if(boot) boot.remove();
   if(ROLE==="stage"){                        // the overlay link pasted into a dock by mistake → say so (never triggers at stream sizes)
     const wrong=()=>{ let w=$("wrongView"); const narrow=innerWidth<520 && innerHeight>innerWidth*1.2;
       if(narrow && !w){ w=document.createElement("div"); w.id="wrongView"; w.className="wrong-view";
-        w.innerHTML='<b>This is the on-stream overlay link</b><p>It belongs in an OBS <b>Browser Source</b>. For your controls dock, use <b>dock.html</b>.</p><a href="dock.html">Open the controls here</a>';
+        w.innerHTML='<b>'+t("This is the on-stream overlay link")+'</b><p>'+t("It belongs in an OBS {bs}. For your controls dock, use {dk}.",{bs:"<b>"+t("Browser Source")+"</b>",dk:"<b><bdi>dock.html</bdi></b>"})+'</p><a href="dock.html">'+t("Open the controls here")+'</a>';
         document.body.appendChild(w); }
       else if(!narrow && w) w.remove(); };
     wrong(); addEventListener("resize",wrong);
