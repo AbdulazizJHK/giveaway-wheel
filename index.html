@@ -516,6 +516,38 @@
   .w-role .role-tag::before{width:10px;height:10px}
   body.role-dock .w-role .role-tag{font-size:11px;padding:3px 9px}
   .kbd-hint{font-size:11px;color:var(--faint)}
+  /* ---------- compact, context-aware tabs ---------- */
+  .panel .group{gap:9px;padding:12px}
+  .panel input[type=text],.panel input[type=password]{padding:9px 11px;font-size:13px}
+  .inline-row{display:flex;gap:8px;align-items:stretch}
+  .inline-row input{flex:1;min-width:0}
+  .inline-row .btn{flex:none}
+  .chan-on{display:none;align-items:center;justify-content:space-between;gap:8px}
+  #chanCard.connected .chan-off,#chanCard.connected>.label{display:none}
+  #chanCard.connected .chan-on{display:flex}
+  .chan-name{display:flex;align-items:center;gap:8px;min-width:0;font-weight:700;color:var(--good);font-size:13.5px}
+  .chan-name bdi{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chan-dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 8px var(--good);flex:none}
+  .block>.label .btn.tiny{order:3;flex:none;padding:3px 9px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;border-radius:6px}
+  .block>.label::after{order:2}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip-t{cursor:pointer}
+  .chip-t input{display:none}
+  .chip-t span{display:inline-block;padding:6px 12px;border-radius:8px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);font-size:12.5px;font-weight:600;color:var(--muted);transition:background .15s,border-color .15s,color .15s}
+  .chip-t input:checked+span{background:rgba(var(--acc-rgb),.24);border-color:rgba(var(--acc-rgb),.6);color:#fff}
+  .sec-h{appearance:none;background:none;border:none;padding:0;margin:0;width:100%;display:flex;align-items:center;gap:8px;cursor:pointer;font:inherit;color:inherit;text-align:start}
+  .sec-t{font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);flex:none}
+  .sec-sum{margin-inline-start:auto;min-width:0;font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .sec-sum i{width:9px;height:9px;border-radius:3px;flex:none;display:inline-block}
+  .chev{font-size:10px;color:var(--faint);transition:transform .15s;flex:none}
+  .sec.open .chev{transform:rotate(90deg)}
+  html[dir="rtl"] .chev{transform:scaleX(-1)}
+  html[dir="rtl"] .sec.open .chev{transform:rotate(90deg)}
+  .sec:not(.open) .sec-b{display:none}
+  .sec .sec-b{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+  .sec-h:hover .sec-t,.sec.open .sec-t{color:var(--muted)}
+  .bot-fields{display:flex;flex-direction:column;gap:9px}
+  #panel-chat.bot-off .bot-fields,#panel-chat.cc-off #ccHint{display:none}
   /* compact Chat bot tab */
   #panel-chat .group{gap:9px;padding:12px}
   #panel-chat .field{gap:6px}
@@ -656,7 +688,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.1</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.2</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -687,66 +719,59 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
 
       <!-- ===== Giveaway ===== -->
       <div class="panel" role="tabpanel" id="panel-giveaway" aria-labelledby="tab-giveaway">
-        <section class="block group">
+        <section class="block group" id="chanCard">
           <div class="label">Channel</div>
-          <div class="field">
-            <input id="channel" type="text" placeholder="your_twitch_name" autocomplete="off" spellcheck="false" />
+          <div class="chan-off">
+            <div class="inline-row"><input id="channel" type="text" placeholder="your_twitch_name" autocomplete="off" spellcheck="false" /><button class="btn primary" id="connectBtn">Connect</button></div>
             <small>Reads chat anonymously — no login needed.</small>
           </div>
-          <div class="row">
-            <button class="btn primary" id="connectBtn">Connect</button>
-            <button class="btn" id="disconnectBtn" disabled>Disconnect</button>
-          </div>
+          <div class="chan-on"><span class="chan-name"><span class="chan-dot"></span><bdi id="chanName">#</bdi></span><button class="btn small" id="disconnectBtn" disabled>Disconnect</button></div>
         </section>
         <section class="block group">
-          <div class="label">Roulette shows</div>
+          <div class="label">Entry rules</div>
           <div class="seg" id="modeSeg">
             <button data-mode="users" class="active">👥 Entrants</button>
             <button data-mode="rewards">🎁 Rewards</button>
           </div>
-        </section>
-        <section class="block group">
-          <div class="label">Entry rules</div>
           <div class="grid2">
             <label class="fl"><span class="fl-l">Join command</span><input id="keyword" type="text" value="!join" autocomplete="off" spellcheck="false" /></label>
             <label class="fl"><span class="fl-l">Timer (seconds)</span><input id="timerDur" type="text" inputmode="numeric" value="60" autocomplete="off" spellcheck="false" /></label>
           </div>
           <div class="presets" id="timerPresets"><button data-t="30">30s</button><button data-t="60">1m</button><button data-t="120">2m</button><button data-t="300">5m</button><button data-t="0">No timer</button></div>
-          <div class="hint-sm">Use <b>Open Entries</b> below to start.</div>
           <label class="toggle"><input type="checkbox" id="autoSpinEnd" checked/><span class="track"></span>Auto-spin when timer ends</label>
           <div class="kbd-hint">Shortcuts: <kbd>O</kbd> open · <kbd>C</kbd> close · <kbd>Space</kbd> spin · <kbd>Esc</kbd> close winner</div>
         </section>
-        <section class="block group">
-          <div class="label">Recent winners</div>
+        <section class="block group" id="histCard" style="display:none">
+          <div class="label">Recent winners <button class="btn tiny" id="copyWinners" title="Copy the winners list">📋 Copy list</button></div>
           <div class="hist" id="historyList"><div class="empty">No winners yet.</div></div>
-          <div class="hist-tools"><span class="hint-sm">Winner didn't claim it? <b>↻ Re-roll</b> puts the reward back and spins again.</span><button class="btn small" id="copyWinners">📋 Copy list</button></div>
         </section>
       </div>
 
       <!-- ===== Entrants ===== -->
       <div class="panel" role="tabpanel" id="panel-entrants" aria-labelledby="tab-entrants" hidden>
         <section class="block group">
-          <div class="label">Entrants</div>
+          <div class="label">Entrants <button class="btn tiny ghost-bad" id="clearUsers">🗑 Clear</button></div>
           <input id="userSearch" type="text" placeholder="🔍 Search entrants…" autocomplete="off" spellcheck="false" style="display:none"/>
           <div class="list" id="userList"><div class="empty">No entrants yet.</div></div>
-          <div class="row list-tools">
-            <input id="manualUser" type="text" placeholder="Add manually…" style="flex:1" autocomplete="off"/>
+          <div class="inline-row">
+            <input id="manualUser" type="text" placeholder="Add manually…" autocomplete="off"/>
             <button class="btn small" id="addUserBtn">Add</button>
           </div>
-          <button class="btn ghost-bad small" id="clearUsers" style="flex:1">Clear entrants</button>
         </section>
         <section class="block group">
-          <div class="label">Odds &amp; winners</div>
+          <div class="label">Rules</div>
           <label class="toggle"><input type="checkbox" id="weighted"/><span class="track"></span>Weighted — each !join adds a chance</label>
           <label class="toggle"><input type="checkbox" id="removeWinner" checked/><span class="track"></span>Remove winner from the roulette</label>
           <label class="toggle"><input type="checkbox" id="blockRecent"/><span class="track"></span>Block the last 5 winners from joining</label>
-        </section>
-        <section class="block group">
-          <div class="label">Who can enter</div>
-          <label class="toggle"><input type="checkbox" id="reqSub"/><span class="track"></span>Subscribers</label>
-          <label class="toggle"><input type="checkbox" id="reqVip"/><span class="track"></span>VIPs</label>
-          <label class="toggle"><input type="checkbox" id="reqMod"/><span class="track"></span>Moderators</label>
-          <div class="hint-sm">🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.</div>
+          <div class="field">
+            <span class="fl-l">Who can enter</span>
+            <div class="chips">
+              <label class="chip-t"><input type="checkbox" id="reqSub"/><span>Subs</span></label>
+              <label class="chip-t"><input type="checkbox" id="reqVip"/><span>VIPs</span></label>
+              <label class="chip-t"><input type="checkbox" id="reqMod"/><span>Mods</span></label>
+            </div>
+            <div class="hint-sm" id="whoHint">Everyone can enter</div>
+          </div>
         </section>
       </div>
 
@@ -755,11 +780,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         <section class="block group">
           <div class="label">Rewards</div>
           <div class="list rewards" id="rewardList"><div class="empty">No rewards added.</div></div>
-          <div class="row list-tools">
-            <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" style="flex:1" autocomplete="off"/>
+          <div class="inline-row">
+            <input id="rewardInput" type="text" placeholder="e.g. Steam key, $10 tip…" autocomplete="off"/>
             <button class="btn small" id="addReward">Add</button>
           </div>
-          <div class="hint-sm" id="rwHint">🎁 <b>Entrants</b> mode: the winner gets the <b>top reward</b> here. <b>Rewards</b> mode: the roulette picks the prize and gives it to a random entrant. Either way it's one chat message: <b>@winner won {reward}</b>. Click 🖼️ to attach a prize image.</div>
+          <div class="hint-sm" id="rwHint"></div>
         </section>
       </div>
 
@@ -768,11 +793,12 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         <section class="block group">
           <div class="label">Chat control</div>
           <label class="toggle"><input type="checkbox" id="chatControl"/><span class="track"></span>Let me &amp; my mods control it from chat</label>
-          <div class="hint-sm">Type <b>!gw open</b> · <b>close</b> · <b>spin</b> in chat — you and your mods only.</div>
+          <div class="hint-sm" id="ccHint">Type <b>!gw open</b> · <b>close</b> · <b>spin</b> in chat — you and your mods only.</div>
         </section>
         <section class="block group">
           <div class="label">Bot account</div>
           <label class="toggle"><input type="checkbox" id="announce"/><span class="track"></span>Post event messages to chat</label>
+          <div class="bot-fields" id="botFields">
           <div class="field">
             <input id="botName" type="text" placeholder="Sender username (your channel or a bot)" autocomplete="off" spellcheck="false"/>
             <input id="botToken" type="password" placeholder="OAuth token (chat:edit)" autocomplete="off" spellcheck="false"/>
@@ -786,13 +812,15 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
           <div class="tpl"><span class="tpl-l">On winner</span><input id="msgWin" type="text" value="🏆 @{winner} won {reward} — congrats! 🎉" autocomplete="off"/></div>
           <div class="msg-foot"><span class="hint-sm">Placeholders: <b>{keyword} {count} {winner} {reward} {timer}</b></span><button class="btn small" id="resetMsgs">↺ Reset</button></div>
           </details>
+          </div>
         </section>
       </div>
 
       <!-- ===== Settings ===== -->
       <div class="panel" role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" hidden>
-        <section class="block group">
-          <div class="label">Look</div>
+        <section class="block group sec" data-sec="look">
+          <button class="sec-h" type="button"><span class="sec-t">Look</span><span class="sec-sum" id="sumLook"></span><span class="chev">▸</span></button>
+          <div class="sec-b">
           <div class="field">
             <span class="fl-l">Language</span>
             <div class="seg" id="langSeg"><button data-lang="en" class="active">English</button><button data-lang="ar">العربية</button></div>
@@ -822,9 +850,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
           <label class="toggle"><input type="checkbox" id="chatColors" checked/><span class="track"></span>Use viewers' Twitch name colours on cells</label>
           <label class="toggle"><input type="checkbox" id="showBadges" checked/><span class="track"></span>Show sub / VIP / mod badges on cells</label>
           <label class="toggle"><input type="checkbox" id="avatars" checked/><span class="track"></span>Show viewers' Twitch profile pictures</label>
+          </div>
         </section>
-        <section class="block group">
-          <div class="label">On stream</div>
+        <section class="block group sec" data-sec="stream">
+          <button class="sec-h" type="button"><span class="sec-t">On stream</span><span class="sec-sum" id="sumStream"></span><span class="chev">▸</span></button>
+          <div class="sec-b">
           <label class="toggle"><input type="checkbox" id="hideUntilSpin"/><span class="track"></span>Hide roulette on stream until it spins</label>
           <label class="toggle"><input type="checkbox" id="beeps" checked/><span class="track"></span>Countdown beeps (final 3s)</label>
           <div class="field">
@@ -835,32 +865,39 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
               <button data-pos="bottom-left" aria-label="Bottom left"></button><button data-pos="bottom-center" aria-label="Bottom center"></button><button data-pos="bottom-right" aria-label="Bottom right"></button>
             </div>
           </div>
+          </div>
         </section>
-        <section class="block group">
-          <div class="label">Winner screen</div>
+        <section class="block group sec" data-sec="winner">
+          <button class="sec-h" type="button"><span class="sec-t">Winner screen</span><span class="sec-sum" id="sumWinner"></span><span class="chev">▸</span></button>
+          <div class="sec-b">
           <div class="field">
             <span class="fl-l">Close automatically after</span>
             <div class="seg" id="autoCloseSeg"><button data-s="0" class="active">Off</button><button data-s="10">10s</button><button data-s="20">20s</button><button data-s="30">30s</button></div>
           </div>
+          </div>
         </section>
-        <section class="block group">
-          <div class="label">Sound</div>
+        <section class="block group sec" data-sec="sound">
+          <button class="sec-h" type="button"><span class="sec-t">Sound</span><span class="sec-sum" id="sumSound"></span><span class="chev">▸</span></button>
+          <div class="sec-b">
           <div class="vol-row">
             <span class="vol-ico" id="volIco">🔊</span>
             <input type="range" id="volume" min="0" max="100" step="5" value="100" aria-label="Sound volume"/>
             <span class="vol-val" id="volVal">100%</span>
             <button class="btn small" id="volTest">Test</button>
           </div>
+          </div>
         </section>
-        <section class="block group dock-only" style="flex-direction:column">
-          <div class="label">OBS</div>
+        <section class="block group sec dock-only" data-sec="obs" style="flex-direction:column">
+          <button class="sec-h" type="button"><span class="sec-t">OBS</span><span class="sec-sum" id="sumObs"></span><span class="chev">▸</span></button>
+          <div class="sec-b">
           <div class="hint-sm">These links <b>always open the newest version</b> and update themselves — paste each one once and never again.</div>
           <div class="obs-link"><span class="ol-k">On stream · Browser Source</span><code id="ovLink">…/overlay.html</code><button class="btn small" id="copyUrl">🔗 Copy</button></div>
           <div class="obs-link"><span class="ol-k">Controls · Custom Browser Dock</span><code id="dkLink">…/dock.html</code><button class="btn small" id="copyDock">🔗 Copy</button></div>
+          </div>
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.1</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.2</b></div>
         </section>
       </div>
 
@@ -953,7 +990,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "3.1";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "3.2";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -983,7 +1020,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   /* ---------------- Language (English / العربية) ----------------
      Static text is translated in place by matching each text node / placeholder / title against the
      table below (originals are kept, so switching back is exact); runtime text goes through t(). */
-  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون (VIP)", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركين", "VIPs ": "المميزين", "Mods": "المشرفين", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة"};
+  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركون", "VIPs ": "المميزين", "Mods": "المشرفون", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة", "Rules": "القواعد", "🗑 Clear": "🗑 مسح", "Sure? Clear {n}": "متأكد؟ مسح {n}", "Everyone can enter": "يمكن للجميع المشاركة", "Only {r} can enter (and you)": "المشاركة متاحة لـ: {r} (ولك دائمًا)", "The winner gets the top reward · 🖼️ adds a prize image": "يحصل الفائز على أعلى جائزة · 🖼️ لإضافة صورة للجائزة", "The roulette picks the prize for a random entrant · 🖼️ adds a prize image": "تختار العجلة الجائزة لمشارك عشوائي · 🖼️ لإضافة صورة للجائزة", "Beeps on": "الصفير مفعّل", "Beeps off": "الصفير متوقف", "Hidden until spin": "مخفية حتى الدوران", "Auto-close: {v}": "إغلاق تلقائي: {v}", "2 permanent links": "رابطان دائمان", "Top left": "أعلى اليسار", "Top center": "أعلى الوسط", "Top right": "أعلى اليمين", "Middle left": "منتصف اليسار", "Middle center": "الوسط", "Middle right": "منتصف اليمين", "Bottom left": "أسفل اليسار", "Bottom center": "أسفل الوسط", "Bottom right": "أسفل اليمين", "Copy the winners list": "نسخ قائمة الفائزين"};
   const ISO=x=>"\u2068"+x+"\u2069";                          // keep usernames/codes in their own direction inside Arabic text
   function t(en,vars){ let s=(state&&state.lang==="ar"&&AR[en])||en; if(vars) s=s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m); return s; }
   const hasArabic=x=>/[\u0600-\u06FF\u0750-\u08FF]/.test(String(x||""));
@@ -1002,13 +1039,33 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         const o=e.dataset[key]; e.setAttribute(a, ar&&AR[o]?AR[o]:o); }); });
     document.querySelectorAll(".hint-sm b,small b,b.k").forEach(b=>{ const tx=b.textContent.replace(/^\u200E/,"");
       if(/^[!{@]|\.(com|net)$/.test(tx.trim())){ b.setAttribute("data-ltr",""); if(tx[0]!=="\u200E") b.textContent="\u200E"+tx; } });   // commands, placeholders, sites stay LTR
-    const rh=$("rwHint"); if(rh){ if(rh.dataset.en==null) rh.dataset.en=rh.innerHTML; rh.innerHTML = ar ? AR_RW_HINT : rh.dataset.en; }
+    updateSmartUI();
     if($("langSeg")) $("langSeg").querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.lang===(state.lang||"en")));
     /* refresh everything that writes its own text */
     if(state._st) setStatus(...state._st); if(state._bst) setBotStatus(...state._bst);
-    if(el.clearUsers && !el.clearUsers.dataset.armed) el.clearUsers.textContent=t("Clear entrants");
+    if(el.clearUsers && !el.clearUsers.dataset.armed) el.clearUsers.textContent=t("🗑 Clear");
     ["copyUrl","copyDock"].forEach(id=>{ const b=$(id); if(b) b.textContent=t("🔗 Copy"); });
     if(typeof tickTimer==="function") tickTimer();
+  }
+  /* small context-aware bits: who-can-enter summary, rewards hint by mode, chat-bot fields only when used, settings summaries */
+  function updateSmartUI(){
+    const who=$("whoHint"); if(who){ const rl=restrictLabel(); who.textContent = rl ? t("Only {r} can enter (and you)",{r:rl}) : t("Everyone can enter"); }
+    const rw=$("rwHint"); if(rw) rw.textContent = t(state.wheelMode==="rewards" ? "The roulette picks the prize for a random entrant · 🖼️ adds a prize image" : "The winner gets the top reward · 🖼️ adds a prize image");
+    const pc=$("panel-chat"); if(pc){ pc.classList.toggle("bot-off",!state.announce); pc.classList.toggle("cc-off",!state.chatControl); }
+    const set=(id,html)=>{ const e=$(id); if(e) e.innerHTML=html; };
+    const sizeN={s:"Small",m:"Medium",l:"Large"}[state.size||"m"], plateN={soft:"Soft",panel:"Panel",none:"None"}[state.plate||"soft"];
+    set("sumLook",`<i style="background:${esc(state.accent||"#7C5CFF")}"></i>${state.lang==="ar"?"العربية":"English"} · ${t(sizeN)} · ${t(plateN)}`);
+    const posN={"top-left":"Top left","top-center":"Top center","top-right":"Top right","mid-left":"Middle left","mid-center":"Middle center","mid-right":"Middle right","bottom-left":"Bottom left","bottom-center":"Bottom center","bottom-right":"Bottom right"}[state.bannerPos||"top-center"];
+    set("sumStream",[t(posN), t(state.beeps?"Beeps on":"Beeps off")].concat(state.hideUntilSpin?[t("Hidden until spin")]:[]).join(" · "));
+    set("sumWinner",t("Auto-close: {v}",{v:state.autoClose?state.autoClose+(state.lang==="ar"?"ث":"s"):t("Off")}));
+    set("sumSound",(state.volume==0?"🔇 ":"🔊 ")+state.volume+"%");
+    set("sumObs",t("2 permanent links"));
+  }
+  function initSections(){
+    let ui={}; try{ ui=JSON.parse(localStorage.getItem("gw_ui")||"{}"); }catch(e){}
+    document.querySelectorAll(".sec").forEach(sc=>{ const k="sec_"+sc.dataset.sec, h=sc.querySelector(".sec-h");
+      sc.classList.toggle("open",!!ui[k]); h.setAttribute("aria-expanded",!!ui[k]);
+      h.onclick=()=>{ const on=sc.classList.toggle("open"); h.setAttribute("aria-expanded",on); let u={}; try{ u=JSON.parse(localStorage.getItem("gw_ui")||"{}"); }catch(e){} u[k]=on; try{ localStorage.setItem("gw_ui",JSON.stringify(u)); }catch(e){} }; });
   }
   const AR_RW_HINT='🎁 في وضع <b>المشاركين</b> يحصل الفائز على <b>أعلى جائزة</b> هنا. في وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي. في الحالتين تُرسل رسالة واحدة في الدردشة بالفائز وجائزته. اضغط 🖼️ لإرفاق صورة للجائزة.';
   const MSG_DEF={ en:{open:"🎡 Giveaway is OPEN! Type {keyword} to enter!",close:"🔒 Entries closed — {count} entered. Spinning now…",win:"🏆 @{winner} won {reward} — congrats! 🎉",landed:"🎁 The roulette landed on {reward}! 🎉"},
@@ -1313,7 +1370,9 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     state.users.set(login,Object.assign({name:disp,weight:1},extra)); wantAvatar(login); renderUsers(); renderWheels(); save(); broadcastSync(); toast(t("{name} joined!",{name:`<b><bdi>${esc(disp)}</bdi></b>`}));
   }
   function disconnectWs(userInit){ state.reconnect=false; if(state.ws){ try{state.ws.close();}catch(e){} state.ws=null; } if(userInit){ state.connected=false; setConnectedUI(false); setStatus("","Not connected"); broadcastSync(); } }
-  function setConnectedUI(on){ state.connected=on; if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
+  function setConnectedUI(on){ state.connected=on;
+    const cc=$("chanCard"); if(cc){ cc.classList.toggle("connected",!!on); const cn=$("chanName"); if(cn) cn.textContent="#"+(state.channel||""); }
+    if(!el.connect)return; el.connect.disabled=on; el.disconnect.disabled=!on; el.open.disabled=!on||state.entriesOpen; el.close.disabled=!on||!state.entriesOpen; reflectChips(); }
 
   /* ---------------- Chat bot (sending) ---------------- */
   function setBotStatus(cls,text,vars){ if(!el.botDot)return; state._bst=[cls,text,vars]; el.botDot.className="dot"+(cls?" "+cls:""); el.botStatus.textContent=t(text,vars); markStatus(el.botDot,cls); }
@@ -1678,6 +1737,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function renderHistory(){
     const L=el.historyList; if(!L) return;
     const H=state.history||[];
+    const hc=$("histCard"); if(hc) hc.style.display = H.length ? "" : "none";
     if(!H.length){ L.innerHTML='<div class="empty">'+t("No winners yet.")+'</div>'; return; }
     const ago=ts=>{ const m=Math.round((Date.now()-ts)/60000); return m<1?t("just now"):m<60?t("{m} min ago",{m}):t("{h} h ago",{h:Math.round(m/60)}); };
     L.innerHTML=H.map((h,i)=>`<div class="h-item${h.rerolled?" rerolled":""}"><div class="h-main"><span class="h-name">🏆 <bdi>${esc(h.name)}</bdi></span><span class="h-sub">${h.reward?"<bdi>"+esc(h.reward)+"</bdi> · ":""}${ago(h.t)}</span></div>${
@@ -1826,8 +1886,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     el.addUser.onclick=addU; el.manualUser.addEventListener("keydown",e=>{ if(e.key==="Enter") addU(); });
     el.clearUsers.onclick=()=>{ if(!state.users.size) return;                 // two-step: first click arms, second clears (no browser dialogs inside OBS)
       const b=el.clearUsers;
-      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent=t("Click again to clear {n} entrants",{n:state.users.size}); clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent=t("Clear entrants"); },3000); return; }
-      delete b.dataset.armed; clearTimeout(b._t); b.textContent=t("Clear entrants");
+      if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent=t("Sure? Clear {n}",{n:state.users.size}); clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent=t("🗑 Clear"); },3000); return; }
+      delete b.dataset.armed; clearTimeout(b._t); b.textContent=t("🗑 Clear");
       state.users.clear(); renderUsers(); renderWheels(); save(); broadcastSync(); toast("Entrants cleared"); };
     const addR=()=>{ const v=el.rewardInput.value.trim(); if(!v)return; state.rewards.push({name:v,img:null}); renderRewards(); renderWheels(); save(); broadcastSync(); el.rewardInput.value=""; el.rewardInput.focus(); };
     if(el.rewardImgInput) el.rewardImgInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f && _rewardImgIdx>=0 && state.rewards[_rewardImgIdx]){ compressImage(f,360,url=>{ if(url && state.rewards[_rewardImgIdx]){ state.rewards[_rewardImgIdx].img=url; renderRewards(); save(); broadcastSync(); toast("Reward image added"); } else toast("Couldn't read that image."); }); } e.target.value=""; };
@@ -1903,7 +1963,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(el.avatars) el.avatars.checked=state.avatars;
     if(el.autoCloseSeg) el.autoCloseSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("active",+b.dataset.s===(state.autoClose||0)));
     if(el.volume){ el.volume.value=state.volume; el.volVal.textContent=state.volume+"%"; el.volIco.textContent=state.volume==0?"🔇":state.volume<50?"🔉":"🔊"; }
-    renderHistory();
+    renderHistory(); updateSmartUI();
   }
 
   /* ---------------- Tabs ---------------- */
@@ -1939,7 +1999,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
   initCollapsible();
   initTabs();
+  initSections();
   applyLang();
+  ["reqSub","reqVip","reqMod","announce","chatControl","hideUntilSpin","beeps"].forEach(id=>{ const e=$(id); if(e) e.addEventListener("change",()=>setTimeout(updateSmartUI,0)); });
+  if(el.posGrid) el.posGrid.addEventListener("click",()=>setTimeout(updateSmartUI,0));
+  if(el.modeSeg) el.modeSeg.addEventListener("click",()=>setTimeout(updateSmartUI,0));
   renderWheels();
   window.__gwReady=true; const boot=$("boot"); if(boot) boot.remove();
   if(ROLE==="stage"){                        // the overlay link pasted into a dock by mistake → say so (never triggers at stream sizes)
