@@ -368,7 +368,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v3.4</span>
+      Giveaway Roulette <span class="ver" id="ver">v3.5</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
@@ -591,7 +591,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Giveaway Roulette · <b id="ver2">v3.4</b> · made for Twitch streamers</span>
+    <span>Giveaway Roulette · <b id="ver2">v3.5</b> · made for Twitch streamers</span>
     <span><a href="https://github.com/AbdulazizJHK/giveaway-wheel" target="_blank" rel="noopener">GitHub</a> · <a href="#setup">Setup</a> · <a href="#top">Back to top ↑</a></span>
   </div>
 </footer>
@@ -694,15 +694,16 @@
       if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,x+pad+1.5,vp+1.5,CW-pad*2-3,H-vp*2-3,r); c.stroke(); }
       if(o&&o.noText){ c.restore(); return; }
     { const rl=o&&ROLE[seg.badge];                                   // role cards stand out: header band, glowing frame (VIP shimmer, host double frame)
-      if(rl){ const bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, band=Math.max(5,Math.round(bh*0.07));
+      if(rl){ const bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, host=seg.badge==="broadcaster", band=Math.max(5,Math.round(bh*(host?0.1:0.065)));
         c.save(); rr(c,bx,by,bw,bh,r); c.clip();
-        const gb=c.createLinearGradient(bx,0,bx+bw,0); gb.addColorStop(0,rl.c); gb.addColorStop(.5,"#ffffff"); gb.addColorStop(1,rl.c);
-        c.globalAlpha*=0.95; c.fillStyle=rl.c; c.fillRect(bx,by,bw,band); c.globalAlpha*=0.35; c.fillStyle=gb; c.fillRect(bx,by,bw,band); c.globalAlpha/=0.35*0.95;
-        if(seg.badge==="vip"){ const sh=c.createLinearGradient(bx,by,bx+bw,by+bh); sh.addColorStop(.3,"rgba(255,255,255,0)"); sh.addColorStop(.47,"rgba(255,255,255,.26)"); sh.addColorStop(.53,"rgba(255,255,255,.26)"); sh.addColorStop(.7,"rgba(255,255,255,0)"); c.fillStyle=sh; c.fillRect(bx,by,bw,bh); }
-        const vg=c.createRadialGradient(bx+bw/2,by+bh,0,bx+bw/2,by+bh,bh); vg.addColorStop(0,rl.c+"55"); vg.addColorStop(1,rl.c+"00"); c.fillStyle=vg; c.fillRect(bx,by,bw,bh);
+        const tint=c.createLinearGradient(0,by,0,by+bh*0.55); tint.addColorStop(0,rl.c+"40"); tint.addColorStop(1,rl.c+"00");   // colour falls softly from the header band
+        c.fillStyle=tint; c.fillRect(bx,by,bw,bh);
+        if(seg.badge==="vip"){ const sh=c.createLinearGradient(bx,by,bx+bw,by+bh); sh.addColorStop(.32,"rgba(255,255,255,0)"); sh.addColorStop(.48,"rgba(255,255,255,.2)"); sh.addColorStop(.52,"rgba(255,255,255,.2)"); sh.addColorStop(.68,"rgba(255,255,255,0)"); c.fillStyle=sh; c.fillRect(bx,by,bw,bh); }
+        c.fillStyle=rl.c; c.fillRect(bx,by,bw,band);
+        c.fillStyle="rgba(255,255,255,.28)"; c.fillRect(bx,by+band-1,bw,1);   // thin highlight under the band
         c.restore();
-        c.save(); c.shadowColor=rl.c; c.shadowBlur=20; c.lineWidth=Math.max(3,Math.round(bh*0.028)); c.strokeStyle=rl.c; rr(c,bx+1.5,by+1.5,bw-3,bh-3,r); c.stroke(); c.restore();
-        if(seg.badge==="broadcaster"){ c.lineWidth=1.5; c.strokeStyle="rgba(255,255,255,.6)"; rr(c,bx+7,by+band+5,bw-14,bh-band-12,Math.max(4,r-4)); c.stroke(); }
+        c.save(); c.shadowColor=rl.c+"aa"; c.shadowBlur=12; c.lineWidth=Math.max(2.5,Math.round(bh*0.022)); c.strokeStyle=rl.c; rr(c,bx+1.25,by+1.25,bw-2.5,bh-2.5,r); c.stroke(); c.restore();
+        if(host){ c.lineWidth=1; c.strokeStyle="rgba(255,255,255,.32)"; rr(c,bx+6,by+band+4,bw-12,bh-band-10,Math.max(4,r-4)); c.stroke(); }
       } }
       const fs=Math.max(11,Math.min((H-vp*2)*0.17,32));
       const role=ROLE[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
