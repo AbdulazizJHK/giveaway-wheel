@@ -688,7 +688,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.3</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v3.4</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span></div>
     </div>
@@ -897,7 +897,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.3</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v3.4</b></div>
         </section>
       </div>
 
@@ -990,7 +990,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "3.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "3.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1575,6 +1575,17 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.06+land*0.08)+")"; rr(c,x+pad,vp,CW-pad*2,H-vp*2,r); c.fill(); }
     if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,x+pad+1.5,vp+1.5,CW-pad*2-3,H-vp*2-3,r); c.stroke(); }
     if(o&&o.noText){ c.restore(); return; }
+    { const rl=o&&ROLE_TAG[seg.badge];                                   // role cards stand out: header band, glowing frame (VIP shimmer, host double frame)
+      if(rl){ const bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, band=Math.max(5,Math.round(bh*0.07));
+        c.save(); rr(c,bx,by,bw,bh,r); c.clip();
+        const gb=c.createLinearGradient(bx,0,bx+bw,0); gb.addColorStop(0,rl.c); gb.addColorStop(.5,"#ffffff"); gb.addColorStop(1,rl.c);
+        c.globalAlpha*=0.95; c.fillStyle=rl.c; c.fillRect(bx,by,bw,band); c.globalAlpha*=0.35; c.fillStyle=gb; c.fillRect(bx,by,bw,band); c.globalAlpha/=0.35*0.95;
+        if(seg.badge==="vip"){ const sh=c.createLinearGradient(bx,by,bx+bw,by+bh); sh.addColorStop(.3,"rgba(255,255,255,0)"); sh.addColorStop(.47,"rgba(255,255,255,.26)"); sh.addColorStop(.53,"rgba(255,255,255,.26)"); sh.addColorStop(.7,"rgba(255,255,255,0)"); c.fillStyle=sh; c.fillRect(bx,by,bw,bh); }
+        const vg=c.createRadialGradient(bx+bw/2,by+bh,0,bx+bw/2,by+bh,bh); vg.addColorStop(0,rl.c+"55"); vg.addColorStop(1,rl.c+"00"); c.fillStyle=vg; c.fillRect(bx,by,bw,bh);
+        c.restore();
+        c.save(); c.shadowColor=rl.c; c.shadowBlur=20; c.lineWidth=Math.max(3,Math.round(bh*0.028)); c.strokeStyle=rl.c; rr(c,bx+1.5,by+1.5,bw-3,bh-3,r); c.stroke(); c.restore();
+        if(seg.badge==="broadcaster"){ c.lineWidth=1.5; c.strokeStyle="rgba(255,255,255,.6)"; rr(c,bx+7,by+band+5,bw-14,bh-band-12,Math.max(4,r-4)); c.stroke(); }
+      } }
     const fs=Math.max(11,o?Math.min((H-vp*2)*0.17,40):Math.min((H-vp*2)*0.2,22));   // stage strip gets bigger names
     const role=o&&ROLE_TAG[seg.badge], ts=Math.max(10,Math.round(fs*0.42)), chipH=ts+10, gap=Math.round(fs*0.3);
     const showAv = o && seg.avatar!=null, inner=H-vp*2, A=showAv?Math.round(inner*0.34):0, avGap=showAv?Math.round(inner*0.06):0;
@@ -1595,8 +1606,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(role){                                                       // role tag under the name: dark chip, coloured dot, MOD / VIP / SUB / HOST
       const rt=t(role.t); c.font="800 "+ts+"px "+FONT; if("letterSpacing" in c) c.letterSpacing=hasArabic(rt)?"0px":Math.round(ts*0.14)+"px";
       const tw=c.measureText(rt).width, dot=Math.round(ts*0.55), cw=tw+dot+ts*1.5, cx=x+CW/2-cw/2, cy=nameY+fs*0.5+gap*0.6;
-      c.fillStyle="rgba(10,10,16,.42)"; rr(c,cx,cy,cw,chipH,5); c.fill();
-      c.fillStyle=role.c; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
+      c.save(); c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=8; c.shadowOffsetY=2; c.fillStyle=role.c; rr(c,cx,cy,cw,chipH,5); c.fill(); c.restore();
+      c.fillStyle="#fff"; c.beginPath(); c.arc(cx+ts*0.6+dot/2,cy+chipH/2,dot/2,0,6.283); c.fill();
       c.fillStyle="#fff"; c.textAlign="left"; c.fillText(rt,cx+ts*0.6+dot+ts*0.35,cy+chipH/2+1);
       if("letterSpacing" in c) c.letterSpacing="0px";
     }
