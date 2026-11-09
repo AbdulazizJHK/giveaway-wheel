@@ -606,6 +606,14 @@
   .u-av img{width:100%;height:100%;object-fit:cover;display:block}
   .jf-av{width:24px;height:24px;border-radius:50%;object-fit:cover;flex:none;margin-left:-4px;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
   .w-stat{margin-top:10px;font-size:17px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+  .w-claim{display:none;margin:12px auto 0;width:max-content;max-width:100%;align-items:center;gap:10px;font-size:16px;font-weight:600;color:var(--ink);padding:8px 16px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+  .w-claim.on{display:flex;animation:pop .4s cubic-bezier(.2,1.3,.4,1) both}
+  .w-claim .wc-t{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+  .w-claim.wait .wc-d{width:8px;height:8px;border-radius:50%;background:#F5B544;box-shadow:0 0 0 0 rgba(245,181,68,.6);animation:wcPulse 1.4s ease-out infinite}
+  .w-claim.ok{color:#3DD68C;background:rgba(61,214,140,.12);border-color:rgba(61,214,140,.45)}
+  @keyframes wcPulse{to{box-shadow:0 0 0 10px rgba(245,181,68,0)}}
+  body.role-dock .w-claim{font-size:12px;padding:5px 10px;margin-top:8px}
+  .h-ok{margin-inline-start:4px;font-size:.9em}
   .w-stat:empty{display:none}
   body.role-dock .w-stat{font-size:12px;margin-top:6px}
   .kbd-hint kbd{font-family:var(--mono);font-size:10.5px;background:rgba(255,255,255,.07);border:1px solid var(--stroke);border-radius:4px;padding:0 5px;color:var(--muted)}
@@ -626,6 +634,14 @@
   body.role-dock .winner-actions{margin-top:20px}
   body.role-dock .winner .w-avatar,body.role-dock .winner .winner-card,body.role-dock .winner .winner-card .who .ch,body.role-dock .winner .winner-card .prize,body.role-dock .winner .winner-img{animation:none!important;opacity:1!important;transform:none!important}
 
+  body.wback-light:not(.role-dock) .winner{background:radial-gradient(circle at 50% 45%,rgba(11,7,19,.42),rgba(11,7,19,.25) 70%,rgba(11,7,19,.12));backdrop-filter:blur(2px)}
+  body.wback-off:not(.role-dock) .winner{background:none;backdrop-filter:none}
+  #stripStage{transition:opacity .35s ease}
+  body.wback-off.win-on:not(.role-dock) #stripStage{opacity:0}        /* nothing behind the name but your scene */
+  body.wback-light.win-on:not(.role-dock) #stripStage{opacity:.3}
+  body.wback-off:not(.role-dock) .winner .w-tint{display:none}
+  body.wback-light:not(.role-dock) .winner .who,body.wback-off:not(.role-dock) .winner .who{filter:drop-shadow(0 4px 22px rgba(0,0,0,.75)) drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+  body.wback-light:not(.role-dock) .winner .w-stat,body.wback-off:not(.role-dock) .winner .w-stat,body.wback-off:not(.role-dock) .winner .eyebrow{text-shadow:0 2px 10px rgba(0,0,0,.85)}
   #confetti{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}   /* inside the winner screen, behind the name card */
   .winner .winner-card{z-index:1}
   #confetti.show{display:block}
@@ -696,7 +712,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.3</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.4</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -882,6 +898,10 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
             <span class="fl-l">Close automatically after</span>
             <div class="seg" id="autoCloseSeg"><button data-s="0" class="active">Off</button><button data-s="10">10s</button><button data-s="20">20s</button><button data-s="30">30s</button></div>
           </div>
+          <div class="field">
+            <span class="fl-l">Backdrop behind the winner</span>
+            <div class="seg" id="wbackSeg"><button data-wb="dark" class="active">Dark</button><button data-wb="light">Light</button><button data-wb="off">Off</button></div>
+          </div>
           </div>
         </section>
         <section class="block group sec" data-sec="sound">
@@ -905,7 +925,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.3</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.4</b></div>
         </section>
       </div>
 
@@ -970,6 +990,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     <div class="who" id="winnerName">—</div>
     <div class="w-role" id="winnerRole"></div>
     <div class="w-stat" id="winnerStat"></div>
+    <div class="w-claim" id="winnerClaim" aria-live="polite"></div>
     <img class="winner-img" id="winnerImg" alt="" style="display:none"/>
     <div class="prize" id="winnerPrize" style="display:none">
       <span class="pi">🎁</span><span class="pt"><span class="pl">Reward</span><span class="pv" id="winnerPrizeVal">—</span></span>
@@ -998,7 +1019,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "4.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "4.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1022,13 +1043,13 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     spinP:0, spinCells:null, spinWinCell:0, spinJitter:0, spinLastCC:null,  // strip-roulette animation state
     _centerColor:"#7C5CFF",
     pendingSync:null,
-    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false, avatars:true, plate:"soft", lang:"en",
+    size:"m", accent:"#7C5CFF", chatColors:true, showBadges:true, autoClose:0, volume:100, chatControl:false, blockRecent:false, avatars:true, plate:"soft", wback:"dark", claim:null, lang:"en",
     history:[],                  // last 5 winners: {name, reward, img, mode, t, rerolled}
   };
   /* ---------------- Language (English / العربية) ----------------
      Static text is translated in place by matching each text node / placeholder / title against the
      table below (originals are kept, so switching back is exact); runtime text goes through t(). */
-  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركون", "VIPs ": "المميزين", "Mods": "المشرفون", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة", "Rules": "القواعد", "🗑 Clear": "🗑 مسح", "Sure? Clear {n}": "متأكد؟ مسح {n}", "Everyone can enter": "يمكن للجميع المشاركة", "Only {r} can enter (and you)": "المشاركة متاحة لـ: {r} (ولك دائمًا)", "The winner gets the top reward · 🖼️ adds a prize image": "يحصل الفائز على أعلى جائزة · 🖼️ لإضافة صورة للجائزة", "The roulette picks the prize for a random entrant · 🖼️ adds a prize image": "تختار العجلة الجائزة لمشارك عشوائي · 🖼️ لإضافة صورة للجائزة", "Beeps on": "الصفير مفعّل", "Beeps off": "الصفير متوقف", "Hidden until spin": "مخفية حتى الدوران", "Auto-close: {v}": "إغلاق تلقائي: {v}", "2 permanent links": "رابطان دائمان", "Top left": "أعلى اليسار", "Top center": "أعلى الوسط", "Top right": "أعلى اليمين", "Middle left": "منتصف اليسار", "Middle center": "الوسط", "Middle right": "منتصف اليمين", "Bottom left": "أسفل اليسار", "Bottom center": "أسفل الوسط", "Bottom right": "أسفل اليمين", "Copy the winners list": "نسخ قائمة الفائزين", "Help": "مساعدة", "🧪 Test names": "🧪 أسماء تجريبية", "Add sample viewers to test the overlay and a spin": "أضف مشاهدين تجريبيين لاختبار الطبقة والدوران", "Added {n} test names — 🗑 Clear them when you're done": "أُضيف {n} أسماء تجريبية — امسحها بـ 🗑 عند الانتهاء", "Test names are already in": "الأسماء التجريبية مضافة بالفعل", "Copy @name": "نسخ ⁦@الاسم⁩", "Copied {n}": "تم نسخ {n}"};
+  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركون", "VIPs ": "المميزين", "Mods": "المشرفون", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة", "Rules": "القواعد", "🗑 Clear": "🗑 مسح", "Sure? Clear {n}": "متأكد؟ مسح {n}", "Everyone can enter": "يمكن للجميع المشاركة", "Only {r} can enter (and you)": "المشاركة متاحة لـ: {r} (ولك دائمًا)", "The winner gets the top reward · 🖼️ adds a prize image": "يحصل الفائز على أعلى جائزة · 🖼️ لإضافة صورة للجائزة", "The roulette picks the prize for a random entrant · 🖼️ adds a prize image": "تختار العجلة الجائزة لمشارك عشوائي · 🖼️ لإضافة صورة للجائزة", "Beeps on": "الصفير مفعّل", "Beeps off": "الصفير متوقف", "Hidden until spin": "مخفية حتى الدوران", "Auto-close: {v}": "إغلاق تلقائي: {v}", "2 permanent links": "رابطان دائمان", "Top left": "أعلى اليسار", "Top center": "أعلى الوسط", "Top right": "أعلى اليمين", "Middle left": "منتصف اليسار", "Middle center": "الوسط", "Middle right": "منتصف اليمين", "Bottom left": "أسفل اليسار", "Bottom center": "أسفل الوسط", "Bottom right": "أسفل اليمين", "Copy the winners list": "نسخ قائمة الفائزين", "Help": "مساعدة", "🧪 Test names": "🧪 أسماء تجريبية", "Add sample viewers to test the overlay and a spin": "أضف مشاهدين تجريبيين لاختبار الطبقة والدوران", "Added {n} test names — 🗑 Clear them when you're done": "أُضيف {n} أسماء تجريبية — امسحها بـ 🗑 عند الانتهاء", "Test names are already in": "الأسماء التجريبية مضافة بالفعل", "Copy @name": "نسخ ⁦@الاسم⁩", "Copied {n}": "تم نسخ {n}", "Backdrop behind the winner": "الخلفية خلف الفائز", "Dark": "داكنة", "Light": "خفيفة", "Light backdrop": "خلفية خفيفة", "No backdrop": "بدون خلفية", "✅ Replied in chat": "✅ ردّ في الدردشة", "Replied in chat": "ردّ في الدردشة", "Waiting for {n} to reply in chat…": "بانتظار ردّ {n} في الدردشة…", "✅ {n} replied in chat": "✅ {n} ردّ في الدردشة"};
   const ISO=x=>"\u2068"+x+"\u2069";                          // keep usernames/codes in their own direction inside Arabic text
   function t(en,vars){ let s=(state&&state.lang==="ar"&&AR[en])||en; if(vars) s=s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m); return s; }
   const hasArabic=x=>/[\u0600-\u06FF\u0750-\u08FF]/.test(String(x||""));
@@ -1065,7 +1086,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     set("sumLook",`<i style="background:${esc(state.accent||"#7C5CFF")}"></i>${state.lang==="ar"?"العربية":"English"} · ${t(sizeN)} · ${t(plateN)}`);
     const posN={"top-left":"Top left","top-center":"Top center","top-right":"Top right","mid-left":"Middle left","mid-center":"Middle center","mid-right":"Middle right","bottom-left":"Bottom left","bottom-center":"Bottom center","bottom-right":"Bottom right"}[state.bannerPos||"top-center"];
     set("sumStream",[t(posN), t(state.beeps?"Beeps on":"Beeps off")].concat(state.hideUntilSpin?[t("Hidden until spin")]:[]).join(" · "));
-    set("sumWinner",t("Auto-close: {v}",{v:state.autoClose?state.autoClose+(state.lang==="ar"?"ث":"s"):t("Off")}));
+    set("sumWinner",t("Auto-close: {v}",{v:state.autoClose?state.autoClose+(state.lang==="ar"?"ث":"s"):t("Off")})+(state.wback&&state.wback!=="dark"?" · "+t({light:"Light backdrop",off:"No backdrop"}[state.wback]):""));
     set("sumSound",(state.volume==0?"🔇 ":"🔊 ")+state.volume+"%");
     set("sumObs",t("2 permanent links"));
   }
@@ -1145,7 +1166,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos,
-      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate, lang:state.lang
+      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate, lang:state.lang, claim:state.claim||null, wback:state.wback
     });
   }
   function applySync(d){
@@ -1169,6 +1190,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(typeof d.volume==="number") state.volume=d.volume;
     if(typeof d.avatars==="boolean") state.avatars=d.avatars;
     if(["soft","panel","none"].includes(d.plate)) state.plate=d.plate;
+    if(["dark","light","off"].includes(d.wback)) state.wback=d.wback;
+    state.claim=d.claim||null; renderClaim();
     if((d.lang==="ar"||d.lang==="en") && d.lang!==state.lang){ state.lang=d.lang; applyLang(); }
     if(Array.isArray(d.users)){ state.users=new Map(d.users); normalizeUsers(); }
     if(Array.isArray(d.rewards)){ state.rewards=d.rewards; normalizeRewards(); }   // names only over sync; images ride the spin command
@@ -1187,7 +1210,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin,
       size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, history:state.history,
-      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate, lang:state.lang
+      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate, lang:state.lang, wback:state.wback
     })); }catch(e){}
   }
   function load(){
@@ -1238,6 +1261,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       if(typeof s.blockRecent==="boolean") state.blockRecent=s.blockRecent;
       if(typeof s.avatars==="boolean") state.avatars=s.avatars;
       if(["soft","panel","none"].includes(s.plate)) state.plate=s.plate;
+      if(["dark","light","off"].includes(s.wback)) state.wback=s.wback;
       if(s.lang==="ar"||s.lang==="en") state.lang=s.lang;
       if(el.chatControl) el.chatControl.checked=state.chatControl;
       if(el.blockRecent) el.blockRecent.checked=state.blockRecent;
@@ -1354,6 +1378,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   }
   function wantAllAvatars(){ for(const [login] of state.users) wantAvatar(login); }
   function onChat(login,disp,text,roles,color){
+    if(state.claim && !state.claim.ok && String(login).toLowerCase()===state.claim.login && Date.now()-state.claim.t<15*60000){   // the winner spoke after winning
+      state.claim.ok=true; state.claim.okT=Date.now();
+      const h=(state.history||[])[0]; if(h && !h.rerolled && h.name===state.claim.name){ h.claimed=true; renderHistory(); }
+      renderClaim(); save(); broadcastSync(); toast(t("✅ {n} replied in chat",{n:"<b><bdi>@"+esc(state.claim.name)+"</bdi></b>"}));
+    }
     /* !gw open | close | spin — broadcaster and mods only, when Chat control is on */
     const cmd=text.trim().toLowerCase().split(/\s+/);
     if(state.chatControl && cmd[0]==="!gw" && roles && (roles.mod||roles.broadcaster)){
@@ -1736,6 +1765,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
 
   /* ---------------- Spin ---------------- */
   function requestSpin(){
+    if(IS_CONTROLLER && !state.spinning) state.claim=null;
     if(ROLE==="stage") return;              // stage never initiates
     if(state.spinning) return;
     const S=getSegments(), n=S.length;
@@ -1803,6 +1833,9 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     else showWinner("rewards", p.label, null, p.color, p.rewardImg);                          // no entrants → just the prize
     chime();
     if(authoritative){
+      { const wName=p.mode==="users"?p.label:(p.winnerUser||null); let wLogin=p.mode!=="users"?(p.winnerUserLogin||null):null;
+        if(wName&&!wLogin){ for(const [lg,u] of state.users){ if(userName(u)===wName){ wLogin=lg; break; } } }
+        state.claim = wName&&wLogin ? {name:wName, login:String(wLogin).toLowerCase(), t:Date.now(), ok:false} : null; renderClaim(); }
       if(p.mode==="users"){
         if(p.reward){ state.rewards.shift(); renderRewards(); }                   // the top reward was given → remove it
         if(state.removeWinner){ for(const [login,u] of state.users){ if(userName(u)===p.label){ state.users.delete(login); break; } } renderUsers(); }
@@ -1830,7 +1863,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const hc=$("histCard"); if(hc) hc.style.display = H.length ? "" : "none";
     if(!H.length){ L.innerHTML='<div class="empty">'+t("No winners yet.")+'</div>'; return; }
     const ago=ts=>{ const m=Math.round((Date.now()-ts)/60000); return m<1?t("just now"):m<60?t("{m} min ago",{m}):t("{h} h ago",{h:Math.round(m/60)}); };
-    L.innerHTML=H.map((h,i)=>`<div class="h-item${h.rerolled?" rerolled":""}"><div class="h-main"><span class="h-name" data-copy="${esc(h.name)}" title="${t("Copy @name")}">🏆 <bdi>${esc(h.name)}</bdi></span><span class="h-sub">${h.reward?"<bdi>"+esc(h.reward)+"</bdi> · ":""}${ago(h.t)}</span></div>${
+    L.innerHTML=H.map((h,i)=>`<div class="h-item${h.rerolled?" rerolled":""}"><div class="h-main"><span class="h-name" data-copy="${esc(h.name)}" title="${t("Copy @name")}">🏆 <bdi>${esc(h.name)}</bdi>${h.claimed?'<span class="h-ok" title="'+t("Replied in chat")+'">✅</span>':""}</span><span class="h-sub">${h.reward?"<bdi>"+esc(h.reward)+"</bdi> · ":""}${ago(h.t)}</span></div>${
       i===0&&!h.rerolled?`<button class="btn small" data-reroll="0" title="${t("Put the reward back and spin again")}">${t("↻ Re-roll")}</button>`:(h.rerolled?'<span class="h-tag">'+t("re-rolled")+'</span>':"")}</div>`).join("");
     const b=L.querySelector("[data-reroll]"); if(b) b.onclick=reroll;
     L.querySelectorAll("[data-copy]").forEach(n=>n.onclick=()=>{ const txt="@"+n.dataset.copy, done=()=>toast(t("Copied {n}",{n:"<b><bdi>"+esc(txt)+"</bdi></b>"}));
@@ -1860,9 +1893,17 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(reward){ el.winnerPrize.style.display="flex"; el.winnerPrizeVal.textContent=reward; } else el.winnerPrize.style.display="none";
     if(el.winTimer){ const on=state.autoClose>0; el.winTimer.classList.toggle("on",on);
       if(on){ const bar=el.winTimer.firstElementChild; bar.style.setProperty("--dur",state.autoClose+"s"); bar.style.animation="none"; void bar.offsetWidth; bar.style.animation=""; } }
-    el.winner.classList.add("show"); fitWinnerName(); paintWinnerLetters(); burst(); updateStripVisibility();
+    el.winner.classList.add("show"); document.body.classList.add("win-on"); fitWinnerName(); paintWinnerLetters(); burst(); updateStripVisibility(); renderClaim();
     const glow=document.getElementById("stripGlow"); if(glow){ if(color) glow.style.setProperty("--gcol",color); glow.classList.add("winpulse"); }
   }
+  /* claim check: is the winner here? (waits for them to type anything in chat) */
+  function renderClaim(){ const e=$("winnerClaim"); if(!e) return; const c=state.claim;
+    const on=!!(c && state.connected && el.winner.classList.contains("show"));
+    e.classList.toggle("on",on); if(!on){ e.innerHTML=""; return; }
+    e.classList.toggle("ok",!!c.ok); e.classList.toggle("wait",!c.ok);
+    e.innerHTML = c.ok ? '<span>'+t("✅ Replied in chat")+'</span><span class="wc-t">'+fmtTime(((c.okT||Date.now())-c.t)/1000)+'</span>'
+      : '<span class="wc-d"></span><span>'+t("Waiting for {n} to reply in chat…",{n:"<bdi>@"+esc(c.name)+"</bdi>"})+'</span><span class="wc-t">'+fmtTime((Date.now()-c.t)/1000)+'</span>'; }
+  setInterval(()=>{ if(state.claim && !state.claim.ok && el.winner.classList.contains("show")) renderClaim(); },1000);
   /* shrink the winner name so long usernames stay on one line */
   function fitWinnerName(){ const w=el.winnerName; if(!w) return; w.style.fontSize=""; requestAnimationFrame(()=>{
     const avail=w.clientWidth; if(!avail||w.scrollWidth<=avail) return;
@@ -1877,7 +1918,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const spans=[...w.querySelectorAll(".ch")]; if(!spans.length) return;
     const left=Math.min(...spans.map(sp=>sp.offsetLeft)), total=Math.max(...spans.map(sp=>sp.offsetLeft+sp.offsetWidth))-left;   // real edges, whatever the direction
     spans.forEach(sp=>{ sp.style.backgroundSize=total+"px 100%"; sp.style.backgroundPosition=(-(sp.offsetLeft-left))+"px 0"; }); })); }
-  function closeWinner(fromBus){ clearTimeout(state._acT); el.winner.classList.remove("show"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
+  function closeWinner(fromBus){ clearTimeout(state._acT); el.winner.classList.remove("show"); document.body.classList.remove("win-on"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
 
   /* confetti */
   const cctx=el.confetti.getContext("2d"); let parts=[],raf=null;
@@ -1953,6 +1994,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(el.showBadges) el.showBadges.onchange=()=>{ state.showBadges=el.showBadges.checked; lookChanged(); };
     if(el.avatars) el.avatars.onchange=()=>{ state.avatars=el.avatars.checked; lookChanged(); if(state.avatars) wantAllAvatars(); };
     if(el.autoCloseSeg) el.autoCloseSeg.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.autoClose=+b.dataset.s; reflectExtras(); save(); broadcastSync(); });
+    { const ws=$("wbackSeg"); if(ws) ws.querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.wback=b.dataset.wb; reflectExtras(); save(); broadcastSync(); }); }
     if(el.volume) el.volume.oninput=()=>{ state.volume=+el.volume.value; reflectExtras(); save(); broadcastSync(); };
     if(el.volTest) el.volTest.onclick=()=>{ chime(); };
     setInterval(()=>{ if(state.history&&state.history.length) renderHistory(); },60000);   // keep "x min ago" fresh
@@ -2061,6 +2103,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(el.showBadges) el.showBadges.checked=state.showBadges;
     if(el.avatars) el.avatars.checked=state.avatars;
     if(el.autoCloseSeg) el.autoCloseSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("active",+b.dataset.s===(state.autoClose||0)));
+    document.body.classList.remove("wback-light","wback-off"); if(state.wback==="light"||state.wback==="off") document.body.classList.add("wback-"+state.wback);
+    { const ws=$("wbackSeg"); if(ws) ws.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.wb===(state.wback||"dark"))); }
     if(el.volume){ el.volume.value=state.volume; el.volVal.textContent=state.volume+"%"; el.volIco.textContent=state.volume==0?"🔇":state.volume<50?"🔉":"🔊"; }
     renderHistory(); updateSmartUI();
   }
