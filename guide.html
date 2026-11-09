@@ -298,6 +298,99 @@
   footer a{color:var(--muted);text-decoration:none}
   footer a:hover{color:var(--ink)}
 
+
+  /* ---------- compact layout ---------- */
+  section{padding:60px 0 0}
+  .sec-head{margin:0 auto 26px}
+  .sec-head h2{font-size:clamp(26px,3.4vw,34px)}
+  .sec-head p{margin-top:8px;font-size:15.5px}
+  .how-sec{padding-top:34px}
+  .how{gap:12px}
+  .how .step{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:15px}
+  .how .step .ico,.how .step .act-row{margin:0;flex:none}
+  .how .step .ico{width:42px;height:42px;font-size:20px}
+  .how .step .act-row{gap:8px}
+  .how .step .mini{font-size:12px;padding:2px 7px}
+  .how .st{min-width:0}
+  .how h3{font-size:16px}
+  .how p{font-size:13.5px;margin-top:1px;line-height:1.45}
+  .how .step::after{font-size:46px;top:4px}
+
+  .setup{max-width:760px}
+  .tl-item{margin-bottom:14px}
+  .card{padding:20px 22px}
+  .card h3{font-size:19px}
+  .card .sub{margin:2px 0 4px}
+  .card .line{color:#D3D6DF;font-size:15px;margin-top:6px}
+  .card .line b{color:#fff;font-weight:650}
+  .lk{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.02)}
+  .lk-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:14.5px}
+  .lk-head b{color:#fff}
+  .lk-ico{font-size:15px}
+  .lk-where{color:var(--faint);font-size:13px}
+  .lk .url-row{grid-template-columns:1fr auto;margin:8px 0}
+  .path{font-size:13.5px;color:var(--muted)}
+  .path b{color:var(--ink);font-weight:600;background:rgba(255,255,255,.06);border-radius:5px;padding:1px 6px;white-space:nowrap;display:inline-block;line-height:1.5;margin:1px 0}
+  .tip{margin-top:12px;font-size:13.5px;color:var(--muted)}
+  .tip b{color:var(--ink)}
+
+  .xtras{margin-top:26px}
+  .xtras-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px}
+  .xtras-h h3{font-family:var(--display);font-size:19px;font-weight:700}
+  .xtras-h span{font-size:12.5px;color:var(--faint)}
+  .x{border:1px solid var(--line);background:var(--card);border-radius:14px;margin-bottom:8px;transition:border-color .2s,background .2s}
+  .x:hover{border-color:var(--line2)}
+  .x[open]{border-color:rgba(124,92,255,.38);background:var(--card2)}
+  .x summary{list-style:none;display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;border-radius:14px}
+  .x summary::-webkit-details-marker{display:none}
+  .x summary:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+  .x summary::after{content:"";margin-inline-start:auto;flex:none;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+  .x[open] summary::after{transform:translateY(2px) rotate(225deg)}
+  .x .ico{width:34px;height:34px;font-size:16px;margin:0;border-radius:10px;flex:none}
+  .x-t{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+  .x-t b{font-size:15px;color:var(--ink);font-weight:650}
+  .x-t small{font-size:13px;color:var(--muted)}
+  .x-body{padding:0 16px 12px 62px}
+  html[dir="rtl"] .x-body{padding:0 62px 12px 16px}
+  .x[open] .x-body{animation:xin .25s ease-out}
+  @keyframes xin{from{opacity:0;transform:translateY(-4px)}}
+  .x-body ul,.x-body ol{padding-inline-start:20px}
+  .x-body li{margin:6px 0;color:#D3D6DF;font-size:14.5px}
+  .x-body li::marker{color:var(--violet);font-weight:700}
+  .x-body li b{color:#fff;font-weight:650}
+
+  .feat{grid-template-columns:repeat(4,1fr);gap:10px}
+  .feat .f{display:flex;align-items:flex-start;gap:12px;padding:14px 15px;border-radius:14px}
+  .feat .f .ico{width:34px;height:34px;font-size:16px;margin:0;flex:none;border-radius:10px}
+  .feat h3{font-size:14.5px}
+  .feat p{font-size:13px;margin-top:2px;line-height:1.45}
+
+  .final{margin:60px 0 0;padding:30px 34px;display:flex;align-items:center;justify-content:space-between;gap:24px;text-align:start}
+  .final h2{font-size:clamp(22px,2.8vw,28px)}
+  .final p{margin:6px 0 0}
+  .final .actions{margin:0;flex:none;justify-content:flex-end}
+  .final .btn.lg{padding:12px 20px;font-size:14.5px}
+  footer{margin-top:44px}
+  @media(max-width:880px){
+    .how-sec .how{grid-template-columns:1fr}
+    .feat{grid-template-columns:1fr 1fr}
+    main .final{flex-direction:column;align-items:stretch;text-align:center}
+    .final .actions{justify-content:center}
+  }
+  @media(max-width:600px){
+    section{padding-top:48px}
+    .how-sec{padding-top:26px}
+    #features .feat{grid-template-columns:1fr}
+    .feat .f{padding:12px 14px}
+    .tl .card{padding:18px 16px}
+    .lk{padding:11px 12px}
+    .lk .url{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal;font-size:12px}
+    .demo .chat ul{height:104px}
+    .x-body,html[dir="rtl"] .x-body{padding:0 14px 12px}
+    main .final{padding:26px 18px}
+  }
+  @media(prefers-reduced-motion:reduce){ .x[open] .x-body{animation:none} .x summary::after{transition:none} }
+
   /* ---------- language switch + Arabic / right-to-left ---------- */
   .lang-btn{appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line2);border-radius:9px;padding:7px 12px;cursor:pointer;transition:background .15s}
   .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -406,12 +499,11 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v3.8</span>
+      Giveaway Roulette <span class="ver" id="ver">v3.9</span>
     </a>
     <div class="nav-links">
-      <a href="#how">How it works</a>
-      <a href="#features">Features</a>
       <a href="#setup">Setup</a>
+      <a href="#features">Features</a>
       <button class="lang-btn" id="langBtn" type="button" aria-label="Switch language">العربية</button>
       <a class="btn" href="dock.html" target="_blank" rel="noopener">Open dock</a>
     </div>
@@ -490,16 +582,89 @@
 
 <main class="wrap">
 
-  <section id="how">
-    <div class="sec-head rv">
-      <div class="kicker">How it works</div>
-      <h2>Three steps from “giveaway!” to winner</h2>
-      <p>You press one button. Chat does the rest.</p>
-    </div>
+  <section id="how" class="how-sec">
     <div class="how" data-stg>
-      <div class="step stg" data-n="1"><div class="act-row"><div class="ico a chat">💬</div><span class="mini">!join</span></div><h3>Chat types !join</h3><p>Entries are collected straight from Twitch chat — the on-stream banner shows the live count.</p></div>
-      <div class="step stg" data-n="2"><div class="ico b count" data-final="⏱️">⏱️</div><h3>The countdown builds hype</h3><p>Set a timer with 3-2-1 beeps. When it hits zero, the roulette spins on its own.</p></div>
-      <div class="step stg" data-n="3"><div class="ico c trophy">🏆</div><h3>A winner is revealed</h3><p>Confetti, the prize and its image pop up — and the bot can @ the winner in chat.</p></div>
+      <div class="step stg" data-n="1"><div class="act-row"><div class="ico a chat">💬</div><span class="mini">!join</span></div><div class="st"><h3>Chat joins</h3><p>Viewers type !join — no sign-up.</p></div></div>
+      <div class="step stg" data-n="2"><div class="ico b count" data-final="⏱️">⏱️</div><div class="st"><h3>Countdown</h3><p>3-2-1, then it spins by itself.</p></div></div>
+      <div class="step stg" data-n="3"><div class="ico c trophy">🏆</div><div class="st"><h3>Winner revealed</h3><p>Confetti, the prize and a shout-out in chat.</p></div></div>
+    </div>
+  </section>
+
+  <section id="setup">
+    <div class="sec-head rv">
+      <div class="kicker">Setup · 2 minutes</div>
+      <h2>Go live in 3 steps</h2>
+      <p>Everything runs inside OBS — no downloads, no accounts.</p>
+    </div>
+    <div class="setup">
+      <div class="tl">
+        <div class="tl-item rv">
+          <div class="tl-num">1</div>
+          <div class="card">
+            <h3>Add two links to OBS</h3>
+            <p class="sub">Set them once — they always load the newest version.</p>
+            <div class="lk">
+              <div class="lk-head"><span class="lk-ico">🎥</span><b>On stream</b><span class="lk-where">the wheel your viewers see</span></div>
+              <div class="url-row"><span class="url" id="stageUrl">https://abdulazizjhk.github.io/giveaway-wheel/overlay.html</span><button class="copy" data-t="stageUrl">Copy</button></div>
+              <div class="path" data-i18n="p1">OBS → <b>Sources</b> → <b>+ Browser</b> → paste → <b>1920 × 1080</b></div>
+            </div>
+            <div class="lk">
+              <div class="lk-head"><span class="lk-ico">🎛️</span><b>Your controls</b><span class="lk-where">private — only you see it</span></div>
+              <div class="url-row"><span class="url" id="dockUrl">https://abdulazizjhk.github.io/giveaway-wheel/dock.html</span><button class="copy" data-t="dockUrl">Copy</button></div>
+              <div class="path" data-i18n="p2">OBS → <b>Docks</b> → <b>Custom Browser Docks…</b> → paste → <b>Apply</b></div>
+            </div>
+            <div class="tip" data-i18n="tip1">💡 In the source’s settings, untick <b>Shutdown source when not visible</b>.</div>
+          </div>
+        </div>
+
+        <div class="tl-item rv">
+          <div class="tl-num">2</div>
+          <div class="card">
+            <h3>Connect your channel</h3>
+            <p class="line" data-i18n="s2">In the dock’s <b>🎡 Giveaway</b> tab, type your Twitch channel → <b>Connect</b>. No login — it only reads chat.</p>
+          </div>
+        </div>
+
+        <div class="tl-item rv">
+          <div class="tl-num">3</div>
+          <div class="card">
+            <h3>Open entries &amp; spin</h3>
+            <p class="line" data-i18n="s3">Pick a timer → <b>▶ Open Entries</b>. Chat types <b class="k">!join</b>; at zero it <b>spins by itself</b> (or press <b class="k">Space</b>).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="xtras rv">
+        <div class="xtras-h"><h3>Optional extras</h3><span>Tap to expand</span></div>
+        <details class="x"><summary><span class="ico a">🎁</span><span class="x-t"><b>Rewards &amp; prize images</b><small>Give the winner a prize with a picture</small></span></summary>
+          <div class="x-body"><ul>
+            <li data-i18n="rw1">Add prizes in the dock’s <b>🎁 Rewards</b> tab. In <b>Entrants</b> mode the winner automatically gets the top reward; in <b>Rewards</b> mode the roulette picks the prize and gives it to a random entrant.</li>
+            <li data-i18n="rw2">Click the <b>🖼️</b> next to a reward to attach an image (logo / prize art) — it reveals big when that prize is won.</li>
+          </ul></div></details>
+        <details class="x"><summary><span class="ico c">📣</span><span class="x-t"><b>Bot announcements</b><small>Post “🏆 @winner won …” in chat</small></span></summary>
+          <div class="x-body"><ol>
+            <li data-i18n="bot1">Get an OAuth token at <a href="https://twitchtokengenerator.com" target="_blank" rel="noopener">twitchtokengenerator.com</a> (scopes: <code>chat:edit</code>, <code>chat:read</code>).</li>
+            <li data-i18n="bot2x">In the dock’s <b>💬 Chat bot</b> tab, enter your channel/bot username + the token → <b>Connect bot</b> → tick <b>Post event messages</b>. The token stays only in your browser.</li>
+          </ol></div></details>
+        <details class="x"><summary><span class="ico d">🛡️</span><span class="x-t"><b>Mod chat commands</b><small>Run it from chat with !gw</small></span></summary>
+          <div class="x-body"><ul>
+            <li data-i18n="mod1">Turn on <b>Chat control</b> in the dock’s <b>💬 Chat bot</b> tab. Then you or your mods type <b class="k">!gw open</b>, <b class="k">!gw close</b> or <b class="k">!gw spin</b>.</li>
+          </ul></div></details>
+        <details class="x"><summary><span class="ico e">🎨</span><span class="x-t"><b>Look &amp; sound</b><small>Colours, size, language, pictures</small></span></summary>
+          <div class="x-body"><ul>
+            <li data-i18n="set1"><b>Language</b> — English or العربية; Arabic switches the dock and on-stream overlay to right-to-left.</li>
+            <li data-i18n="set2"><b>Overlay size</b> — Small, Medium or Large, to suit your layout.</li>
+            <li data-i18n="set3"><b>Theme colour</b> — pick a preset or any custom colour to match your channel.</li>
+            <li data-i18n="set4"><b>Twitch colours &amp; badges</b> — cells use each viewer’s chat colour and show MOD, VIP and SUB tags.</li>
+            <li data-i18n="set5"><b>Profile pictures</b> — each viewer’s Twitch picture on their card and the winner screen (an initial if they have none).</li>
+            <li data-i18n="set6"><b>Winner screen</b> — close it automatically after 10, 20 or 30 seconds.</li>
+            <li data-i18n="set7"><b>Sound</b> — volume slider for the beeps, ticks and win chime.</li>
+          </ul></div></details>
+        <details class="x"><summary><span class="ico b">↻</span><span class="x-t"><b>Re-roll a winner</b><small>Winner didn’t claim it? Spin again</small></span></summary>
+          <div class="x-body"><ul>
+            <li data-i18n="rr1">The <b>🎡 Giveaway</b> tab lists the last 5 winners — <b>Re-roll</b> puts the reward back and spins again.</li>
+          </ul></div></details>
+      </div>
     </div>
   </section>
 
@@ -507,120 +672,28 @@
     <div class="sec-head rv">
       <div class="kicker">Features</div>
       <h2>Everything a streamer actually needs</h2>
-      <p>Fair picks, real prizes, and a reveal that looks great on stream.</p>
     </div>
     <div class="feat" data-stg>
-      <div class="f big stg"><div class="ico a">🎁</div><div><h3>Rewards &amp; prize images</h3><p data-i18n="rwP">Add prizes to the <b>Rewards</b> list and attach an image to each. In <b>Entrants</b> mode the winner gets the top reward; in <b>Rewards</b> mode the roulette picks the prize and gives it to a random entrant. Either way, one clean result.</p></div></div>
-      <div class="f stg"><div class="ico c">⚖️</div><h3>Weighted odds</h3><p>Repeat !join = more chances, if you want it.</p></div>
-      <div class="f stg"><div class="ico d">🛡️</div><h3>Sub / VIP / Mod only</h3><p>Gate entries by chat badge.</p></div>
-      <div class="f stg"><div class="ico b">⏱️</div><h3>Countdown + auto-spin</h3><p>3-2-1 beeps, then it spins by itself.</p></div>
-      <div class="f stg"><div class="ico e">🙈</div><h3>Hide until spin</h3><p>Keep the roulette off-screen and reveal it on cue.</p></div>
-      <div class="f stg"><div class="ico a">📣</div><h3>Chat announcements</h3><p>“🏆 @winner won {reward}!” posted for you.</p></div>
-      <div class="f stg"><div class="ico c">📍</div><h3>Movable banner</h3><p>Place the “Entries open” banner anywhere.</p></div>
-      <div class="f stg"><div class="ico d">✨</div><h3>Colour glow</h3><p>A glow that pulses when the winner lands.</p></div>
-      <div class="f stg"><div class="ico e">🎨</div><h3>Your colours</h3><p>Theme colour, size presets, and each viewer's own Twitch colour.</p></div>
-      <div class="f stg"><div class="ico b">🏷️</div><h3>Role tags</h3><p>MOD, VIP and SUB tags show on their cells and the winner screen.</p></div>
-      <div class="f stg"><div class="ico c">↻</div><h3>History &amp; re-roll</h3><p>Last 5 winners, one-tap re-roll if nobody claims it.</p></div>
-      <div class="f stg"><div class="ico a">🛡️</div><h3>Mod chat control</h3><p>You and your mods run it from chat: !gw open, close, spin.</p></div>
-      <div class="f stg"><div class="ico d">🚫</div><h3>Fair rotation</h3><p>Optionally block the last 5 winners from re-joining.</p></div>
-      <div class="f stg"><div class="ico e">📡</div><h3>Overlay check</h3><p>The dock tells you if the on-stream source is live.</p></div>
-      <div class="f stg"><div class="ico c">🖼️</div><h3>Profile pictures</h3><p>Each viewer's Twitch picture on their card and the winner screen.</p></div>
-      <div class="f stg"><div class="ico b">🌐</div><h3>English &amp; العربية</h3><p>Switch the dock and overlay to Arabic, fully right-to-left.</p></div>
-    </div>
-  </section>
-
-  <section id="setup">
-    <div class="sec-head rv">
-      <div class="kicker">Setup guide</div>
-      <h2>Live on your stream in 2 minutes</h2>
-      <p>Two browser sources in OBS. No downloads, no accounts.</p>
-    </div>
-    <div class="setup">
-      <div class="tl">
-        <div class="tl-item rv">
-          <div class="tl-num">1</div>
-          <div class="card">
-            <h3>Add it to OBS</h3>
-            <p class="sub" data-i18n="sub1">Two pieces from the same page — the <b>wheel</b> goes on your stream, the <b>controls</b> stay private in a dock.</p>
-            <div class="url-row">
-              <span class="tag">On stream</span>
-              <span class="url" id="stageUrl">https://abdulazizjhk.github.io/giveaway-wheel/overlay.html</span>
-              <button class="copy" data-t="stageUrl">Copy</button>
-            </div>
-            <div class="url-row">
-              <span class="tag">Your controls</span>
-              <span class="url" id="dockUrl">https://abdulazizjhk.github.io/giveaway-wheel/dock.html</span>
-              <button class="copy" data-t="dockUrl">Copy</button>
-            </div>
-            <ol>
-              <li data-i18n="obs1">In your scene, <b>Sources → ➕ Browser</b> → paste the <b>On stream</b> URL → set <b>1920 × 1080</b> → uncheck “Shutdown source when not visible”. It’s transparent, so it sits over your scene.</li>
-              <li data-i18n="obs2">Top menu <b>Docks → Custom Browser Docks…</b> → name it “Giveaway” → paste the <b>Your controls</b> URL → <b>Apply</b>. Dock it wherever you like — only you see this.</li>
-            </ol>
-            <div class="note"><span class="ni">⟳</span><div data-i18n="note1">Set these two links <b>once</b> — they never change. Each time OBS opens them they load the newest version, and a running dock or source updates itself between giveaways. Keep them apart: the <b>On stream</b> link is see-through and belongs in a Browser Source, not a dock.</div></div>
-          </div>
-        </div>
-
-        <div class="tl-item rv">
-          <div class="tl-num">2</div>
-          <div class="card">
-            <h3>Run a giveaway</h3>
-            <ol>
-              <li data-i18n="run1">In the dock’s <b>🎡 Giveaway</b> tab, type your <b>Twitch channel</b> → <b>Connect</b> (no login needed — it reads chat anonymously).</li>
-              <li data-i18n="run2">Set a <b>Timer</b> (e.g. 60s) and click <b>▶ Open Entries</b> in the bar at the bottom of the dock. Viewers type <b class="k">!join</b> to enter — the on-stream banner shows the live count + countdown.</li>
-              <li data-i18n="run3">When the timer ends it <b>auto-spins</b>. Or press <b class="k">Spin</b> / <b class="k">Space</b> any time.</li>
-              <li>The winner is revealed with confetti — and if you added rewards, the prize (and its image) shows too.</li>
-              <li data-i18n="run5"><b>Tip:</b> turn on <b>Chat control</b> in the dock’s <b>💬 Chat bot</b> tab and you or your mods can type <b class="k">!gw open</b>, <b class="k">!gw close</b> or <b class="k">!gw spin</b> right in chat.</li>
-            </ol>
-          </div>
-        </div>
-
-        <div class="tl-item rv">
-          <div class="tl-num">3</div>
-          <div class="card">
-            <h3>Add rewards &amp; prizes</h3>
-            <ul>
-              <li data-i18n="rw1">Add prizes in the dock’s <b>🎁 Rewards</b> tab. In <b>Entrants</b> mode the winner automatically gets the top reward; in <b>Rewards</b> mode the roulette picks the prize and gives it to a random entrant.</li>
-              <li data-i18n="rw2">Click the <b>🖼️</b> next to a reward to attach an image (logo / prize art) — it reveals big when that prize is won.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="tl-item rv">
-          <div class="tl-num">4</div>
-          <div class="card">
-            <h3>Chat announcements <span class="pill">OPTIONAL</span></h3>
-            <p class="sub" data-i18n="bot0">Want the bot to post “🏆 @winner won {reward}!” to chat? In the dock’s <b>💬 Chat bot</b> tab:</p>
-            <ol>
-              <li data-i18n="bot1">Get an OAuth token at <a href="https://twitchtokengenerator.com" target="_blank" rel="noopener">twitchtokengenerator.com</a> (scopes: <code>chat:edit</code>, <code>chat:read</code>).</li>
-              <li data-i18n="bot2">Enter your channel/bot username + the token → <b>Connect bot</b> → tick <b>Post event messages</b>. The token stays only in your browser.</li>
-            </ol>
-          </div>
-        </div>
-
-        <div class="tl-item rv">
-          <div class="tl-num">5</div>
-          <div class="card">
-            <h3>Make it yours <span class="pill">OPTIONAL</span></h3>
-            <p class="sub" data-i18n="set0">In the dock’s <b>⚙️ Settings</b> tab — everything updates on stream instantly:</p>
-            <ul>
-              <li data-i18n="set1"><b>Language</b> — English or العربية; Arabic switches the dock and on-stream overlay to right-to-left.</li>
-              <li data-i18n="set2"><b>Overlay size</b> — Small, Medium or Large, to suit your layout.</li>
-              <li data-i18n="set3"><b>Theme colour</b> — pick a preset or any custom colour to match your channel.</li>
-              <li data-i18n="set4"><b>Twitch colours &amp; badges</b> — cells use each viewer’s chat colour and show MOD, VIP and SUB tags.</li>
-              <li data-i18n="set5"><b>Profile pictures</b> — each viewer’s Twitch picture on their card and the winner screen (an initial if they have none).</li>
-              <li data-i18n="set6"><b>Winner screen</b> — close it automatically after 10, 20 or 30 seconds.</li>
-              <li data-i18n="set7"><b>Sound</b> — volume slider for the beeps, ticks and win chime.</li>
-            </ul>
-            <div class="note"><span class="ni">⟳</span><div data-i18n="note2">Updates install themselves — the dock and the on-stream source reload onto a new version between giveaways. Winner didn’t claim it? The <b>🎡 Giveaway</b> tab lists the last 5 winners — <b>Re-roll</b> puts the reward back and spins again.</div></div>
-          </div>
-        </div>
-      </div>
+      <div class="f stg"><div class="ico c">⚖️</div><div><h3>Weighted odds</h3><p>Repeat !join = more chances, if you want it.</p></div></div>
+      <div class="f stg"><div class="ico d">🛡️</div><div><h3>Sub / VIP / Mod only</h3><p>Gate entries by chat badge.</p></div></div>
+      <div class="f stg"><div class="ico e">🙈</div><div><h3>Hide until spin</h3><p>Keep the roulette off-screen and reveal it on cue.</p></div></div>
+      <div class="f stg"><div class="ico c">📍</div><div><h3>Movable banner</h3><p>Place the “Entries open” banner anywhere.</p></div></div>
+      <div class="f stg"><div class="ico d">✨</div><div><h3>Colour glow</h3><p>A glow that pulses when the winner lands.</p></div></div>
+      <div class="f stg"><div class="ico e">🎨</div><div><h3>Your colours</h3><p>Theme colour, size presets, and each viewer's own Twitch colour.</p></div></div>
+      <div class="f stg"><div class="ico b">🏷️</div><div><h3>Role tags</h3><p>MOD, VIP and SUB tags show on their cells and the winner screen.</p></div></div>
+      <div class="f stg"><div class="ico c">🖼️</div><div><h3>Profile pictures</h3><p>Each viewer's Twitch picture on their card and the winner screen.</p></div></div>
+      <div class="f stg"><div class="ico d">🚫</div><div><h3>Fair rotation</h3><p>Optionally block the last 5 winners from re-joining.</p></div></div>
+      <div class="f stg"><div class="ico e">📡</div><div><h3>Overlay check</h3><p>The dock tells you if the on-stream source is live.</p></div></div>
+      <div class="f stg"><div class="ico a">⟳</div><div><h3>Auto-updates</h3><p>Links never change; new versions load themselves.</p></div></div>
+      <div class="f stg"><div class="ico b">🌐</div><div><h3>English &amp; العربية</h3><p>Switch the dock and overlay to Arabic, fully right-to-left.</p></div></div>
     </div>
   </section>
 
   <div class="final rv">
-    <h2>Ready for your next giveaway?</h2>
-    <p>Open the control dock, connect your channel, and let chat start joining.</p>
+    <div class="final-t">
+      <h2>Ready for your next giveaway?</h2>
+      <p>Open the control dock, connect your channel, and let chat start joining.</p>
+    </div>
     <div class="actions">
       <a class="btn lg" href="dock.html" target="_blank" rel="noopener">Open the control dock →</a>
       <a class="btn lg ghost" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Report a bug / request a feature</a>
@@ -630,7 +703,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Giveaway Roulette · <b id="ver2">v3.8</b> · made for Twitch streamers</span>
+    <span>Giveaway Roulette · <b id="ver2">v3.9</b> · made for Twitch streamers</span>
     <span><a href="https://github.com/AbdulazizJHK/giveaway-wheel" target="_blank" rel="noopener">GitHub</a> · <a href="#setup">Setup</a> · <a href="#top">Back to top ↑</a></span>
   </div>
 </footer>
@@ -639,7 +712,7 @@
   /* ---------------- Language (English / العربية) ----------------
      Mixed paragraphs carry data-i18n and swap whole (Arabic word order differs); everything else is
      translated text node by text node; the live demo reads gt() for the text it writes itself. */
-  const GAR={"How it works": "كيف يعمل", "Features": "المزايا", "Setup": "الإعداد", "Open dock": "لوحة التحكم", "FOR TWITCH": "لتويتش", "Free · no install · runs in OBS": "مجاني · بدون تثبيت · يعمل داخل OBS", "Set it up in 2 minutes ↓": "جهّزه في دقيقتين ↓", "🎰 Try the live demo": "🎰 جرّب العرض الحي", "No login to read chat": "بدون تسجيل دخول لقراءة الدردشة", "Transparent overlay": "طبقة شفافة", "100% free": "مجاني 100%", "Live demo — sample entrants": "عرض حي — مشاركون تجريبيون", "LIVE": "مباشر", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "Spin": "دوران", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Stream chat": "دردشة البث", "Three steps from “giveaway!” to winner": "ثلاث خطوات من «سحب!» إلى الفائز", "You press one button. Chat does the rest.": "تضغط زرًا واحدًا، والدردشة تتكفّل بالباقي.", "Chat types !join": "الدردشة تكتب ⁦!join⁩", "Entries are collected straight from Twitch chat — the on-stream banner shows the live count.": "تُجمع المشاركات مباشرة من دردشة تويتش — ولافتة البث تعرض العدد لحظة بلحظة.", "The countdown builds hype": "العد التنازلي يرفع الحماس", "Set a timer with 3-2-1 beeps. When it hits zero, the roulette spins on its own.": "اضبط مؤقتًا مع صفير 3-2-1، وعند الصفر تدور العجلة تلقائيًا.", "A winner is revealed": "يُكشف الفائز", "Confetti, the prize and its image pop up — and the bot can @ the winner in chat.": "تظهر قصاصات الاحتفال والجائزة وصورتها — ويمكن للبوت الإشارة إلى الفائز في الدردشة.", "Everything a streamer actually needs": "كل ما يحتاجه الستريمر فعلًا", "Fair picks, real prizes, and a reveal that looks great on stream.": "سحب عادل، جوائز حقيقية، وكشف يبدو رائعًا على البث.", "Rewards & prize images": "الجوائز وصورها", "Weighted odds": "فرص مرجّحة", "Repeat !join = more chances, if you want it.": "تكرار ⁦!join⁩ = فرص أكثر، إن أردت.", "Sub / VIP / Mod only": "للمشتركين / المميزين / المشرفين فقط", "Gate entries by chat badge.": "قيّد المشاركة حسب شارة الدردشة.", "Countdown + auto-spin": "عد تنازلي + دوران تلقائي", "3-2-1 beeps, then it spins by itself.": "صفير 3-2-1 ثم تدور وحدها.", "Hide until spin": "إخفاء حتى الدوران", "Keep the roulette off-screen and reveal it on cue.": "أبقِ العجلة مخفية واكشفها في اللحظة المناسبة.", "Chat announcements": "إعلانات الدردشة", "“🏆 @winner won {reward}!” posted for you.": "«🏆 مبروك @الفائز! فزت بـ {reward}» تُنشر نيابةً عنك.", "Movable banner": "لافتة قابلة للنقل", "Place the “Entries open” banner anywhere.": "ضع لافتة «المشاركة مفتوحة» في أي مكان.", "Colour glow": "توهّج ملوّن", "A glow that pulses when the winner lands.": "توهّج ينبض عندما تتوقف العجلة على الفائز.", "Your colours": "ألوانك", "Theme colour, size presets, and each viewer's own Twitch colour.": "لون السمة، وأحجام جاهزة، ولون كل مشاهد في تويتش.", "Role tags": "وسوم الأدوار", "MOD, VIP and SUB tags show on their cells and the winner screen.": "تظهر وسوم المشرف والمميز والمشترك على بطاقاتهم وشاشة الفائز.", "History & re-roll": "السجل وإعادة السحب", "Last 5 winners, one-tap re-roll if nobody claims it.": "آخر 5 فائزين، وإعادة سحب بضغطة إن لم يستلم أحد جائزته.", "Mod chat control": "تحكّم المشرفين من الدردشة", "You and your mods run it from chat: !gw open, close, spin.": "أنت ومشرفوك تديرونه من الدردشة: ⁦!gw open⁩ و close و spin.", "Fair rotation": "تناوب عادل", "Optionally block the last 5 winners from re-joining.": "اختياريًا: امنع آخر 5 فائزين من المشاركة مجددًا.", "Overlay check": "فحص الطبقة", "The dock tells you if the on-stream source is live.": "لوحة التحكم تخبرك إن كان مصدر البث يعمل.", "Profile pictures": "صور الملف الشخصي", "Each viewer's Twitch picture on their card and the winner screen.": "صورة كل مشاهد في تويتش على بطاقته وشاشة الفائز.", "English & العربية": "English و العربية", "Switch the dock and overlay to Arabic, fully right-to-left.": "حوّل لوحة التحكم والطبقة إلى العربية، من اليمين لليسار بالكامل.", "Setup guide": "دليل الإعداد", "Live on your stream in 2 minutes": "على بثك خلال دقيقتين", "Two browser sources in OBS. No downloads, no accounts.": "مصدرا متصفح في OBS — بلا تنزيلات ولا حسابات.", "Add it to OBS": "أضفه إلى OBS", "On stream": "على البث", "Copy": "نسخ", "Your controls": "لوحة تحكمك", "Run a giveaway": "شغّل سحبًا", "Add rewards & prizes": "أضف الجوائز", "OPTIONAL": "اختياري", "Make it yours": "اجعله خاصًا بك", "The winner is revealed with confetti — and if you added rewards, the prize (and its image) shows too.": "يُكشف الفائز مع قصاصات الاحتفال — وإن أضفت جوائز تظهر الجائزة (وصورتها) أيضًا.", "Ready for your next giveaway?": "جاهز لسحبك القادم؟", "Open the control dock, connect your channel, and let chat start joining.": "افتح لوحة التحكم، اربط قناتك، ودع الدردشة تبدأ بالمشاركة.", "Open the control dock →": "افتح لوحة التحكم ←", "💬 Report a bug / request a feature": "💬 أبلغ عن خطأ / اقترح ميزة", "· made for Twitch streamers": "· صُنع لستريمرز تويتش", "Back to top ↑": "العودة للأعلى ↑", "Giveaway Roulette home": "Giveaway Roulette — الرئيسية", "Sample chat": "دردشة تجريبية", "Waiting for entrants…": "بانتظار المشاركين…", "{name} joined": "انضم {name}", "⏳ Entries closed — spinning!": "⏳ أُغلقت المشاركة — العجلة تدور!", "🏆 @{n} won {r}!": "🏆 مبروك \u2066@{n}\u2069! فاز بـ {r}", "✓ Copied": "✓ تم النسخ"}, GAR_HTML={"h1": "<span class=\"w\" style=\"--i:1\">حوّل</span> <span class=\"w\" style=\"--i:2\">كل</span> <span class=\"w\" style=\"--i:3\">سحب</span> <span class=\"w\" style=\"--i:4\">إلى</span> <span class=\"w grad\" style=\"--i:5\">لحظة</span> <span class=\"w grad\" style=\"--i:6\">لا&nbsp;تُفوَّت</span>", "lead": "يكتب المشاهدون <b class=\"k\">&lrm;!join</b> في الدردشة، والعد التنازلي يرفع الحماس، ثم تدور عجلة أفقية لتتوقف على فائز — مع جوائز وقصاصات احتفال وتهنئة في الدردشة.", "rwP": "أضف الجوائز إلى قائمة <b>الجوائز</b> وأرفق صورة لكل منها. في وضع <b>المشاركين</b> يحصل الفائز على أعلى جائزة؛ وفي وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي. في الحالتين نتيجة واحدة واضحة.", "sub1": "جزآن من الصفحة نفسها — <b>العجلة</b> تظهر على بثك، و<b>أدوات التحكم</b> تبقى خاصة بك في لوحة.", "obs1": "في مشهدك: <b dir=\"ltr\">Sources → ➕ Browser</b> ← الصق رابط <b>على البث</b> ← اضبط <b dir=\"ltr\">1920 × 1080</b> ← ألغِ تحديد «<bdi>Shutdown source when not visible</bdi>». المصدر شفاف فيظهر فوق مشهدك.", "obs2": "من القائمة العلوية <b dir=\"ltr\">Docks → Custom Browser Docks…</b> ← سمّها «Giveaway» ← الصق رابط <b>لوحة تحكمك</b> ← <b dir=\"ltr\">Apply</b>. ضعها حيث تشاء — أنت وحدك من يراها.", "note1": "عيّن هذين الرابطين <b>مرة واحدة</b> — لا يتغيّران أبدًا. في كل مرة يفتحهما OBS يُحمَّل أحدث إصدار، ولوحة التحكم أو المصدر العاملان يحدّثان نفسيهما بين السحوبات. لا تخلط بينهما: رابط <b>على البث</b> شفاف ومكانه مصدر متصفح، لا لوحة تحكم.", "run1": "في تبويب <b>🎡 السحب</b> بلوحة التحكم، اكتب <b>قناتك على تويتش</b> ← <b>اتصال</b> (بلا تسجيل دخول — يقرأ الدردشة دون هوية).", "run2": "حدّد <b>المؤقت</b> (مثلًا 60 ثانية) واضغط <b>▶ فتح المشاركة</b> في الشريط أسفل لوحة التحكم. يكتب المشاهدون <b class=\"k\">&lrm;!join</b> للمشاركة — ولافتة البث تعرض العدد والعد التنازلي.", "run3": "عند انتهاء المؤقت <b>تدور العجلة تلقائيًا</b>. أو اضغط <b class=\"k\">دوران</b> / <b class=\"k\">Space</b> في أي وقت.", "run5": "<b>نصيحة:</b> فعّل <b>التحكم من الدردشة</b> في تبويب <b>💬 البوت</b> لتكتب أنت أو مشرفوك <b class=\"k\">&lrm;!gw open</b> أو <b class=\"k\">&lrm;!gw close</b> أو <b class=\"k\">&lrm;!gw spin</b> مباشرة في الدردشة.", "rw1": "أضف الجوائز في تبويب <b>🎁 الجوائز</b> بلوحة التحكم. في وضع <b>المشاركين</b> يحصل الفائز تلقائيًا على أعلى جائزة؛ وفي وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي.", "rw2": "اضغط <b>🖼️</b> بجانب الجائزة لإرفاق صورة (شعار / صورة الجائزة) — تظهر كبيرة عند الفوز بها.", "bot0": "تريد أن ينشر البوت «🏆 مبروك @الفائز! فزت بـ {reward}» في الدردشة؟ من تبويب <b>💬 البوت</b> بلوحة التحكم:", "bot1": "احصل على رمز OAuth من <a href=\"https://twitchtokengenerator.com\" target=\"_blank\" rel=\"noopener\">twitchtokengenerator.com</a> (الصلاحيات: <code>chat:edit</code> و <code>chat:read</code>).", "bot2": "أدخل اسم قناتك أو البوت والرمز ← <b>ربط البوت</b> ← فعّل <b>نشر رسائل الأحداث</b>. يبقى الرمز في متصفحك فقط.", "set0": "من تبويب <b>⚙️ الإعدادات</b> بلوحة التحكم — كل شيء يتحدّث على البث فورًا:", "set1": "<b>اللغة</b> — English أو العربية؛ العربية تحوّل لوحة التحكم وطبقة البث إلى اتجاه اليمين لليسار.", "set2": "<b>حجم الطبقة</b> — صغير أو متوسط أو كبير بما يناسب تخطيطك.", "set3": "<b>لون السمة</b> — اختر لونًا جاهزًا أو أي لون مخصص ليناسب قناتك.", "set4": "<b>ألوان تويتش والشارات</b> — تستخدم البطاقات لون كل مشاهد في الدردشة وتُظهر وسوم المشرف والمميز والمشترك.", "set5": "<b>صور الملف الشخصي</b> — صورة كل مشاهد في تويتش على بطاقته وشاشة الفائز (أو الحرف الأول إن لم تكن لديه صورة).", "set6": "<b>شاشة الفائز</b> — أغلقها تلقائيًا بعد 10 أو 20 أو 30 ثانية.", "set7": "<b>الصوت</b> — شريط لمستوى صوت الصفير والنقرات ونغمة الفوز.", "note2": "التحديثات تُثبَّت تلقائيًا — لوحة التحكم ومصدر البث يُعاد تحميلهما على الإصدار الجديد بين السحوبات. لم يستلم الفائز جائزته؟ يعرض تبويب <b>🎡 السحب</b> آخر 5 فائزين — و<b>إعادة السحب</b> تُرجع الجائزة وتدور من جديد."};
+  const GAR={"How it works": "كيف يعمل", "Features": "المزايا", "Setup": "الإعداد", "Open dock": "لوحة التحكم", "FOR TWITCH": "لتويتش", "Free · no install · runs in OBS": "مجاني · بدون تثبيت · يعمل داخل OBS", "Set it up in 2 minutes ↓": "جهّزه في دقيقتين ↓", "🎰 Try the live demo": "🎰 جرّب العرض الحي", "No login to read chat": "بدون تسجيل دخول لقراءة الدردشة", "Transparent overlay": "طبقة شفافة", "100% free": "مجاني 100%", "Live demo — sample entrants": "عرض حي — مشاركون تجريبيون", "LIVE": "مباشر", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "Spin": "دوران", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Stream chat": "دردشة البث", "Three steps from “giveaway!” to winner": "ثلاث خطوات من «سحب!» إلى الفائز", "You press one button. Chat does the rest.": "تضغط زرًا واحدًا، والدردشة تتكفّل بالباقي.", "Chat types !join": "الدردشة تكتب ⁦!join⁩", "Entries are collected straight from Twitch chat — the on-stream banner shows the live count.": "تُجمع المشاركات مباشرة من دردشة تويتش — ولافتة البث تعرض العدد لحظة بلحظة.", "The countdown builds hype": "العد التنازلي يرفع الحماس", "Set a timer with 3-2-1 beeps. When it hits zero, the roulette spins on its own.": "اضبط مؤقتًا مع صفير 3-2-1، وعند الصفر تدور العجلة تلقائيًا.", "A winner is revealed": "يُكشف الفائز", "Confetti, the prize and its image pop up — and the bot can @ the winner in chat.": "تظهر قصاصات الاحتفال والجائزة وصورتها — ويمكن للبوت الإشارة إلى الفائز في الدردشة.", "Everything a streamer actually needs": "كل ما يحتاجه الستريمر فعلًا", "Fair picks, real prizes, and a reveal that looks great on stream.": "سحب عادل، جوائز حقيقية، وكشف يبدو رائعًا على البث.", "Rewards & prize images": "الجوائز وصورها", "Weighted odds": "فرص مرجّحة", "Repeat !join = more chances, if you want it.": "تكرار ⁦!join⁩ = فرص أكثر، إن أردت.", "Sub / VIP / Mod only": "للمشتركين / المميزين / المشرفين فقط", "Gate entries by chat badge.": "قيّد المشاركة حسب شارة الدردشة.", "Countdown + auto-spin": "عد تنازلي + دوران تلقائي", "3-2-1 beeps, then it spins by itself.": "صفير 3-2-1 ثم تدور وحدها.", "Hide until spin": "إخفاء حتى الدوران", "Keep the roulette off-screen and reveal it on cue.": "أبقِ العجلة مخفية واكشفها في اللحظة المناسبة.", "Chat announcements": "إعلانات الدردشة", "“🏆 @winner won {reward}!” posted for you.": "«🏆 مبروك @الفائز! فزت بـ {reward}» تُنشر نيابةً عنك.", "Movable banner": "لافتة قابلة للنقل", "Place the “Entries open” banner anywhere.": "ضع لافتة «المشاركة مفتوحة» في أي مكان.", "Colour glow": "توهّج ملوّن", "A glow that pulses when the winner lands.": "توهّج ينبض عندما تتوقف العجلة على الفائز.", "Your colours": "ألوانك", "Theme colour, size presets, and each viewer's own Twitch colour.": "لون السمة، وأحجام جاهزة، ولون كل مشاهد في تويتش.", "Role tags": "وسوم الأدوار", "MOD, VIP and SUB tags show on their cells and the winner screen.": "تظهر وسوم المشرف والمميز والمشترك على بطاقاتهم وشاشة الفائز.", "History & re-roll": "السجل وإعادة السحب", "Last 5 winners, one-tap re-roll if nobody claims it.": "آخر 5 فائزين، وإعادة سحب بضغطة إن لم يستلم أحد جائزته.", "Mod chat control": "تحكّم المشرفين من الدردشة", "You and your mods run it from chat: !gw open, close, spin.": "أنت ومشرفوك تديرونه من الدردشة: ⁦!gw open⁩ و close و spin.", "Fair rotation": "تناوب عادل", "Optionally block the last 5 winners from re-joining.": "اختياريًا: امنع آخر 5 فائزين من المشاركة مجددًا.", "Overlay check": "فحص الطبقة", "The dock tells you if the on-stream source is live.": "لوحة التحكم تخبرك إن كان مصدر البث يعمل.", "Profile pictures": "صور الملف الشخصي", "Each viewer's Twitch picture on their card and the winner screen.": "صورة كل مشاهد في تويتش على بطاقته وشاشة الفائز.", "English & العربية": "English و العربية", "Switch the dock and overlay to Arabic, fully right-to-left.": "حوّل لوحة التحكم والطبقة إلى العربية، من اليمين لليسار بالكامل.", "Setup guide": "دليل الإعداد", "Live on your stream in 2 minutes": "على بثك خلال دقيقتين", "Two browser sources in OBS. No downloads, no accounts.": "مصدرا متصفح في OBS — بلا تنزيلات ولا حسابات.", "Add it to OBS": "أضفه إلى OBS", "On stream": "على البث", "Copy": "نسخ", "Your controls": "لوحة تحكمك", "Run a giveaway": "شغّل سحبًا", "Add rewards & prizes": "أضف الجوائز", "OPTIONAL": "اختياري", "Make it yours": "اجعله خاصًا بك", "The winner is revealed with confetti — and if you added rewards, the prize (and its image) shows too.": "يُكشف الفائز مع قصاصات الاحتفال — وإن أضفت جوائز تظهر الجائزة (وصورتها) أيضًا.", "Ready for your next giveaway?": "جاهز لسحبك القادم؟", "Open the control dock, connect your channel, and let chat start joining.": "افتح لوحة التحكم، اربط قناتك، ودع الدردشة تبدأ بالمشاركة.", "Open the control dock →": "افتح لوحة التحكم ←", "💬 Report a bug / request a feature": "💬 أبلغ عن خطأ / اقترح ميزة", "· made for Twitch streamers": "· صُنع لستريمرز تويتش", "Back to top ↑": "العودة للأعلى ↑", "Giveaway Roulette home": "Giveaway Roulette — الرئيسية", "Sample chat": "دردشة تجريبية", "Waiting for entrants…": "بانتظار المشاركين…", "{name} joined": "انضم {name}", "⏳ Entries closed — spinning!": "⏳ أُغلقت المشاركة — العجلة تدور!", "🏆 @{n} won {r}!": "🏆 مبروك ⁦@{n}⁩! فاز بـ {r}", "✓ Copied": "✓ تم النسخ", "Chat joins": "الدردشة تشارك", "Viewers type !join — no sign-up.": "يكتب المشاهدون ⁦!join⁩ — بلا تسجيل.", "Countdown": "العد التنازلي", "3-2-1, then it spins by itself.": "3-2-1 ثم تدور وحدها.", "Winner revealed": "كشف الفائز", "Confetti, the prize and a shout-out in chat.": "قصاصات احتفال والجائزة وتهنئة في الدردشة.", "Setup · 2 minutes": "الإعداد · دقيقتان", "Go live in 3 steps": "جاهز للبث في 3 خطوات", "Everything runs inside OBS — no downloads, no accounts.": "كل شيء يعمل داخل OBS — بلا تنزيلات ولا حسابات.", "Add two links to OBS": "أضف رابطين إلى OBS", "Set them once — they always load the newest version.": "عيّنهما مرة واحدة — يُحمّلان أحدث إصدار دائمًا.", "the wheel your viewers see": "العجلة التي يراها المشاهدون", "private — only you see it": "خاصة — لا يراها غيرك", "Connect your channel": "اربط قناتك", "Open entries & spin": "افتح المشاركة وأدر العجلة", "Optional extras": "إضافات اختيارية", "Tap to expand": "اضغط للتوسيع", "Give the winner a prize with a picture": "امنح الفائز جائزة مع صورتها", "Bot announcements": "إعلانات البوت", "Post “🏆 @winner won …” in chat": "انشر «🏆 مبروك @الفائز…» في الدردشة", "Mod chat commands": "أوامر المشرفين", "Run it from chat with !gw": "أدِره من الدردشة بأمر ⁦!gw⁩", "Look & sound": "الشكل والصوت", "Colours, size, language, pictures": "الألوان والحجم واللغة والصور", "Re-roll a winner": "إعادة سحب فائز", "Winner didn’t claim it? Spin again": "لم يستلم الفائز جائزته؟ أعد السحب", "Auto-updates": "تحديث تلقائي", "Links never change; new versions load themselves.": "الروابط لا تتغيّر، والإصدارات الجديدة تُحمَّل وحدها."}, GAR_HTML={"h1": "<span class=\"w\" style=\"--i:1\">حوّل</span> <span class=\"w\" style=\"--i:2\">كل</span> <span class=\"w\" style=\"--i:3\">سحب</span> <span class=\"w\" style=\"--i:4\">إلى</span> <span class=\"w grad\" style=\"--i:5\">لحظة</span> <span class=\"w grad\" style=\"--i:6\">لا&nbsp;تُفوَّت</span>", "lead": "يكتب المشاهدون <b class=\"k\">&lrm;!join</b> في الدردشة، والعد التنازلي يرفع الحماس، ثم تدور عجلة أفقية لتتوقف على فائز — مع جوائز وقصاصات احتفال وتهنئة في الدردشة.", "rwP": "أضف الجوائز إلى قائمة <b>الجوائز</b> وأرفق صورة لكل منها. في وضع <b>المشاركين</b> يحصل الفائز على أعلى جائزة؛ وفي وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي. في الحالتين نتيجة واحدة واضحة.", "sub1": "جزآن من الصفحة نفسها — <b>العجلة</b> تظهر على بثك، و<b>أدوات التحكم</b> تبقى خاصة بك في لوحة.", "obs1": "في مشهدك: <b dir=\"ltr\">Sources → ➕ Browser</b> ← الصق رابط <b>على البث</b> ← اضبط <b dir=\"ltr\">1920 × 1080</b> ← ألغِ تحديد «<bdi>Shutdown source when not visible</bdi>». المصدر شفاف فيظهر فوق مشهدك.", "obs2": "من القائمة العلوية <b dir=\"ltr\">Docks → Custom Browser Docks…</b> ← سمّها «Giveaway» ← الصق رابط <b>لوحة تحكمك</b> ← <b dir=\"ltr\">Apply</b>. ضعها حيث تشاء — أنت وحدك من يراها.", "note1": "عيّن هذين الرابطين <b>مرة واحدة</b> — لا يتغيّران أبدًا. في كل مرة يفتحهما OBS يُحمَّل أحدث إصدار، ولوحة التحكم أو المصدر العاملان يحدّثان نفسيهما بين السحوبات. لا تخلط بينهما: رابط <b>على البث</b> شفاف ومكانه مصدر متصفح، لا لوحة تحكم.", "run1": "في تبويب <b>🎡 السحب</b> بلوحة التحكم، اكتب <b>قناتك على تويتش</b> ← <b>اتصال</b> (بلا تسجيل دخول — يقرأ الدردشة دون هوية).", "run2": "حدّد <b>المؤقت</b> (مثلًا 60 ثانية) واضغط <b>▶ فتح المشاركة</b> في الشريط أسفل لوحة التحكم. يكتب المشاهدون <b class=\"k\">&lrm;!join</b> للمشاركة — ولافتة البث تعرض العدد والعد التنازلي.", "run3": "عند انتهاء المؤقت <b>تدور العجلة تلقائيًا</b>. أو اضغط <b class=\"k\">دوران</b> / <b class=\"k\">Space</b> في أي وقت.", "run5": "<b>نصيحة:</b> فعّل <b>التحكم من الدردشة</b> في تبويب <b>💬 البوت</b> لتكتب أنت أو مشرفوك <b class=\"k\">&lrm;!gw open</b> أو <b class=\"k\">&lrm;!gw close</b> أو <b class=\"k\">&lrm;!gw spin</b> مباشرة في الدردشة.", "rw1": "أضف الجوائز في تبويب <b>🎁 الجوائز</b> بلوحة التحكم. في وضع <b>المشاركين</b> يحصل الفائز تلقائيًا على أعلى جائزة؛ وفي وضع <b>الجوائز</b> تختار العجلة الجائزة وتمنحها لمشارك عشوائي.", "rw2": "اضغط <b>🖼️</b> بجانب الجائزة لإرفاق صورة (شعار / صورة الجائزة) — تظهر كبيرة عند الفوز بها.", "bot0": "تريد أن ينشر البوت «🏆 مبروك @الفائز! فزت بـ {reward}» في الدردشة؟ من تبويب <b>💬 البوت</b> بلوحة التحكم:", "bot1": "احصل على رمز OAuth من <a href=\"https://twitchtokengenerator.com\" target=\"_blank\" rel=\"noopener\">twitchtokengenerator.com</a> (الصلاحيات: <code>chat:edit</code> و <code>chat:read</code>).", "bot2": "أدخل اسم قناتك أو البوت والرمز ← <b>ربط البوت</b> ← فعّل <b>نشر رسائل الأحداث</b>. يبقى الرمز في متصفحك فقط.", "set0": "من تبويب <b>⚙️ الإعدادات</b> بلوحة التحكم — كل شيء يتحدّث على البث فورًا:", "set1": "<b>اللغة</b> — English أو العربية؛ العربية تحوّل لوحة التحكم وطبقة البث إلى اتجاه اليمين لليسار.", "set2": "<b>حجم الطبقة</b> — صغير أو متوسط أو كبير بما يناسب تخطيطك.", "set3": "<b>لون السمة</b> — اختر لونًا جاهزًا أو أي لون مخصص ليناسب قناتك.", "set4": "<b>ألوان تويتش والشارات</b> — تستخدم البطاقات لون كل مشاهد في الدردشة وتُظهر وسوم المشرف والمميز والمشترك.", "set5": "<b>صور الملف الشخصي</b> — صورة كل مشاهد في تويتش على بطاقته وشاشة الفائز (أو الحرف الأول إن لم تكن لديه صورة).", "set6": "<b>شاشة الفائز</b> — أغلقها تلقائيًا بعد 10 أو 20 أو 30 ثانية.", "set7": "<b>الصوت</b> — شريط لمستوى صوت الصفير والنقرات ونغمة الفوز.", "note2": "التحديثات تُثبَّت تلقائيًا — لوحة التحكم ومصدر البث يُعاد تحميلهما على الإصدار الجديد بين السحوبات. لم يستلم الفائز جائزته؟ يعرض تبويب <b>🎡 السحب</b> آخر 5 فائزين — و<b>إعادة السحب</b> تُرجع الجائزة وتدور من جديد.", "p1": "في OBS: <b dir=\"ltr\">Sources</b> ← <b dir=\"ltr\">+ Browser</b> ← الصق ← <b dir=\"ltr\">1920 × 1080</b>", "p2": "في OBS: <b dir=\"ltr\">Docks</b> ← <b dir=\"ltr\">Custom Browser Docks…</b> ← الصق ← <b dir=\"ltr\">Apply</b>", "tip1": "💡 في إعدادات المصدر، ألغِ تحديد <b dir=\"ltr\">Shutdown source when not visible</b>.", "s2": "في تبويب <b>🎡 السحب</b> بلوحة التحكم، اكتب قناتك على تويتش ← <b>اتصال</b>. بلا تسجيل دخول — يقرأ الدردشة فقط.", "s3": "اختر مؤقتًا ← <b>▶ فتح المشاركة</b>. تكتب الدردشة <b class=\"k\">&lrm;!join</b>، وعند الصفر <b>تدور وحدها</b> (أو اضغط <b class=\"k\">Space</b>).", "bot2x": "في تبويب <b>💬 البوت</b> بلوحة التحكم، أدخل اسم قناتك أو البوت والرمز ← <b>ربط البوت</b> ← فعّل <b>نشر رسائل الأحداث</b>. يبقى الرمز في متصفحك فقط.", "mod1": "فعّل <b>التحكم من الدردشة</b> في تبويب <b>💬 البوت</b>، ثم تكتب أنت أو مشرفوك <b class=\"k\">&lrm;!gw open</b> أو <b class=\"k\">&lrm;!gw close</b> أو <b class=\"k\">&lrm;!gw spin</b>.", "rr1": "يعرض تبويب <b>🎡 السحب</b> آخر 5 فائزين — و<b>إعادة السحب</b> تُرجع الجائزة وتدور من جديد."};
   function gt(en,v){ let s=(window.GLANG==="ar"&&GAR[en])||en; if(v) s=s.replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m); return s; }
   const gOrig=new WeakMap();
   function applyGuideLang(){
