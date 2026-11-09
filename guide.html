@@ -592,7 +592,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v5.2</span>
+      Giveaway Roulette <span class="ver" id="ver">v5.3</span>
     </a>
     <div class="nav-links">
       <a href="#setup">Setup</a>
@@ -841,7 +841,7 @@
 <a class="to-top" id="toTop" href="#top" aria-label="Back to top">↑</a>
 <footer>
   <div class="wrap">
-    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.2</b> ·
+    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.3</b> ·
       <details class="wn"><summary>✨ What’s new</summary>
         <ul class="wn-pop">
           <li>Claim check: see when the winner replies in chat</li>
@@ -1033,7 +1033,7 @@
       /* brushed-metal grain */
       c.globalCompositeOperation="source-over"; c.globalAlpha=ga; c.fillStyle=grainPattern(c); c.fillRect(bx,by,bw,bh);
       /* glint: a bright diagonal streak travelling across the face */
-      const gx=bx-bw*0.5+bw*2*ph, gl=c.createLinearGradient(gx-bw*0.22,by,gx+bw*0.22,by+bh*0.7);
+      const gx=bx-bw*1.1+bw*3.2*ph, gl=c.createLinearGradient(gx-bw*0.2,by,gx+bw*0.2,by+bh*0.25);   // wraps well off the card: seamless
       gl.addColorStop(0,"rgba(255,255,255,0)"); gl.addColorStop(.46,"rgba(255,255,255,.08)"); gl.addColorStop(.5,"rgba(255,255,255,.34)"); gl.addColorStop(.54,"rgba(255,255,255,.08)"); gl.addColorStop(1,"rgba(255,255,255,0)");
       c.globalCompositeOperation="lighter"; c.globalAlpha=ga*0.7; c.fillStyle=gl; c.fillRect(bx,by,bw,topH);
       c.globalCompositeOperation="source-over"; c.globalAlpha=ga;
@@ -1046,8 +1046,8 @@
       for(let i=0;i<n;i++){ const r1=((h>>>(i*3))%97)/97, r2=((h>>>(i*3+11))%89)/89;
         const px=bx+bw*(0.1+r1*0.8), py=by+topH*(0.1+r2*0.72);
         if(Math.abs(px-(bx+bw/2))<bw*0.24 && Math.abs(py-(by+topH*0.55))<topH*0.38) continue;   // keep clear of the picture
-        const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.12) continue;
-        c.globalAlpha=ga*(0.45+0.55*tw); sparkle(c,px,py,Math.max(4,bh*0.068)*(0.6+0.55*tw)); }
+        const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.02) continue;
+        c.globalAlpha=ga*tw; sparkle(c,px,py,Math.max(4,bh*0.068)*(0.25+0.9*tw)); }   // fades to nothing and back
       c.globalAlpha=ga;
       c.restore();
       /* thin chrome edge in the role colour (an edge highlight, not a frame) */
@@ -1098,7 +1098,7 @@
       c.fillStyle=fg; c.fill();                                                                                                 // body (covers inner outline overlaps)
       c.save(); c.clip();
       { const gl=c.createLinearGradient(0,-s*.6,0,-s*.05); gl.addColorStop(0,"rgba(255,255,255,.32)"); gl.addColorStop(1,"rgba(255,255,255,0)"); c.fillStyle=gl; c.fillRect(-s,-s,s*2,s*0.95); }                                                          // gloss on the upper half
-      const gp=(((now/2400)+x/W2)%1+1)%1, gx=-s*1.4+s*2.8*gp, gg=c.createLinearGradient(gx-s*.16,-s*.6,gx+s*.16,s*.6);
+      const gp=(((now/2400)+x/W2)%1+1)%1, gx=-s*1.6+s*3.2*gp, gg=c.createLinearGradient(gx-s*.22,-s*.08,gx+s*.22,s*.08);
       gg.addColorStop(0,"rgba(255,255,255,0)"); gg.addColorStop(.5,"rgba(255,255,255,.42)"); gg.addColorStop(1,"rgba(255,255,255,0)");
       c.fillStyle=gg; c.fillRect(-s,-s,s*2,s*2);                                                                                 // travelling glint
       c.lineWidth=Math.max(1,s*0.05); c.strokeStyle="rgba(255,255,255,.7)"; iconPath(c,kind,s); c.stroke();                        // thin bright inner edge (clipped)
@@ -1205,7 +1205,7 @@
       }
     }
     function renderWheels(){ drawStrip(); if(!el.glow.classList.contains("winpulse")) el.glow.style.setProperty("--gcol",state._centerColor||"#7C5CFF"); }
-    setInterval(()=>{ if(demoVisible && !document.hidden && !state.spinning && state.landT==null && !el.winner.classList.contains("show")) renderWheels(); },85);   // foil shimmer + sparkles at rest
+    setInterval(()=>{ if(demoVisible && !document.hidden && !state.spinning && state.landT==null && !el.winner.classList.contains("show")) renderWheels(); },33);   // foil shimmer + sparkles at rest
 
     /* sound — same as wheel.html */
     let ac=null;

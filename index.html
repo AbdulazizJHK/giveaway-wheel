@@ -713,7 +713,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.2</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.3</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -926,7 +926,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.2</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.3</b></div>
         </section>
       </div>
 
@@ -1020,7 +1020,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "5.2";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "5.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1607,7 +1607,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(document.hidden||state.spinning||state.landT!=null||(el.winner&&el.winner.classList.contains("show"))) return;
     const wrap=document.getElementById("stripStage"); if(!wrap||wrap.classList.contains("hidden")) return;
     if(!segs().some(sg=>ROLE_TAG[sg.badge])) return;
-    const cv=document.getElementById("strip"); if(cv){ drawStrip(cv); updateGlow(); } },85);
+    const cv=document.getElementById("strip"); if(cv){ drawStrip(cv); updateGlow(); } },33);
   function updateGlow(){
     const glow=document.getElementById("stripGlow");
     if(glow && !glow.classList.contains("winpulse")) glow.style.setProperty("--gcol", state._centerColor||"#7C5CFF");
@@ -1648,7 +1648,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     /* brushed-metal grain */
     c.globalCompositeOperation="source-over"; c.globalAlpha=ga; c.fillStyle=grainPattern(c); c.fillRect(bx,by,bw,bh);
     /* glint: a bright diagonal streak travelling across the face */
-    const gx=bx-bw*0.5+bw*2*ph, gl=c.createLinearGradient(gx-bw*0.22,by,gx+bw*0.22,by+bh*0.7);
+    const gx=bx-bw*1.1+bw*3.2*ph, gl=c.createLinearGradient(gx-bw*0.2,by,gx+bw*0.2,by+bh*0.25);   // wraps well off the card: seamless
     gl.addColorStop(0,"rgba(255,255,255,0)"); gl.addColorStop(.46,"rgba(255,255,255,.08)"); gl.addColorStop(.5,"rgba(255,255,255,.34)"); gl.addColorStop(.54,"rgba(255,255,255,.08)"); gl.addColorStop(1,"rgba(255,255,255,0)");
     c.globalCompositeOperation="lighter"; c.globalAlpha=ga*0.7; c.fillStyle=gl; c.fillRect(bx,by,bw,topH);
     c.globalCompositeOperation="source-over"; c.globalAlpha=ga;
@@ -1661,8 +1661,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     for(let i=0;i<n;i++){ const r1=((h>>>(i*3))%97)/97, r2=((h>>>(i*3+11))%89)/89;
       const px=bx+bw*(0.1+r1*0.8), py=by+topH*(0.1+r2*0.72);
       if(Math.abs(px-(bx+bw/2))<bw*0.24 && Math.abs(py-(by+topH*0.55))<topH*0.38) continue;   // keep clear of the picture
-      const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.12) continue;
-      c.globalAlpha=ga*(0.45+0.55*tw); sparkle(c,px,py,Math.max(4,bh*0.068)*(0.6+0.55*tw)); }
+      const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.02) continue;
+      c.globalAlpha=ga*tw; sparkle(c,px,py,Math.max(4,bh*0.068)*(0.25+0.9*tw)); }   // fades to nothing and back
     c.globalAlpha=ga;
     c.restore();
     /* thin chrome edge in the role colour (an edge highlight, not a frame) */
@@ -1713,7 +1713,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     c.fillStyle=fg; c.fill();                                                                                                 // body (covers inner outline overlaps)
     c.save(); c.clip();
     { const gl=c.createLinearGradient(0,-s*.6,0,-s*.05); gl.addColorStop(0,"rgba(255,255,255,.32)"); gl.addColorStop(1,"rgba(255,255,255,0)"); c.fillStyle=gl; c.fillRect(-s,-s,s*2,s*0.95); }                                                          // gloss on the upper half
-    const gp=(((now/2400)+x/W2)%1+1)%1, gx=-s*1.4+s*2.8*gp, gg=c.createLinearGradient(gx-s*.16,-s*.6,gx+s*.16,s*.6);
+    const gp=(((now/2400)+x/W2)%1+1)%1, gx=-s*1.6+s*3.2*gp, gg=c.createLinearGradient(gx-s*.22,-s*.08,gx+s*.22,s*.08);
     gg.addColorStop(0,"rgba(255,255,255,0)"); gg.addColorStop(.5,"rgba(255,255,255,.42)"); gg.addColorStop(1,"rgba(255,255,255,0)");
     c.fillStyle=gg; c.fillRect(-s,-s,s*2,s*2);                                                                                 // travelling glint
     c.lineWidth=Math.max(1,s*0.05); c.strokeStyle="rgba(255,255,255,.7)"; iconPath(c,kind,s); c.stroke();                        // thin bright inner edge (clipped)
