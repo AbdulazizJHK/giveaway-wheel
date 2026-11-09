@@ -132,9 +132,10 @@
   .strip-marker::before,.strip-marker::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent}
   .strip-marker::before{top:-11px;border-top:11px solid #7C5CFF}
   .strip-marker::after{bottom:-11px;border-bottom:11px solid #7C5CFF}
-  .strip-glow{position:absolute;inset:-42% -4%;z-index:0;border-radius:50%;filter:blur(46px);opacity:.42;
-    background:radial-gradient(60% 120% at 50% 50%,var(--gcol,#7C5CFF),transparent 70%);transition:background .12s}
-  @keyframes glowPulse{0%,100%{opacity:.32;filter:blur(46px) brightness(.9)}50%{opacity:.9;filter:blur(38px) brightness(1.7)}}
+  .strip-glow{position:absolute;inset:-52% -6%;z-index:0;border-radius:50%;filter:blur(50px) saturate(1.3);opacity:.78;
+    background:radial-gradient(60% 120% at 50% 50%,var(--gcol,#7C5CFF),transparent 78%);transition:background .12s}
+  .strip-glow::after{content:"";position:absolute;inset:32% 36%;border-radius:50%;background:var(--gcol,#7C5CFF);opacity:.85;filter:blur(18px)}   /* hot core right behind the front card */
+  @keyframes glowPulse{0%,100%{opacity:.6;filter:blur(50px) saturate(1.3) brightness(1)}50%{opacity:1;filter:blur(40px) saturate(1.4) brightness(2)}}
   .strip-glow.winpulse{animation:glowPulse 1.05s ease-in-out infinite}
   .spin-cta{display:flex;flex-direction:column;align-items:center;gap:10px;z-index:6;position:relative}
   .btn-spin{appearance:none;border:none;cursor:pointer;font:inherit;font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;padding:15px 46px;border-radius:12px;background:linear-gradient(145deg,#7C5CFF,#6847E8);box-shadow:0 10px 28px -12px rgba(124,92,255,.7),0 1px 0 rgba(255,255,255,.08) inset;transition:transform .1s,filter .15s}
@@ -165,7 +166,7 @@
   .strip-plate{position:absolute;inset:-6% -2%;z-index:1;pointer-events:none;
     background:linear-gradient(180deg,transparent 0%,rgba(8,9,14,.62) 26%,rgba(8,9,14,.62) 74%,transparent 100%);
     -webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-  .strip-wrap .strip-glow{inset:-22% 4%;opacity:.38}
+  .strip-wrap .strip-glow{inset:-34% 2%;opacity:.72}
   .strip-wrap .strip-marker{top:4px;bottom:4px;width:4px;z-index:6;background:#fff;
     box-shadow:0 0 0 1px rgba(124,92,255,.7),0 0 18px 3px rgba(124,92,255,.75)}
   .strip-wrap .strip-marker::before{top:-2px;border-left-width:11px;border-right-width:11px;border-top:14px solid #fff;filter:drop-shadow(0 2px 6px rgba(124,92,255,.9))}
@@ -591,7 +592,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v4.6</span>
+      Giveaway Roulette <span class="ver" id="ver">v4.7</span>
     </a>
     <div class="nav-links">
       <a href="#setup">Setup</a>
@@ -840,7 +841,7 @@
 <a class="to-top" id="toTop" href="#top" aria-label="Back to top">↑</a>
 <footer>
   <div class="wrap">
-    <span class="foot-l">Giveaway Roulette · <b id="ver2">v4.6</b> ·
+    <span class="foot-l">Giveaway Roulette · <b id="ver2">v4.7</b> ·
       <details class="wn"><summary>✨ What’s new</summary>
         <ul class="wn-pop">
           <li>Claim check: see when the winner replies in chat</li>

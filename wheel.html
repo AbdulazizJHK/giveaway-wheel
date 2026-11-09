@@ -340,9 +340,10 @@
   .strip-marker::before,.strip-marker::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent}
   .strip-marker::before{top:-11px;border-top:11px solid var(--accent)}
   .strip-marker::after{bottom:-11px;border-bottom:11px solid var(--accent)}
-  .strip-glow{position:absolute;inset:-42% -4%;z-index:0;border-radius:50%;filter:blur(46px);opacity:.42;
-    background:radial-gradient(60% 120% at 50% 50%, var(--gcol,var(--accent)), transparent 70%);transition:background .12s}
-  @keyframes glowPulse{0%,100%{opacity:.32;filter:blur(46px) brightness(.9)}50%{opacity:.9;filter:blur(38px) brightness(1.7)}}
+  .strip-glow{position:absolute;inset:-52% -6%;z-index:0;border-radius:50%;filter:blur(50px) saturate(1.3);opacity:.78;
+    background:radial-gradient(60% 120% at 50% 50%, var(--gcol,var(--accent)), transparent 78%);transition:background .12s}
+  .strip-glow::after{content:"";position:absolute;inset:32% 36%;border-radius:50%;background:var(--gcol,var(--accent));opacity:.85;filter:blur(18px)}   /* hot core right behind the front card */
+  @keyframes glowPulse{0%,100%{opacity:.6;filter:blur(50px) saturate(1.3) brightness(1)}50%{opacity:1;filter:blur(40px) saturate(1.4) brightness(2)}}
   .strip-glow.winpulse{animation:glowPulse 1.05s ease-in-out infinite}
   .strip-stage.dock-strip{width:100%;height:82px}
   .strip-stage.dock-strip .strip-marker{top:-8px;bottom:-8px}
@@ -384,7 +385,7 @@
     box-shadow:0 30px 80px -28px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.06);
     -webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
   body.plate-none .strip-plate{display:none}
-  .strip-wrap .strip-glow{inset:-22% 4%;opacity:.38}
+  .strip-wrap .strip-glow{inset:-34% 2%;opacity:.72}
   .strip-wrap .strip-marker{top:4px;bottom:4px;width:4px;z-index:6;background:#fff;
     box-shadow:0 0 0 1px rgba(var(--acc-rgb),.7),0 0 18px 3px rgba(var(--acc-rgb),.75)}
   .strip-wrap .strip-marker::before{top:-2px;border-left-width:12px;border-right-width:12px;border-top:16px solid #fff;filter:drop-shadow(0 2px 6px rgba(var(--acc-rgb),.9))}
@@ -712,7 +713,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.6</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.7</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -925,7 +926,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.6</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.7</b></div>
         </section>
       </div>
 
@@ -1019,7 +1020,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "4.6";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "4.7";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
