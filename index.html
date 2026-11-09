@@ -712,7 +712,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.5</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.6</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -925,7 +925,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.5</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.6</b></div>
         </section>
       </div>
 
@@ -1019,7 +1019,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "4.5";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "4.6";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1610,7 +1610,10 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function grainPattern(c){ if(_grain) return _grain; const g=document.createElement("canvas"); g.width=g.height=8; const x=g.getContext("2d");
     x.strokeStyle="rgba(255,255,255,.07)"; x.lineWidth=1; x.beginPath(); x.moveTo(-2,10); x.lineTo(10,-2); x.stroke(); x.beginPath(); x.moveTo(-2,6); x.lineTo(6,-2); x.stroke();
     _grain=c.createPattern(g,"repeat"); return _grain; }
-  function sparkle(c,px,py,s){ c.save(); c.translate(px,py); c.shadowColor="rgba(255,255,255,.9)"; c.shadowBlur=s*2.2; c.fillStyle="#fff";
+  function sparkle(c,px,py,s){ c.save(); c.translate(px,py);
+    const ray=c.createLinearGradient(-s*2.4,0,s*2.4,0); ray.addColorStop(0,"rgba(255,255,255,0)"); ray.addColorStop(.5,"rgba(255,255,255,.75)"); ray.addColorStop(1,"rgba(255,255,255,0)");
+    c.fillStyle=ray; c.fillRect(-s*2.4,-.6,s*4.8,1.2); c.rotate(Math.PI/2); c.fillRect(-s*2.4,-.6,s*4.8,1.2); c.rotate(-Math.PI/2);   // long thin cross glints
+    c.shadowColor="rgba(255,255,255,.95)"; c.shadowBlur=s*2.6; c.fillStyle="#fff";
     c.beginPath(); c.moveTo(0,-s); c.quadraticCurveTo(s*.16,-s*.16,s,0); c.quadraticCurveTo(s*.16,s*.16,0,s); c.quadraticCurveTo(-s*.16,s*.16,-s,0); c.quadraticCurveTo(-s*.16,-s*.16,0,-s); c.fill(); c.restore(); }
   function roleFinish(c,x,bx,by,bw,bh,topH,R,role,seg,rt,arabic){
     const ga=c.globalAlpha, now=performance.now(), W2=c.canvas.clientWidth||1600;
@@ -1618,9 +1621,10 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     c.save(); rr(c,bx,by,bw,bh,R); c.clip();
     /* holographic sheen (soft-light keeps the role colour; bands slide as the card travels) */
     const span=bw*2.4, sx=bx-span*ph, holo=c.createLinearGradient(sx,by,sx+span,by+bh);
-    [0,45,95,165,215,275,330,360,405].forEach((h,i,a)=>holo.addColorStop(i/(a.length-1),"hsla("+(h%360)+",100%,72%,1)"));
-    c.globalCompositeOperation="overlay"; c.globalAlpha=ga*0.42; c.fillStyle=holo; c.fillRect(bx,by,bw,bh);
-    c.globalCompositeOperation="soft-light"; c.globalAlpha=ga*0.5; c.fillRect(bx,by,bw,bh);
+    [0,45,95,165,215,275,330,360,405].forEach((h,i,a)=>holo.addColorStop(i/(a.length-1),"hsla("+(h%360)+",100%,64%,1)"));
+    const hf=()=>{ const al=c.globalAlpha; c.fillRect(bx,by,bw,topH); c.globalAlpha=al*0.35; c.fillRect(bx,by+topH,bw,bh-topH); c.globalAlpha=al; };   // full rainbow on the face, a hint on the name strip
+    c.globalCompositeOperation="overlay"; c.globalAlpha=ga*0.72; c.fillStyle=holo; hf();
+    c.globalCompositeOperation="soft-light"; c.globalAlpha=ga*0.8; hf(); c.globalCompositeOperation="screen"; c.globalAlpha=ga*0.14; hf();
     /* brushed-metal grain */
     c.globalCompositeOperation="source-over"; c.globalAlpha=ga; c.fillStyle=grainPattern(c); c.fillRect(bx,by,bw,bh);
     /* glint: a bright diagonal streak travelling across the face */
@@ -1633,12 +1637,12 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     c.fillStyle=gs; c.beginPath(); c.moveTo(bx,by); c.lineTo(bx+bw,by); c.lineTo(bx+bw,by+topH*0.34); c.quadraticCurveTo(bx+bw*0.5,by+topH*0.6,bx,by+topH*0.42); c.closePath(); c.fill();
     /* sparkles (VIP and Host get more) */
     let h=7; for(const ch of String(seg.label)) h=(h*31+ch.charCodeAt(0))>>>0;
-    const n=(seg.badge==="vip"||seg.badge==="broadcaster")?5:3;
+    const n=(seg.badge==="vip"||seg.badge==="broadcaster")?6:4;
     for(let i=0;i<n;i++){ const r1=((h>>>(i*3))%97)/97, r2=((h>>>(i*3+11))%89)/89;
       const px=bx+bw*(0.1+r1*0.8), py=by+topH*(0.1+r2*0.72);
-      if(Math.abs(px-(bx+bw/2))<bw*0.2 && Math.abs(py-(by+topH*0.55))<topH*0.32) continue;   // keep clear of the picture
+      if(Math.abs(px-(bx+bw/2))<bw*0.24 && Math.abs(py-(by+topH*0.55))<topH*0.38) continue;   // keep clear of the picture
       const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.12) continue;
-      c.globalAlpha=ga*(0.45+0.55*tw); sparkle(c,px,py,Math.max(2.5,bh*0.04)*(0.55+0.6*tw)); }
+      c.globalAlpha=ga*(0.45+0.55*tw); sparkle(c,px,py,Math.max(4,bh*0.068)*(0.6+0.55*tw)); }
     c.globalAlpha=ga;
     /* corner ribbon: shaded band, gloss, fine edges */
     const rs=Math.max(9,Math.round(bh*0.072)), rw=Math.round(Math.max(bh*0.17,rs*1.9)), off=Math.round(Math.min(bw,bh)*0.2);
@@ -1655,8 +1659,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     c.restore();
     /* thin chrome edge in the role colour (an edge highlight, not a frame) */
     const rim=c.createLinearGradient(bx,by,bx+bw,by+bh);
-    rim.addColorStop(0,"rgba(255,255,255,.95)"); rim.addColorStop(.3,shade(role.c,.45)); rim.addColorStop(.5,"rgba(255,255,255,.8)"); rim.addColorStop(.72,shade(role.c,.1)); rim.addColorStop(1,"rgba(255,255,255,.55)");
-    c.lineWidth=2; c.strokeStyle=rim; rr(c,bx+1,by+1,bw-2,bh-2,Math.max(2,R-1)); c.stroke();
+    const gold=seg.badge==="vip";   /* VIP: polished gold edge */
+    if(gold){ rim.addColorStop(0,"#FFF8DC"); rim.addColorStop(.18,"#F7C948"); rim.addColorStop(.36,"#FFF1B5"); rim.addColorStop(.55,"#C8931D"); rim.addColorStop(.74,"#FFE27A"); rim.addColorStop(1,"#A87412"); }
+    else { rim.addColorStop(0,"rgba(255,255,255,.95)"); rim.addColorStop(.3,shade(role.c,.45)); rim.addColorStop(.5,"rgba(255,255,255,.8)"); rim.addColorStop(.72,shade(role.c,.1)); rim.addColorStop(1,"rgba(255,255,255,.55)"); }
+    c.lineWidth=gold?3:2; c.strokeStyle=rim; rr(c,bx+(gold?1.5:1),by+(gold?1.5:1),bw-(gold?3:2),bh-(gold?3:2),Math.max(2,R-1)); c.stroke();
+    if(gold){ c.lineWidth=1; c.strokeStyle="rgba(255,236,170,.35)"; rr(c,bx+4,by+4,bw-8,bh-8,Math.max(2,R-4)); c.stroke(); }   // faint inner gold line
   }
 
   function drawCell(c,x,CW,H,seg,o){
@@ -1697,7 +1704,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       else { const ig=c.createLinearGradient(0,ay-A/2,0,ay+A/2); ig.addColorStop(0,shade(col,-.15)); ig.addColorStop(1,shade(col,-.45)); c.fillStyle=ig; c.fillRect(ax-A/2,ay-A/2,A,A);
         c.fillStyle="#fff"; c.font="800 "+Math.round(A*0.46)+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillText(initialOf(seg.label),ax,ay+1); }
       c.restore();
-      c.lineWidth=Math.max(2.5,Math.round(A*0.06)); if(role){ const rg=c.createLinearGradient(ax-A/2,ay-A/2,ax+A/2,ay+A/2); rg.addColorStop(0,"#fff"); rg.addColorStop(.35,shade(role.c,.55)); rg.addColorStop(.55,"#fff"); rg.addColorStop(.8,shade(role.c,.2)); rg.addColorStop(1,"#fff"); c.strokeStyle=rg; } else c.strokeStyle="rgba(255,255,255,.95)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
+      c.lineWidth=Math.max(2.5,Math.round(A*0.06)); if(role){ const rg=c.createLinearGradient(ax-A/2,ay-A/2,ax+A/2,ay+A/2); if(seg.badge==="vip"){ rg.addColorStop(0,"#FFF8DC"); rg.addColorStop(.3,"#F7C948"); rg.addColorStop(.55,"#FFF1B5"); rg.addColorStop(.8,"#C8931D"); rg.addColorStop(1,"#FFE27A"); } else { rg.addColorStop(0,"#fff"); rg.addColorStop(.35,shade(role.c,.55)); rg.addColorStop(.55,"#fff"); rg.addColorStop(.8,shade(role.c,.2)); rg.addColorStop(1,"#fff"); } c.strokeStyle=rg; } else c.strokeStyle="rgba(255,255,255,.95)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
       c.lineWidth=1.5; c.strokeStyle="rgba(255,255,255,.28)"; c.beginPath(); c.arc(ax,ay,A/2+Math.max(4,A*0.07),0,6.283); c.stroke();
     }
     const fs=Math.max(12,Math.min(footH*0.44,40)), nameY=fy+footH*0.5;
