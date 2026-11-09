@@ -713,7 +713,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.1</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.2</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -926,7 +926,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.1</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.2</b></div>
         </section>
       </div>
 
@@ -1020,7 +1020,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "5.1";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "5.2";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1281,7 +1281,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function getSegments(){
     if(state.wheelMode==="users"){
       const out=[]; let i=0;
-      for(const [,u] of state.users){ out.push({label:userName(u), weight: state.weighted?userWeight(u):1, color:(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length], badge:state.showBadges?(u.badge||""):"", avatar:state.avatars?(u.avatar||""):null}); i++; }
+      for(const [,u] of state.users){ out.push({label:userName(u), weight: state.weighted?userWeight(u):1, color:(state.chatColors&&viewerColor(u.color))||SEG[i%SEG.length], badge:state.showBadges?(u.badge||""):"", subv:u.subv||"", avatar:state.avatars?(u.avatar||""):null}); i++; }
       return out;
     }
     return state.rewards.map((r,i)=>({label:rewardName(r), weight:1, color:SEG[i%SEG.length]}));
@@ -1321,7 +1321,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       sub:  t.subscriber==="1" || /(^|,)(subscriber|founder)\//.test(b),
       vip:  t.vip==="1" || /(^|,)vip\//.test(b),
       mod:  t.mod==="1" || /(^|,)moderator\//.test(b),
-      broadcaster: /(^|,)broadcaster\//.test(b)
+      broadcaster: /(^|,)broadcaster\//.test(b),
+      subv: ((b.match(/(?:^|,)subscriber\/(\d+)/)||[])[1])||""          // sub-badge version (months, 2000+/3000+ for tiers)
     };
   }
   function parseIRC(line){ const o={tags:{},prefix:null,command:"",params:""}; let r=line;
@@ -1399,7 +1400,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       if(!((R.sub&&roles.sub)||(R.vip&&roles.vip)||(R.mod&&roles.mod))) return;   // not an allowed role
     }
     if(state.blockRecent && (state.history||[]).slice(0,5).some(h=>!h.rerolled && String(h.name).toLowerCase()===disp.toLowerCase())) return;   // recent winner — sit this one out
-    const extra={color:viewerColor(color)||undefined, badge:badgeOf(roles)||undefined};
+    const extra={color:viewerColor(color)||undefined, badge:badgeOf(roles)||undefined, subv:(roles&&roles.subv)||undefined};
     if(state.users.has(login)){
       const u=state.users.get(login); Object.assign(u,extra);
       if(state.weighted){ u.weight=(u.weight||1)+1; renderUsers(); renderWheels(); save(); broadcastSync(); }
@@ -1583,7 +1584,25 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   /* ---------------- Wheel drawing ---------------- */
   const DPR=Math.min(window.devicePixelRatio||1,2);
   function fitCanvas(cv){ const w=cv.clientWidth||(cv.parentElement&&cv.parentElement.clientWidth)||300, h=cv.clientHeight||120; cv.width=Math.round(w*DPR); cv.height=Math.round(h*DPR); cv.getContext("2d").setTransform(DPR,0,0,DPR,0,0); }
-  function renderWheels(){ document.querySelectorAll(".strip-canvas").forEach(drawStrip); updateGlow(); }
+  /* the channel's own subscriber badges (public, no login) — SUB cards wear the badge for the viewer's sub length */
+  const SUB_BADGES={for:null,map:null};
+  function ensureSubBadges(){ const ch=String(state.channel||"").toLowerCase().replace(/^#/,""); if(!ch||SUB_BADGES.for===ch) return;
+    SUB_BADGES.for=ch; SUB_BADGES.map=null;
+    fetch("https://api.ivr.fi/v2/twitch/badges/channel?login="+encodeURIComponent(ch)).then(r=>r.ok?r.json():null).then(d=>{
+      if(SUB_BADGES.for!==ch||!Array.isArray(d)) return;
+      const set=d.find(x=>x&&x.set_id==="subscriber"); if(!set||!Array.isArray(set.versions)) return;
+      const m={}; set.versions.forEach(v=>{ const u=v.image_url_4x||v.image_url_2x||v.image_url_1x; if(u&&/^https:\/\//.test(u)) m[String(v.id)]=u; });
+      if(!Object.keys(m).length) return; SUB_BADGES.map=m; Object.values(m).forEach(u=>avImg(u)); avRepaint();
+    }).catch(()=>{}); }
+  function subBadgeImg(v){ const m=SUB_BADGES.map; if(!m) return null;
+    const keys=Object.keys(m).map(Number).filter(n=>!isNaN(n)); if(!keys.length) return null;
+    const n=parseInt(v,10); let pick=null;
+    if(!isNaN(n)){ const tier=Math.floor(n/1000), mo=n%1000;
+      const same=keys.filter(k=>Math.floor(k/1000)===tier&&k%1000<=mo); if(same.length) pick=Math.max(...same);
+      else { const t1=keys.filter(k=>k<1000&&k<=mo); if(t1.length) pick=Math.max(...t1); } }
+    if(pick==null) pick=keys.includes(0)?0:Math.min(...keys);
+    return avImg(m[String(pick)]); }
+  function renderWheels(){ ensureSubBadges(); document.querySelectorAll(".strip-canvas").forEach(drawStrip); updateGlow(); }
   if(ROLE!=="dock") setInterval(()=>{   // keeps the foil shimmering and sparkles twinkling at rest (~12fps, only when role cards are showing)
     if(document.hidden||state.spinning||state.landT!=null||(el.winner&&el.winner.classList.contains("show"))) return;
     const wrap=document.getElementById("stripStage"); if(!wrap||wrap.classList.contains("hidden")) return;
@@ -1621,8 +1640,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const ph=(((x/W2)+now/9000)%1+1)%1;                                // position along the strip + a slow drift
     c.save(); rr(c,bx,by,bw,bh,R); c.clip();
     /* holographic sheen (soft-light keeps the role colour; bands slide as the card travels) */
-    const span=bw*2.4, sx=bx-span*ph, holo=c.createLinearGradient(sx,by,sx+span,by+bh);
-    [0,45,95,165,215,275,330,360,405].forEach((h,i,a)=>holo.addColorStop(i/(a.length-1),"hsla("+(h%360)+",100%,64%,1)"));
+    const h0=ph*360, holo=c.createLinearGradient(bx,by,bx+bw,by+bh);   // hues rotate around the wheel: no seam when the cycle wraps
+    for(let k=0;k<=8;k++) holo.addColorStop(k/8,"hsl("+((h0+k*30)%360)+",100%,64%)");
     const hf=()=>{ const al=c.globalAlpha; c.fillRect(bx,by,bw,topH); c.globalAlpha=al*0.35; c.fillRect(bx,by+topH,bw,bh-topH); c.globalAlpha=al; };   // full rainbow on the face, a hint on the name strip
     c.globalCompositeOperation="overlay"; c.globalAlpha=ga*0.72; c.fillStyle=holo; hf();
     c.globalCompositeOperation="soft-light"; c.globalAlpha=ga*0.8; hf(); c.globalCompositeOperation="screen"; c.globalAlpha=ga*0.14; hf();
@@ -1657,8 +1676,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
 
   function glowColorFor(seg,x,W){   // the colour the card really shows: role colour + the rainbow hue currently over it (matches roleFinish)
     const role=ROLE_TAG[seg.badge]; if(!role) return seg.color;
-    const ph=(((x/(W||1600))+performance.now()/9000)%1+1)%1, tt=Math.min(1,0.5/2.4+ph), HS=[0,45,95,165,215,275,330,360,405];
-    const f=tt*(HS.length-1), i=Math.min(HS.length-2,Math.floor(f)), hue=((HS[i]+(HS[i+1]-HS[i])*(f-i))%360)/360;
+    const ph=(((x/(W||1600))+performance.now()/9000)%1+1)%1, hue=((ph*360+120)%360)/360;
     const q=.64<.5?.64*2:.64+1-.64, pp=2*.64-q, h2r=t=>{ t=(t+1)%1; return t<1/6?pp+(q-pp)*6*t:t<.5?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp; };
     const hc=[h2r(hue+1/3),h2r(hue),h2r(hue-1/3)].map(v=>v*255), a=hexRGB(role.c), m=.4;
     return "rgb("+a.map((v,k)=>Math.round(v*(1-m)+hc[k]*m)).join(",")+")"; }
@@ -1676,6 +1694,12 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const now=performance.now(), W2=c.canvas.clientWidth||1600, kind=seg.badge==="broadcaster"?"host":seg.badge, gold=kind==="vip";
     const s=Math.round(bh*0.3), ins=Math.max(bh*0.06,bw*0.05)+s*0.5, ex=arabic?bx+bw-ins:bx+ins, ey=by+s*0.02;
     c.save(); c.translate(ex,ey); c.rotate((arabic?1:-1)*0.14);
+    const bimg=kind==="sub"&&typeof subBadgeImg==="function"?subBadgeImg(seg.subv):null;
+    if(bimg){ const z=s*1.12; if(dim>0.01) c.globalAlpha*=1-Math.min(.6,dim*1.6);                                   // the channel's real sub badge
+      c.shadowColor=role.c; c.shadowBlur=s*0.55; c.drawImage(bimg,-z/2,-z/2,z,z);
+      c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=s*0.16; c.shadowOffsetY=s*0.06; c.drawImage(bimg,-z/2,-z/2,z,z);
+      c.shadowColor="transparent"; c.shadowBlur=0; c.shadowOffsetY=0; c.drawImage(bimg,-z/2,-z/2,z,z);
+    } else {
     if(kind==="mod") c.rotate(-Math.PI/4);
     const lw=Math.max(2,s*(gold?0.1:0.12));
     const edge=c.createLinearGradient(-s/2,-s/2,s/2,s/2);
@@ -1697,7 +1721,16 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       c.moveTo(-s*.52,-s*.12); c.lineTo(s*.52,-s*.12); c.moveTo(-s*.13,-s*.44); c.lineTo(-s*.22,-s*.12); c.lineTo(0,s*.52); c.lineTo(s*.22,-s*.12); c.lineTo(s*.13,-s*.44); c.stroke(); }   // gem facets
     c.restore();
     if(dim>0.01){ iconPath(c,kind,s); c.fillStyle="rgba(8,9,14,"+dim+")"; c.lineWidth=lw; c.strokeStyle="rgba(8,9,14,"+dim+")"; c.stroke(); c.fill(); }   // side cards step back with it
-    c.restore(); }
+    }
+    c.restore();
+    { const fs=Math.max(9,Math.round(s*0.24)); c.save(); c.font="900 "+fs+"px "+FONT; c.textAlign="center"; c.textBaseline="top";     // role name, small, under the icon
+      if("letterSpacing" in c) c.letterSpacing=arabic?"0px":Math.round(fs*0.16)+"px";
+      const ty=ey+s*0.6, tx=ex+(arabic?0:Math.round(fs*0.08));
+      c.globalAlpha*=1-Math.min(.6,dim*1.6); c.lineJoin="round"; c.lineWidth=Math.max(2,fs*0.32); c.strokeStyle=shade(role.c,-.65); c.strokeText(rt,tx,ty);
+      c.shadowColor="rgba(0,0,0,.5)"; c.shadowBlur=3; c.fillStyle=gold?"#FFE9A8":"#fff"; c.fillText(rt,tx,ty);
+      if("letterSpacing" in c) c.letterSpacing="0px";
+      c.restore(); }
+  }
   function drawCell(c,x,CW,H,seg,o){
     if(!o) return drawCellSimple(c,x,CW,H,seg,o);                    // dock preview keeps the simple cell
     const pad=3, vp=o.vp, lift=o.lift, land=o.land, bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, R=Math.max(10,Math.round(bh*0.075));
@@ -1816,7 +1849,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const W=cv.clientWidth, H=cv.clientHeight; c.clearRect(0,0,W,H);
     const S=segs(), n=S.length;
     if(n===0){
-      rr(c,0,0,W,H,12); c.fillStyle="#191C24"; c.fill();
+      const ve=cv.id==="strip"?Math.round(H*0.2137):0;              // card-height box, not the glow headroom
+      rr(c,0,ve,W,H-ve*2,12); c.fillStyle="#191C24"; c.fill();
       c.fillStyle="#7A808E"; c.textAlign="center"; c.textBaseline="middle"; c.font="600 "+Math.max(12,Math.min(H*0.2,18))+"px "+FONT;
       c.fillText(t(state.wheelMode==="users"?"Waiting for entrants…":"Add rewards…"), W/2, H/2);
       if(cv.id==="strip") state._centerColor="#7C5CFF";
