@@ -592,7 +592,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v5.0</span>
+      Giveaway Roulette <span class="ver" id="ver">v5.1</span>
     </a>
     <div class="nav-links">
       <a href="#setup">Setup</a>
@@ -841,7 +841,7 @@
 <a class="to-top" id="toTop" href="#top" aria-label="Back to top">↑</a>
 <footer>
   <div class="wrap">
-    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.0</b> ·
+    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.1</b> ·
       <details class="wn"><summary>✨ What’s new</summary>
         <ul class="wn-pop">
           <li>Claim check: see when the winner replies in chat</li>
@@ -1066,45 +1066,41 @@
       const q=.64<.5?.64*2:.64+1-.64, pp=2*.64-q, h2r=t=>{ t=(t+1)%1; return t<1/6?pp+(q-pp)*6*t:t<.5?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp; };
       const hc=[h2r(hue+1/3),h2r(hue),h2r(hue-1/3)].map(v=>v*255), a=hexRGB(role.c), m=.4;
       return "rgb("+a.map((v,k)=>Math.round(v*(1-m)+hc[k]*m)).join(",")+")"; }
-    function roleIcon(c,kind,ix,iy,s){   // hand-drawn role icons: sword (mod), gem (vip), star (sub), crown (host)
-      c.save(); c.translate(ix,iy); c.fillStyle="#fff"; c.strokeStyle="#fff"; c.lineJoin="round"; c.lineCap="round";
-      if(kind==="sub"){ c.beginPath(); for(let i=0;i<10;i++){ const r=i%2?s*0.22:s*0.52, a=-Math.PI/2+i*Math.PI/5; c.lineTo(Math.cos(a)*r,Math.sin(a)*r); } c.closePath(); c.fill(); }
-      else if(kind==="vip"){ c.beginPath(); c.moveTo(-s*.5,-s*.12); c.lineTo(-s*.27,-s*.42); c.lineTo(s*.27,-s*.42); c.lineTo(s*.5,-s*.12); c.lineTo(0,s*.5); c.closePath(); c.fill();
-        c.strokeStyle="rgba(0,0,0,.28)"; c.lineWidth=Math.max(1,s*.06); c.beginPath(); c.moveTo(-s*.5,-s*.12); c.lineTo(s*.5,-s*.12); c.moveTo(-s*.12,-s*.42); c.lineTo(-s*.2,-s*.12); c.lineTo(0,s*.5); c.lineTo(s*.2,-s*.12); c.lineTo(s*.12,-s*.42); c.stroke(); }
-      else if(kind==="mod"){ c.rotate(-Math.PI/4); const w=s*.17;
-        c.beginPath(); c.moveTo(-w/2,s*.12); c.lineTo(-w/2,-s*.42); c.lineTo(0,-s*.6); c.lineTo(w/2,-s*.42); c.lineTo(w/2,s*.12); c.closePath(); c.fill();   // blade
-        c.fillRect(-s*.3,s*.12,s*.6,s*.11);                                                                                                                      // guard
-        c.fillRect(-w*.42,s*.23,w*.84,s*.26); c.beginPath(); c.arc(0,s*.53,w*.55,0,6.283); c.fill(); }                                                          // grip + pommel
-      else { c.beginPath(); c.moveTo(-s*.5,s*.32); c.lineTo(-s*.5,-s*.2); c.lineTo(-s*.25,s*.05); c.lineTo(0,-s*.38); c.lineTo(s*.25,s*.05); c.lineTo(s*.5,-s*.2); c.lineTo(s*.5,s*.32); c.closePath(); c.fill();
-        [[-s*.5,-s*.24],[0,-s*.42],[s*.5,-s*.24]].forEach(([x,y])=>{ c.beginPath(); c.arc(x,y,s*.08,0,6.283); c.fill(); }); }
-      c.restore(); }
-    function rolePlate(c,x,bx,by,bw,bh,role,seg,rt,arabic,dim){   // role nameplate pinned across the top edge — half on the card, half above it
-      const now=performance.now(), W2=c.canvas.clientWidth||1600, gold=seg.badge==="vip";
-      const fs=Math.max(10,Math.round(bh*0.085)); c.save(); c.font="900 "+fs+"px "+FONT;
-      if("letterSpacing" in c) c.letterSpacing=arabic?"0px":Math.round(fs*0.2)+"px";
-      const tw=c.measureText(rt).width, isz=fs*1.15, gap=fs*0.45, ph=Math.round(fs*1.8), pw=Math.round(tw+isz+gap+fs*2.6), px=Math.round(arabic?bx+bw-Math.max(bh*0.07,bw*0.07)-pw:bx+Math.max(bh*0.07,bw*0.07)), py=Math.round(by-ph*0.52), k=Math.round(ph*0.3);
-      const plate=()=>{ c.beginPath(); c.moveTo(px+k,py); c.lineTo(px+pw-k,py); c.lineTo(px+pw,py+k); c.lineTo(px+pw,py+ph-k); c.lineTo(px+pw-k,py+ph); c.lineTo(px+k,py+ph); c.lineTo(px,py+ph-k); c.lineTo(px,py+k); c.closePath(); };
-      c.shadowColor=role.c; c.shadowBlur=ph*0.7; plate(); c.fillStyle=role.c; c.fill();                         // soft glow in the role colour
-      c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=ph*0.35; c.shadowOffsetY=ph*0.12;                            // lifts off the card
-      const pg=c.createLinearGradient(0,py,0,py+ph); pg.addColorStop(0,shade(role.c,.3)); pg.addColorStop(.48,shade(role.c,-.05)); pg.addColorStop(1,shade(role.c,-.45));
-      plate(); c.fillStyle=pg; c.fill(); c.shadowColor="transparent"; c.shadowBlur=0; c.shadowOffsetY=0;
-      c.save(); plate(); c.clip();
-      c.fillStyle="rgba(255,255,255,.22)"; c.fillRect(px,py,pw,ph*0.46);                                        // gloss
-      const gp=(((now/2600)+x/W2)%1+1)%1, gx=px-ph+(pw+ph*2)*gp, gg=c.createLinearGradient(gx-ph*0.8,py,gx+ph*0.8,py+ph);
-      gg.addColorStop(0,"rgba(255,255,255,0)"); gg.addColorStop(.5,"rgba(255,255,255,.5)"); gg.addColorStop(1,"rgba(255,255,255,0)");
-      c.fillStyle=gg; c.fillRect(px,py,pw,ph); c.restore();                                                      // travelling glint
-      const st=c.createLinearGradient(px,py,px+pw,py+ph);
-      if(gold){ st.addColorStop(0,"#FFF8DC"); st.addColorStop(.3,"#F7C948"); st.addColorStop(.55,"#FFF1B5"); st.addColorStop(.8,"#C8931D"); st.addColorStop(1,"#FFE27A"); }
-      else { st.addColorStop(0,"rgba(255,255,255,.95)"); st.addColorStop(.5,shade(role.c,.55)); st.addColorStop(1,"rgba(255,255,255,.7)"); }
-      c.lineWidth=Math.max(1.5,ph*(gold?0.09:0.07)); c.strokeStyle=st; plate(); c.stroke();                      // chrome (gold on VIP) edge
-      [px+k*0.95,px+pw-k*0.95].forEach(dx=>{ const r=Math.max(1.8,ph*0.085), dy=py+ph/2;                       // diamond studs
-        c.beginPath(); c.moveTo(dx,dy-r); c.lineTo(dx+r,dy); c.lineTo(dx,dy+r); c.lineTo(dx-r,dy); c.closePath(); c.fillStyle=gold?"#FFE9A8":"rgba(255,255,255,.92)"; c.fill(); });
-      c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=3; c.shadowOffsetY=1;
-      const cw=isz+gap+tw, cx0=px+(pw-cw)/2, cy=py+ph/2;                                          // icon + label, centred together
-      roleIcon(c,seg.badge==="broadcaster"?"host":seg.badge,arabic?cx0+cw-isz/2:cx0+isz/2,cy,isz);
-      c.textAlign=arabic?"right":"left"; c.fillText(rt,arabic?cx0+cw-isz-gap:cx0+isz+gap,cy+1);
-      if("letterSpacing" in c) c.letterSpacing="0px";
-      if(dim>0.01){ c.shadowColor="transparent"; c.fillStyle="rgba(8,9,14,"+dim+")"; plate(); c.fill(); }      // side cards step back with their plate
+    function iconPath(c,kind,s){   // role icon outlines (built as one path; caller strokes then fills): star (sub), gem (vip), sword (mod), crown (host)
+      c.beginPath();
+      if(kind==="sub"){ for(let i=0;i<10;i++){ const r=i%2?s*0.25:s*0.54, a=-Math.PI/2+i*Math.PI/5; c.lineTo(Math.cos(a)*r,Math.sin(a)*r+s*0.03); } c.closePath(); }
+      else if(kind==="vip"){ c.moveTo(-s*.52,-s*.12); c.lineTo(-s*.28,-s*.44); c.lineTo(s*.28,-s*.44); c.lineTo(s*.52,-s*.12); c.lineTo(0,s*.52); c.closePath(); }
+      else if(kind==="mod"){ const w=s*.2;
+        c.moveTo(-w/2,s*.1); c.lineTo(-w/2,-s*.4); c.lineTo(0,-s*.62); c.lineTo(w/2,-s*.4); c.lineTo(w/2,s*.1); c.closePath();     // blade
+        c.rect(-s*.32,s*.1,s*.64,s*.13); c.rect(-w*.45,s*.23,w*.9,s*.25); c.moveTo(w*.62,s*.53); c.arc(0,s*.53,w*.62,0,6.283); }    // guard, grip, pommel
+      else { c.moveTo(-s*.52,s*.36); c.lineTo(-s*.52,-s*.18); c.lineTo(-s*.26,s*.06); c.lineTo(0,-s*.38); c.lineTo(s*.26,s*.06); c.lineTo(s*.52,-s*.18); c.lineTo(s*.52,s*.36); c.closePath();
+        [[-s*.52,-s*.24],[0,-s*.45],[s*.52,-s*.24]].forEach(([x,y])=>{ c.moveTo(x+s*.09,y); c.arc(x,y,s*.09,0,6.283); }); }
+    }
+    function rolePlate(c,x,bx,by,bw,bh,role,seg,rt,arabic,dim){   // big role emblem pinned over the card's top corner — mostly outside the card
+      const now=performance.now(), W2=c.canvas.clientWidth||1600, kind=seg.badge==="broadcaster"?"host":seg.badge, gold=kind==="vip";
+      const s=Math.round(bh*0.3), ins=Math.max(bh*0.06,bw*0.05)+s*0.5, ex=arabic?bx+bw-ins:bx+ins, ey=by+s*0.02;
+      c.save(); c.translate(ex,ey); c.rotate((arabic?1:-1)*0.14);
+      if(kind==="mod") c.rotate(-Math.PI/4);
+      const lw=Math.max(2,s*(gold?0.1:0.12));
+      const edge=c.createLinearGradient(-s/2,-s/2,s/2,s/2);
+      if(gold){ edge.addColorStop(0,"#FFF8DC"); edge.addColorStop(.3,"#F7C948"); edge.addColorStop(.55,"#FFF1B5"); edge.addColorStop(.8,"#C8931D"); edge.addColorStop(1,"#FFE27A"); }
+      else { edge.addColorStop(0,shade(role.c,-.45)); edge.addColorStop(1,shade(role.c,-.7)); }   // deep outline in the role colour
+      c.lineJoin="round"; c.lineCap="round";
+      iconPath(c,kind,s); c.shadowColor=role.c; c.shadowBlur=s*0.55; c.fillStyle=role.c; c.fill();                         // glow in the role colour
+      c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=s*0.16; c.shadowOffsetY=s*0.06; c.lineWidth=lw; c.strokeStyle=edge; c.stroke();   // outline + drop shadow
+      c.shadowColor="transparent"; c.shadowBlur=0; c.shadowOffsetY=0; c.stroke();
+      const fg=c.createLinearGradient(0,-s*.55,0,s*.55); fg.addColorStop(0,role.c); fg.addColorStop(.5,shade(role.c,-.12)); fg.addColorStop(1,shade(role.c,-.55));
+      c.fillStyle=fg; c.fill();                                                                                                 // body (covers inner outline overlaps)
+      c.save(); c.clip();
+      { const gl=c.createLinearGradient(0,-s*.6,0,-s*.05); gl.addColorStop(0,"rgba(255,255,255,.32)"); gl.addColorStop(1,"rgba(255,255,255,0)"); c.fillStyle=gl; c.fillRect(-s,-s,s*2,s*0.95); }                                                          // gloss on the upper half
+      const gp=(((now/2400)+x/W2)%1+1)%1, gx=-s*1.4+s*2.8*gp, gg=c.createLinearGradient(gx-s*.16,-s*.6,gx+s*.16,s*.6);
+      gg.addColorStop(0,"rgba(255,255,255,0)"); gg.addColorStop(.5,"rgba(255,255,255,.42)"); gg.addColorStop(1,"rgba(255,255,255,0)");
+      c.fillStyle=gg; c.fillRect(-s,-s,s*2,s*2);                                                                                 // travelling glint
+      c.lineWidth=Math.max(1,s*0.05); c.strokeStyle="rgba(255,255,255,.7)"; iconPath(c,kind,s); c.stroke();                        // thin bright inner edge (clipped)
+    if(kind==="vip"){ c.strokeStyle="rgba(255,255,255,.55)"; c.lineWidth=Math.max(1,s*.04); c.beginPath();
+        c.moveTo(-s*.52,-s*.12); c.lineTo(s*.52,-s*.12); c.moveTo(-s*.13,-s*.44); c.lineTo(-s*.22,-s*.12); c.lineTo(0,s*.52); c.lineTo(s*.22,-s*.12); c.lineTo(s*.13,-s*.44); c.stroke(); }   // gem facets
+      c.restore();
+      if(dim>0.01){ iconPath(c,kind,s); c.fillStyle="rgba(8,9,14,"+dim+")"; c.lineWidth=lw; c.strokeStyle="rgba(8,9,14,"+dim+")"; c.stroke(); c.fill(); }   // side cards step back with it
       c.restore(); }
     function drawCell(c,x,CW,H,seg,o){
       const pad=3, vp=o.vp, lift=o.lift, land=o.land, bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, R=Math.max(10,Math.round(bh*0.075));
