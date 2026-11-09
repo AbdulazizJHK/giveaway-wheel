@@ -712,7 +712,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.4</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.5</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -925,7 +925,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.4</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.5</b></div>
         </section>
       </div>
 
@@ -1019,7 +1019,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "4.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "4.5";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1583,6 +1583,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   const DPR=Math.min(window.devicePixelRatio||1,2);
   function fitCanvas(cv){ const w=cv.clientWidth||(cv.parentElement&&cv.parentElement.clientWidth)||300, h=cv.clientHeight||120; cv.width=Math.round(w*DPR); cv.height=Math.round(h*DPR); cv.getContext("2d").setTransform(DPR,0,0,DPR,0,0); }
   function renderWheels(){ document.querySelectorAll(".strip-canvas").forEach(drawStrip); updateGlow(); }
+  if(ROLE!=="dock") setInterval(()=>{   // keeps the foil shimmering and sparkles twinkling at rest (~12fps, only when role cards are showing)
+    if(document.hidden||state.spinning||state.landT!=null||(el.winner&&el.winner.classList.contains("show"))) return;
+    const wrap=document.getElementById("stripStage"); if(!wrap||wrap.classList.contains("hidden")) return;
+    if(!segs().some(sg=>ROLE_TAG[sg.badge])) return;
+    const cv=document.getElementById("strip"); if(cv) drawStrip(cv); },85);
   function updateGlow(){
     const glow=document.getElementById("stripGlow");
     if(glow && !glow.classList.contains("winpulse")) glow.style.setProperty("--gcol", state._centerColor||"#7C5CFF");
@@ -1599,6 +1604,61 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   /* o (stage strip only): {vp: vertical pad, lift: 0–1 how close to the marker, land: 0–1 landing highlight, alpha} */
   /* ---- stage "player card": picture on a rich gradient, name on a glass footer, rim light; role cards add frame + band ---- */
   function shade(hex,amt){ const v=/^#[0-9a-f]{6}$/i.test(hex||"")?hexRGB(hex):[124,92,255]; const f=x=>Math.round(amt<0?x*(1+amt):x+(255-x)*amt); return "rgb("+f(v[0])+","+f(v[1])+","+f(v[2])+")"; }
+  /* ---- role cards (MOD / VIP / SUB / HOST): trading-card foil — holo sheen that slides with the card, a glint,
+     brushed grain, twinkling sparkles, a thin chrome edge and a polished corner ribbon ---- */
+  let _grain=null;
+  function grainPattern(c){ if(_grain) return _grain; const g=document.createElement("canvas"); g.width=g.height=8; const x=g.getContext("2d");
+    x.strokeStyle="rgba(255,255,255,.07)"; x.lineWidth=1; x.beginPath(); x.moveTo(-2,10); x.lineTo(10,-2); x.stroke(); x.beginPath(); x.moveTo(-2,6); x.lineTo(6,-2); x.stroke();
+    _grain=c.createPattern(g,"repeat"); return _grain; }
+  function sparkle(c,px,py,s){ c.save(); c.translate(px,py); c.shadowColor="rgba(255,255,255,.9)"; c.shadowBlur=s*2.2; c.fillStyle="#fff";
+    c.beginPath(); c.moveTo(0,-s); c.quadraticCurveTo(s*.16,-s*.16,s,0); c.quadraticCurveTo(s*.16,s*.16,0,s); c.quadraticCurveTo(-s*.16,s*.16,-s,0); c.quadraticCurveTo(-s*.16,-s*.16,0,-s); c.fill(); c.restore(); }
+  function roleFinish(c,x,bx,by,bw,bh,topH,R,role,seg,rt,arabic){
+    const ga=c.globalAlpha, now=performance.now(), W2=c.canvas.clientWidth||1600;
+    const ph=(((x/W2)+now/9000)%1+1)%1;                                // position along the strip + a slow drift
+    c.save(); rr(c,bx,by,bw,bh,R); c.clip();
+    /* holographic sheen (soft-light keeps the role colour; bands slide as the card travels) */
+    const span=bw*2.4, sx=bx-span*ph, holo=c.createLinearGradient(sx,by,sx+span,by+bh);
+    [0,45,95,165,215,275,330,360,405].forEach((h,i,a)=>holo.addColorStop(i/(a.length-1),"hsla("+(h%360)+",100%,72%,1)"));
+    c.globalCompositeOperation="overlay"; c.globalAlpha=ga*0.42; c.fillStyle=holo; c.fillRect(bx,by,bw,bh);
+    c.globalCompositeOperation="soft-light"; c.globalAlpha=ga*0.5; c.fillRect(bx,by,bw,bh);
+    /* brushed-metal grain */
+    c.globalCompositeOperation="source-over"; c.globalAlpha=ga; c.fillStyle=grainPattern(c); c.fillRect(bx,by,bw,bh);
+    /* glint: a bright diagonal streak travelling across the face */
+    const gx=bx-bw*0.5+bw*2*ph, gl=c.createLinearGradient(gx-bw*0.22,by,gx+bw*0.22,by+bh*0.7);
+    gl.addColorStop(0,"rgba(255,255,255,0)"); gl.addColorStop(.46,"rgba(255,255,255,.08)"); gl.addColorStop(.5,"rgba(255,255,255,.34)"); gl.addColorStop(.54,"rgba(255,255,255,.08)"); gl.addColorStop(1,"rgba(255,255,255,0)");
+    c.globalCompositeOperation="lighter"; c.globalAlpha=ga*0.7; c.fillStyle=gl; c.fillRect(bx,by,bw,topH);
+    c.globalCompositeOperation="source-over"; c.globalAlpha=ga;
+    /* gloss on the upper half — a curved glass reflection */
+    const gs=c.createLinearGradient(0,by,0,by+topH*0.55); gs.addColorStop(0,"rgba(255,255,255,.22)"); gs.addColorStop(1,"rgba(255,255,255,0)");
+    c.fillStyle=gs; c.beginPath(); c.moveTo(bx,by); c.lineTo(bx+bw,by); c.lineTo(bx+bw,by+topH*0.34); c.quadraticCurveTo(bx+bw*0.5,by+topH*0.6,bx,by+topH*0.42); c.closePath(); c.fill();
+    /* sparkles (VIP and Host get more) */
+    let h=7; for(const ch of String(seg.label)) h=(h*31+ch.charCodeAt(0))>>>0;
+    const n=(seg.badge==="vip"||seg.badge==="broadcaster")?5:3;
+    for(let i=0;i<n;i++){ const r1=((h>>>(i*3))%97)/97, r2=((h>>>(i*3+11))%89)/89;
+      const px=bx+bw*(0.1+r1*0.8), py=by+topH*(0.1+r2*0.72);
+      if(Math.abs(px-(bx+bw/2))<bw*0.2 && Math.abs(py-(by+topH*0.55))<topH*0.32) continue;   // keep clear of the picture
+      const tw=0.5+0.5*Math.sin(now/420+i*2.3+(h%11)); if(tw<0.12) continue;
+      c.globalAlpha=ga*(0.45+0.55*tw); sparkle(c,px,py,Math.max(2.5,bh*0.04)*(0.55+0.6*tw)); }
+    c.globalAlpha=ga;
+    /* corner ribbon: shaded band, gloss, fine edges */
+    const rs=Math.max(9,Math.round(bh*0.072)), rw=Math.round(Math.max(bh*0.17,rs*1.9)), off=Math.round(Math.min(bw,bh)*0.2);
+    c.translate(bx+bw,by); c.rotate(Math.PI/4);
+    c.shadowColor="rgba(0,0,0,.45)"; c.shadowBlur=8; c.shadowOffsetY=3;
+    const rg=c.createLinearGradient(0,off,0,off+rw); rg.addColorStop(0,shade(role.c,.12)); rg.addColorStop(.5,shade(role.c,-.22)); rg.addColorStop(1,shade(role.c,-.48));
+    c.fillStyle=rg; c.fillRect(-bw,off,bw*2,rw); c.shadowColor="transparent"; c.shadowBlur=0; c.shadowOffsetY=0;
+    c.fillStyle="rgba(255,255,255,.2)"; c.fillRect(-bw,off,bw*2,rw*0.45);
+    c.fillStyle="rgba(255,255,255,.55)"; c.fillRect(-bw,off,bw*2,1); c.fillStyle="rgba(0,0,0,.35)"; c.fillRect(-bw,off+rw-1,bw*2,1);
+    c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.font="900 "+rs+"px "+FONT;
+    c.shadowColor="rgba(0,0,0,.5)"; c.shadowBlur=3; c.shadowOffsetY=1;
+    if("letterSpacing" in c) c.letterSpacing=arabic?"0px":Math.round(rs*0.18)+"px";
+    c.fillText(rt,0,off+rw/2+1); if("letterSpacing" in c) c.letterSpacing="0px";
+    c.restore();
+    /* thin chrome edge in the role colour (an edge highlight, not a frame) */
+    const rim=c.createLinearGradient(bx,by,bx+bw,by+bh);
+    rim.addColorStop(0,"rgba(255,255,255,.95)"); rim.addColorStop(.3,shade(role.c,.45)); rim.addColorStop(.5,"rgba(255,255,255,.8)"); rim.addColorStop(.72,shade(role.c,.1)); rim.addColorStop(1,"rgba(255,255,255,.55)");
+    c.lineWidth=2; c.strokeStyle=rim; rr(c,bx+1,by+1,bw-2,bh-2,Math.max(2,R-1)); c.stroke();
+  }
+
   function drawCell(c,x,CW,H,seg,o){
     if(!o) return drawCellSimple(c,x,CW,H,seg,o);                    // dock preview keeps the simple cell
     const pad=3, vp=o.vp, lift=o.lift, land=o.land, bx=x+pad, by=vp, bw=CW-pad*2, bh=H-vp*2, R=Math.max(10,Math.round(bh*0.075));
@@ -1626,25 +1686,8 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     c.fillStyle="rgba(255,255,255,.14)"; c.fillRect(bx,fy,bw,1);
     c.restore();
     c.lineWidth=1; c.strokeStyle="rgba(255,255,255,.22)"; rr(c,bx+.5,by+.5,bw-1,bh-1,R); c.stroke();   // rim light
-    if(role){                                                         // role cards: foil finish + corner ribbon (no frame)
-      c.save(); rr(c,bx,by,bw,bh,R); c.clip();
-      const foil=c.createLinearGradient(bx,by,bx+bw,by+bh);
-      [[.18,0],[.26,.16],[.3,0],[.58,0],[.64,.1],[.68,0]].forEach(([p,a])=>foil.addColorStop(p,"rgba(255,255,255,"+a+")"));
-      c.fillStyle=foil; c.fillRect(bx,by,bw,bh);
-      if(seg.badge==="vip"){ const vs=c.createLinearGradient(bx+bw,by,bx,by+bh); vs.addColorStop(.4,"rgba(255,255,255,0)"); vs.addColorStop(.5,"rgba(255,255,255,.14)"); vs.addColorStop(.6,"rgba(255,255,255,0)"); c.fillStyle=vs; c.fillRect(bx,by,bw,bh); }
-      const rt=t(role.t), rs=Math.max(9,Math.round(bh*0.072)), rw=Math.round(Math.max(bh*0.17,rs*1.9));   // ribbon across the top-right corner
-      c.translate(bx+bw,by); c.rotate(Math.PI/4);
-      const off=Math.round(Math.min(bw,bh)*0.2);
-      c.shadowColor="rgba(0,0,0,.35)"; c.shadowBlur=6; c.shadowOffsetY=2;
-      c.fillStyle=shade(role.c,-.38); c.fillRect(-bw,off,bw*2,rw);
-      c.shadowBlur=0; c.shadowOffsetY=0;
-      c.fillStyle="rgba(255,255,255,.22)"; c.fillRect(-bw,off,bw*2,1); c.fillRect(-bw,off+rw-1,bw*2,1);
-      c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.font="900 "+rs+"px "+FONT;
-      if("letterSpacing" in c) c.letterSpacing=hasArabic(rt)?"0px":Math.round(rs*0.16)+"px";
-      c.fillText(rt,0,off+rw/2+1); if("letterSpacing" in c) c.letterSpacing="0px";
-      c.restore();
-    }
-    if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.05+land*0.07)+")"; rr(c,bx,by,bw,bh,R); c.fill(); }
+    if(role) roleFinish(c,x,bx,by,bw,bh,topH,R,role,seg,t(role.t),hasArabic(t(role.t)));
+  if(lift>0||land>0){ c.fillStyle="rgba(255,255,255,"+(lift*0.05+land*0.07)+")"; rr(c,bx,by,bw,bh,R); c.fill(); }
     if(land>0){ c.lineWidth=3; c.strokeStyle="rgba(255,255,255,"+(0.9*land)+")"; rr(c,bx+1.5,by+1.5,bw-3,bh-3,R); c.stroke(); }
     if(seg.avatar!=null){                                             // picture (or initial) in a glowing ring
       const A=Math.round(Math.min(topH*0.6,bw*0.4)), ax=bx+bw/2, ay=by+topH*0.55, im=avImg(seg.avatar);
@@ -1654,7 +1697,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       else { const ig=c.createLinearGradient(0,ay-A/2,0,ay+A/2); ig.addColorStop(0,shade(col,-.15)); ig.addColorStop(1,shade(col,-.45)); c.fillStyle=ig; c.fillRect(ax-A/2,ay-A/2,A,A);
         c.fillStyle="#fff"; c.font="800 "+Math.round(A*0.46)+"px "+FONT; c.textAlign="center"; c.textBaseline="middle"; c.fillText(initialOf(seg.label),ax,ay+1); }
       c.restore();
-      c.lineWidth=Math.max(2.5,Math.round(A*0.06)); c.strokeStyle="rgba(255,255,255,.95)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
+      c.lineWidth=Math.max(2.5,Math.round(A*0.06)); if(role){ const rg=c.createLinearGradient(ax-A/2,ay-A/2,ax+A/2,ay+A/2); rg.addColorStop(0,"#fff"); rg.addColorStop(.35,shade(role.c,.55)); rg.addColorStop(.55,"#fff"); rg.addColorStop(.8,shade(role.c,.2)); rg.addColorStop(1,"#fff"); c.strokeStyle=rg; } else c.strokeStyle="rgba(255,255,255,.95)"; c.beginPath(); c.arc(ax,ay,A/2,0,6.283); c.stroke();
       c.lineWidth=1.5; c.strokeStyle="rgba(255,255,255,.28)"; c.beginPath(); c.arc(ax,ay,A/2+Math.max(4,A*0.07),0,6.283); c.stroke();
     }
     const fs=Math.max(12,Math.min(footH*0.44,40)), nameY=fy+footH*0.5;
