@@ -373,7 +373,7 @@
 
   /* ---------- Overlay polish: strip plate, marker, banner extras, countdown, winner ---------- */
   .strip-wrap{position:relative;z-index:5;width:min(1640px,96%);padding:20px 0;display:flex;justify-content:center}
-  .strip-wrap .strip-stage{width:100%;height:264px;z-index:2}
+  .strip-wrap .strip-stage{width:100%;height:328px;margin:-32px 0;z-index:2}   /* extra room above/below so plate glows aren't clipped; same card size + layout */
   /* strip background (Settings → Look): soft band (default), panel, or none.
      Every style fades out at the sides exactly like the cards, so they read as one piece. */
   .strip-plate{position:absolute;inset:-6% -2%;z-index:1;pointer-events:none;
@@ -476,9 +476,9 @@
 
   /* overlay size presets (Settings → Look) */
   body.size-s .strip-wrap{width:min(1320px,94%)}
-  body.size-s .strip-wrap .strip-stage{height:204px}
+  body.size-s .strip-wrap .strip-stage{height:252px;margin:-24px 0}
   body.size-l .strip-wrap{width:min(1840px,97%)}
-  body.size-l .strip-wrap .strip-stage{height:338px}
+  body.size-l .strip-wrap .strip-stage{height:418px;margin:-40px 0}
   body.size-s .stage .eb-col{zoom:.85}
   body.size-l .stage .eb-col{zoom:1.22}
   body.size-s:not(.role-dock) .winner .winner-card{zoom:.82}
@@ -713,7 +713,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v4.9</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.0</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -926,7 +926,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v4.9</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.0</b></div>
         </section>
       </div>
 
@@ -1020,7 +1020,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "4.9";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "5.0";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1662,13 +1662,25 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const q=.64<.5?.64*2:.64+1-.64, pp=2*.64-q, h2r=t=>{ t=(t+1)%1; return t<1/6?pp+(q-pp)*6*t:t<.5?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp; };
     const hc=[h2r(hue+1/3),h2r(hue),h2r(hue-1/3)].map(v=>v*255), a=hexRGB(role.c), m=.4;
     return "rgb("+a.map((v,k)=>Math.round(v*(1-m)+hc[k]*m)).join(",")+")"; }
+  function roleIcon(c,kind,ix,iy,s){   // hand-drawn role icons: sword (mod), gem (vip), star (sub), crown (host)
+    c.save(); c.translate(ix,iy); c.fillStyle="#fff"; c.strokeStyle="#fff"; c.lineJoin="round"; c.lineCap="round";
+    if(kind==="sub"){ c.beginPath(); for(let i=0;i<10;i++){ const r=i%2?s*0.22:s*0.52, a=-Math.PI/2+i*Math.PI/5; c.lineTo(Math.cos(a)*r,Math.sin(a)*r); } c.closePath(); c.fill(); }
+    else if(kind==="vip"){ c.beginPath(); c.moveTo(-s*.5,-s*.12); c.lineTo(-s*.27,-s*.42); c.lineTo(s*.27,-s*.42); c.lineTo(s*.5,-s*.12); c.lineTo(0,s*.5); c.closePath(); c.fill();
+      c.strokeStyle="rgba(0,0,0,.28)"; c.lineWidth=Math.max(1,s*.06); c.beginPath(); c.moveTo(-s*.5,-s*.12); c.lineTo(s*.5,-s*.12); c.moveTo(-s*.12,-s*.42); c.lineTo(-s*.2,-s*.12); c.lineTo(0,s*.5); c.lineTo(s*.2,-s*.12); c.lineTo(s*.12,-s*.42); c.stroke(); }
+    else if(kind==="mod"){ c.rotate(-Math.PI/4); const w=s*.17;
+      c.beginPath(); c.moveTo(-w/2,s*.12); c.lineTo(-w/2,-s*.42); c.lineTo(0,-s*.6); c.lineTo(w/2,-s*.42); c.lineTo(w/2,s*.12); c.closePath(); c.fill();   // blade
+      c.fillRect(-s*.3,s*.12,s*.6,s*.11);                                                                                                                      // guard
+      c.fillRect(-w*.42,s*.23,w*.84,s*.26); c.beginPath(); c.arc(0,s*.53,w*.55,0,6.283); c.fill(); }                                                          // grip + pommel
+    else { c.beginPath(); c.moveTo(-s*.5,s*.32); c.lineTo(-s*.5,-s*.2); c.lineTo(-s*.25,s*.05); c.lineTo(0,-s*.38); c.lineTo(s*.25,s*.05); c.lineTo(s*.5,-s*.2); c.lineTo(s*.5,s*.32); c.closePath(); c.fill();
+      [[-s*.5,-s*.24],[0,-s*.42],[s*.5,-s*.24]].forEach(([x,y])=>{ c.beginPath(); c.arc(x,y,s*.08,0,6.283); c.fill(); }); }
+    c.restore(); }
   function rolePlate(c,x,bx,by,bw,bh,role,seg,rt,arabic,dim){   // role nameplate pinned across the top edge — half on the card, half above it
     const now=performance.now(), W2=c.canvas.clientWidth||1600, gold=seg.badge==="vip";
     const fs=Math.max(10,Math.round(bh*0.085)); c.save(); c.font="900 "+fs+"px "+FONT;
     if("letterSpacing" in c) c.letterSpacing=arabic?"0px":Math.round(fs*0.2)+"px";
-    const tw=c.measureText(rt).width, ph=Math.round(fs*1.8), pw=Math.round(tw+fs*2.6), px=Math.round(arabic?bx+bw-Math.max(bh*0.07,bw*0.07)-(tw+fs*2.6):bx+Math.max(bh*0.07,bw*0.07)), py=Math.round(by-ph*0.52), k=Math.round(ph*0.3);
+    const tw=c.measureText(rt).width, isz=fs*1.15, gap=fs*0.45, ph=Math.round(fs*1.8), pw=Math.round(tw+isz+gap+fs*2.6), px=Math.round(arabic?bx+bw-Math.max(bh*0.07,bw*0.07)-pw:bx+Math.max(bh*0.07,bw*0.07)), py=Math.round(by-ph*0.52), k=Math.round(ph*0.3);
     const plate=()=>{ c.beginPath(); c.moveTo(px+k,py); c.lineTo(px+pw-k,py); c.lineTo(px+pw,py+k); c.lineTo(px+pw,py+ph-k); c.lineTo(px+pw-k,py+ph); c.lineTo(px+k,py+ph); c.lineTo(px,py+ph-k); c.lineTo(px,py+k); c.closePath(); };
-    c.shadowColor=role.c; c.shadowBlur=ph*0.9; plate(); c.fillStyle=role.c; c.fill();                         // soft glow in the role colour
+    c.shadowColor=role.c; c.shadowBlur=ph*0.7; plate(); c.fillStyle=role.c; c.fill();                         // soft glow in the role colour
     c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=ph*0.35; c.shadowOffsetY=ph*0.12;                            // lifts off the card
     const pg=c.createLinearGradient(0,py,0,py+ph); pg.addColorStop(0,shade(role.c,.3)); pg.addColorStop(.48,shade(role.c,-.05)); pg.addColorStop(1,shade(role.c,-.45));
     plate(); c.fillStyle=pg; c.fill(); c.shadowColor="transparent"; c.shadowBlur=0; c.shadowOffsetY=0;
@@ -1684,7 +1696,9 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     [px+k*0.95,px+pw-k*0.95].forEach(dx=>{ const r=Math.max(1.8,ph*0.085), dy=py+ph/2;                       // diamond studs
       c.beginPath(); c.moveTo(dx,dy-r); c.lineTo(dx+r,dy); c.lineTo(dx,dy+r); c.lineTo(dx-r,dy); c.closePath(); c.fillStyle=gold?"#FFE9A8":"rgba(255,255,255,.92)"; c.fill(); });
     c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle"; c.shadowColor="rgba(0,0,0,.55)"; c.shadowBlur=3; c.shadowOffsetY=1;
-    c.fillText(rt,px+pw/2+(arabic?0:Math.round(fs*0.1)),py+ph/2+1);
+    const cw=isz+gap+tw, cx0=px+(pw-cw)/2, cy=py+ph/2;                                          // icon + label, centred together
+    roleIcon(c,seg.badge==="broadcaster"?"host":seg.badge,arabic?cx0+cw-isz/2:cx0+isz/2,cy,isz);
+    c.textAlign=arabic?"right":"left"; c.fillText(rt,arabic?cx0+cw-isz-gap:cx0+isz+gap,cy+1);
     if("letterSpacing" in c) c.letterSpacing="0px";
     if(dim>0.01){ c.shadowColor="transparent"; c.fillStyle="rgba(8,9,14,"+dim+")"; plate(); c.fill(); }      // side cards step back with their plate
     c.restore(); }
@@ -1812,7 +1826,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       if(cv.id==="strip") state._centerColor="#7C5CFF";
       return;
     }
-    const main=cv.id==="strip", vp=main?Math.round(H*0.145):3, CW=main?Math.max(78,Math.round((H-vp*2)*1.44)):cellWidth(H);   // headroom above the cards for the role plates
+    const main=cv.id==="strip", vp=main?Math.round(H*0.2137):3, CW=main?Math.max(78,Math.round((H-vp*2)*1.44)):cellWidth(H);   // headroom above the cards for the role plates
     const opt=(x,extra)=>main?Object.assign({vp,lift:liftOf(x,CW,W),land:0},extra):undefined;
     if(state.spinning && state.spinCells){
       const cells=state.spinCells, finalOffset=state.spinWinCell*CW+CW/2-W/2+state.spinJitter*CW, startOff=CW/2-W/2, offset=startOff+state.spinP*(finalOffset-startOff);   // starts where the resting strip sits: a card centred under the marker
