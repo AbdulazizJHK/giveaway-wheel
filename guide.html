@@ -483,6 +483,19 @@
   @media(max-width:700px){ .cheat{grid-template-columns:1fr} }
   @media(prefers-reduced-motion:reduce){ .to-top{transition:none} }
 
+  /* ---- winner reveal: gold headline, crown, uncropped name ---- */
+  .w-crown{position:relative;z-index:3;width:62px;height:42px;margin:0 auto -24px;transform:translateX(-18px) rotate(-14deg);
+    background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 96 64%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23FFF4C2%22/%3E%3Cstop offset=%22.45%22 stop-color=%22%23FFD24A%22/%3E%3Cstop offset=%22.75%22 stop-color=%22%23E09A12%22/%3E%3Cstop offset=%221%22 stop-color=%22%23FFE38A%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22%237A4A00%22 stroke-width=%223%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M10 52 L8 18 L30 34 L48 8 L66 34 L88 18 L86 52 Z%22 fill=%22url%28%23g%29%22/%3E%3Crect x=%2210%22 y=%2248%22 width=%2276%22 height=%2210%22 rx=%223%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%228%22 cy=%2215%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2248%22 cy=%226%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2288%22 cy=%2215%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3C/g%3E%3Ccircle cx=%2248%22 cy=%2238%22 r=%225%22 fill=%22%23F04B4B%22 stroke=%22%237A1B1B%22 stroke-width=%222%22/%3E%3Ccircle cx=%2229%22 cy=%2242%22 r=%223.5%22 fill=%22%234C93FF%22 stroke=%22%231B3A7A%22 stroke-width=%222%22/%3E%3Ccircle cx=%2267%22 cy=%2242%22 r=%223.5%22 fill=%22%233DD68C%22 stroke=%22%2314603E%22 stroke-width=%222%22/%3E%3Cpath d=%22M14 24 L18 47%22 stroke=%22%23fff%22 stroke-opacity=%22.55%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 4px 7px rgba(0,0,0,.55)) drop-shadow(0 0 12px rgba(255,200,60,.45));animation:crownIn .7s cubic-bezier(.2,1.4,.4,1) .15s both}
+  @keyframes crownIn{from{opacity:0;transform:translate(-18px,-40px) rotate(-40deg) scale(.6)}to{opacity:1;transform:translateX(-18px) rotate(-14deg)}}
+  .r-winner .winner-card .eyebrow-w{font-size:26px;font-weight:900;letter-spacing:.24em;margin-bottom:2px;text-shadow:none;color:transparent;
+    background:linear-gradient(180deg,#FFF6D0 0%,#FFD45A 42%,#E39E16 72%,#FFE7A0 100%);-webkit-background-clip:text;background-clip:text;padding:.08em 0 .12em;line-height:1.15;
+    filter:drop-shadow(0 0 14px rgba(255,196,64,.45)) drop-shadow(0 2px 2px rgba(0,0,0,.55))}
+  .r-winner .winner-card .eyebrow-w::before,.r-winner .winner-card .eyebrow-w::after{width:56px;background:linear-gradient(90deg,transparent,#F7C948)}
+  html[lang="ar"] .r-winner .winner-card .eyebrow-w{font-size:30px}
+  .r-winner .winner-card .who{line-height:1.22;padding-top:.04em}
+  .r-winner .winner-card .who .ch{padding:.16em .015em .22em;margin:-.16em 0 -.22em}   /* room for tall letters + descenders (was clipping) */
+  @media(max-width:600px){ .r-winner .winner-card .eyebrow-w{font-size:20px} .w-crown{width:48px;height:32px;margin-bottom:-18px} }
+  @media(prefers-reduced-motion:reduce){ .w-crown{animation:none} }
   /* ---------- language switch + Arabic / right-to-left ---------- */
   .lang-btn{appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line2);border-radius:9px;padding:7px 12px;cursor:pointer;transition:background .15s}
   .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -592,7 +605,7 @@
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      Giveaway Roulette <span class="ver" id="ver">v5.3</span>
+      Giveaway Roulette <span class="ver" id="ver">v5.4</span>
     </a>
     <div class="nav-links">
       <a href="#setup">Setup</a>
@@ -652,6 +665,7 @@
                 <div class="w-rays"></div>
                 <canvas class="confetti" id="confetti"></canvas>
                 <div class="winner-card">
+                  <div class="w-crown" aria-hidden="true"></div>
                   <div class="w-avatar" id="demoAvatar"></div>
                   <div class="eyebrow-w">Winner</div>
                   <div class="who" id="demoWho">—</div>
@@ -841,7 +855,7 @@
 <a class="to-top" id="toTop" href="#top" aria-label="Back to top">↑</a>
 <footer>
   <div class="wrap">
-    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.3</b> ·
+    <span class="foot-l">Giveaway Roulette · <b id="ver2">v5.4</b> ·
       <details class="wn"><summary>✨ What’s new</summary>
         <ul class="wn-pop">
           <li>Claim check: see when the winner replies in chat</li>

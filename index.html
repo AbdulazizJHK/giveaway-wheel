@@ -643,6 +643,21 @@
   body.wback-off:not(.role-dock) .winner .w-tint{display:none}
   body.wback-light:not(.role-dock) .winner .who,body.wback-off:not(.role-dock) .winner .who{filter:drop-shadow(0 4px 22px rgba(0,0,0,.75)) drop-shadow(0 1px 2px rgba(0,0,0,.6))}
   body.wback-light:not(.role-dock) .winner .w-stat,body.wback-off:not(.role-dock) .winner .w-stat,body.wback-off:not(.role-dock) .winner .eyebrow{text-shadow:0 2px 10px rgba(0,0,0,.85)}
+  /* ---- winner reveal: gold headline, crown, uncropped name ---- */
+  .w-crown{display:none;position:relative;z-index:3;width:104px;height:70px;margin:0 auto -40px;transform:translateX(-30px) rotate(-14deg);
+    background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 96 64%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23FFF4C2%22/%3E%3Cstop offset=%22.45%22 stop-color=%22%23FFD24A%22/%3E%3Cstop offset=%22.75%22 stop-color=%22%23E09A12%22/%3E%3Cstop offset=%221%22 stop-color=%22%23FFE38A%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg stroke=%22%237A4A00%22 stroke-width=%223%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M10 52 L8 18 L30 34 L48 8 L66 34 L88 18 L86 52 Z%22 fill=%22url%28%23g%29%22/%3E%3Crect x=%2210%22 y=%2248%22 width=%2276%22 height=%2210%22 rx=%223%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%228%22 cy=%2215%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2248%22 cy=%226%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3Ccircle cx=%2288%22 cy=%2215%22 r=%225%22 fill=%22url%28%23g%29%22/%3E%3C/g%3E%3Ccircle cx=%2248%22 cy=%2238%22 r=%225%22 fill=%22%23F04B4B%22 stroke=%22%237A1B1B%22 stroke-width=%222%22/%3E%3Ccircle cx=%2229%22 cy=%2242%22 r=%223.5%22 fill=%22%234C93FF%22 stroke=%22%231B3A7A%22 stroke-width=%222%22/%3E%3Ccircle cx=%2267%22 cy=%2242%22 r=%223.5%22 fill=%22%233DD68C%22 stroke=%22%2314603E%22 stroke-width=%222%22/%3E%3Cpath d=%22M14 24 L18 47%22 stroke=%22%23fff%22 stroke-opacity=%22.55%22 stroke-width=%223%22 stroke-linecap=%22round%22/%3E%3C/svg%3E") center/contain no-repeat;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(255,200,60,.45));animation:crownIn .7s cubic-bezier(.2,1.4,.4,1) .15s both}
+  .winner-card:has(.w-avatar.on) .w-crown{display:block}
+  @keyframes crownIn{from{opacity:0;transform:translate(-30px,-60px) rotate(-40deg) scale(.6)}to{opacity:1;transform:translateX(-30px) rotate(-14deg)}}
+  body.role-dock .w-crown{width:50px;height:34px;margin-bottom:-19px;transform:translateX(-15px) rotate(-14deg);animation:none}
+  .winner .winner-card .eyebrow{font-size:46px;font-weight:900;letter-spacing:.24em;margin-bottom:4px;text-shadow:none;color:transparent;
+    background:linear-gradient(180deg,#FFF6D0 0%,#FFD45A 42%,#E39E16 72%,#FFE7A0 100%);-webkit-background-clip:text;background-clip:text;padding:.08em 0 .12em;line-height:1.15;
+    filter:drop-shadow(0 0 22px rgba(255,196,64,.45)) drop-shadow(0 3px 3px rgba(0,0,0,.55))}
+  .winner .winner-card .eyebrow::before,.winner .winner-card .eyebrow::after{width:96px;height:3px;background:linear-gradient(90deg,transparent,#F7C948)}
+  html[lang="ar"] .winner .winner-card .eyebrow{letter-spacing:0;font-size:54px}
+  body.role-dock .winner .winner-card .eyebrow{font-size:18px;filter:none}
+  body.role-dock .winner .winner-card .eyebrow::before,body.role-dock .winner .winner-card .eyebrow::after{width:30px;height:2px}
+  .winner .winner-card .who{line-height:1.22;padding-top:.04em}
+  .winner .winner-card .who .ch{padding:.16em .015em .22em;margin:-.16em 0 -.22em}   /* room for tall letters + descenders (was clipping) */
   #confetti{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}   /* inside the winner screen, behind the name card */
   .winner .winner-card{z-index:1}
   #confetti.show{display:block}
@@ -713,7 +728,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.3</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.4</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -926,7 +941,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.3</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.4</b></div>
         </section>
       </div>
 
@@ -986,6 +1001,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   <div class="w-rays"></div>
   <canvas id="confetti"></canvas>
   <div class="winner-card">
+    <div class="w-crown" aria-hidden="true"></div>
     <div class="w-avatar" id="winnerAvatar"></div>
     <div class="eyebrow" id="winnerEyebrow">Winner</div>
     <div class="who" id="winnerName">—</div>
@@ -1020,7 +1036,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "5.3";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "5.4";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
