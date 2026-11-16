@@ -751,6 +751,27 @@
   .th-range input{flex:1;min-width:0;accent-color:var(--accent)}
   .th-range b{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--muted);width:40px;text-align:end;font-variant-numeric:tabular-nums}
   #thFontName{margin-top:6px}
+  .pv-btn{width:100%}
+  body.pv-on #winAgain{display:none}   /* a preview is not a real draw */
+  .my-th{display:flex;flex-wrap:wrap;gap:6px}
+  .my-th:empty{display:none}
+  .mt{display:inline-flex;align-items:stretch;border:1px solid var(--stroke);border-radius:8px;overflow:hidden;background:rgba(255,255,255,.03);max-width:100%}
+  .mt.active{border-color:var(--accent);background:rgba(var(--acc-rgb),.16)}
+  .mt button{appearance:none;border:none;background:none;font:inherit;color:var(--ink);cursor:pointer}
+  .mt .mt-n{display:inline-flex;align-items:center;gap:7px;padding:6px 6px 6px 9px;font-size:12.5px;font-weight:600;min-width:0}
+  .mt .mt-n span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mt .mt-n i{width:10px;height:10px;border-radius:3px;flex:none}
+  .mt .mt-x{padding:0 8px;color:var(--faint);font-size:14px;border-inline-start:1px solid var(--stroke)}
+  .mt .mt-x:hover,.mt .mt-x.armed{color:var(--bad);background:rgba(242,109,109,.12)}
+  .mt .mt-x.armed{font-size:11.5px;font-weight:700}
+  .mt button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .snd-list{display:flex;flex-direction:column;border:1px solid var(--stroke);border-radius:10px;background:rgba(9,10,14,.4);overflow:hidden}
+  .snd-row{display:flex;align-items:center;gap:8px;padding:7px 8px 7px 11px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px}
+  .snd-row:last-child{border-bottom:none}
+  .snd-row .snd-k{flex:none;width:96px;font-weight:600;color:var(--ink)}
+  .snd-row .snd-f{flex:1;min-width:0;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .snd-row.custom .snd-f{color:var(--good)}
+  .snd-row .btn.tiny{padding:4px 8px}
 
   /* ---------- Role layouts ---------- */
   /* Full = default: rail + stage. Stream Mode hides rail + transparent. */
@@ -812,7 +833,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </g>
         <g fill="#F5F7FF"><path d="M256 152 l-17 -24 h34 z"/><rect x="251.5" y="150" width="9" height="212" rx="4.5" opacity=".92"/><path d="M256 360 l-17 24 h34 z"/></g>
       </svg>
-      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.6</b></span></h1>
+      <h1>Giveaway Roulette<span>Twitch Live · <b id="verTag">v5.7</b></span></h1>
       <div class="status hdr-status" id="status" title="Twitch chat connection"><span class="dot" id="dot"></span><span class="st-txt"><span class="st-k">Twitch chat</span><span id="statusText">Not connected</span></span></div>
       <div class="ov-status dock-only" id="ovStatus" title="Is the on-stream Browser Source running?"><span class="ov-dot"></span><span id="ovText">Looking for the on-stream overlay…</span><a class="ov-help" id="ovHelp" href="guide.html#faq-overlay" target="_blank" rel="noopener">Help</a></div>
     </div>
@@ -949,9 +970,16 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
             <div class="entry-banner thp-b"><span class="eb-dot"></span><span class="eb-label" id="thpLabel">Entries Open</span><span class="eb-sep"></span><span class="eb-join"><b>!join</b></span><span class="eb-sep"></span><span class="eb-count"><b>24</b></span><span class="eb-timer">0:42</span></div>
             <div class="thp-row"><div class="thp-cards" id="thpCards"></div><div class="thp-win"><span class="thp-head" id="thpHead">Winner</span><span class="thp-name">nova_rae</span></div></div>
           </div>
+          <button class="btn small pv-btn" id="previewBtn" type="button">👁 Preview on stream</button>
+          <div class="hint-sm">Shows the banner and a sample winner on your stream for a few seconds — no entrants, rewards or chat are touched.</div>
           <div class="field">
             <span class="fl-l">Ready-made themes</span>
             <div class="th-presets" id="thPresets"></div>
+          </div>
+          <div class="field">
+            <span class="fl-l">My themes</span>
+            <div class="my-th" id="myThemes"></div>
+            <div class="inline-row"><input id="myThName" type="text" placeholder="Name this look, e.g. Horror nights" maxlength="30" autocomplete="off"/><button class="btn small" id="myThSave" type="button">💾 Save</button></div>
           </div>
           <div class="field">
             <span class="fl-l">Theme colour</span>
@@ -1085,6 +1113,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
             <span class="vol-val" id="volVal">100%</span>
             <button class="btn small" id="volTest">Test</button>
           </div>
+          <label class="toggle"><input type="checkbox" id="ticks" checked/><span class="track"></span>Tick sound while spinning</label>
+          <div class="th-sub">Your own sounds</div>
+          <div class="snd-list" id="sndList"></div>
+          <div class="hint-sm">MP3, WAV or OGG, up to 3 MB each. They play on stream and in the dock. Leave a slot empty for the built-in sound.</div>
+          <input type="file" id="sndInput" accept="audio/*" style="display:none"/>
           </div>
         </section>
         <section class="block group sec dock-only" data-sec="obs" style="flex-direction:column">
@@ -1097,7 +1130,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
         </section>
         <section class="block rail-foot">
           <a class="feedback-btn" href="https://github.com/AbdulazizJHK/giveaway-wheel/issues/new" target="_blank" rel="noopener">💬 Found a bug or want a feature? Tell us</a>
-          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.6</b></div>
+          <div class="ver-line">Giveaway Roulette · <b id="verTag2">v5.7</b></div>
         </section>
       </div>
 
@@ -1192,7 +1225,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   if(ROLE==="dock")  document.title="Wheel (Controls)";
 
   const MYID = Math.random().toString(36).slice(2);
-  const APP_VERSION = "5.6";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
+  const APP_VERSION = "5.7";   // ← bump this AND version.json on every update; docks and sources auto-reload when they differ
 
   /* ---------------- State ---------------- */
   const state={
@@ -1222,11 +1255,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   /* ---------------- Language (English / العربية) ----------------
      Static text is translated in place by matching each text node / placeholder / title against the
      table below (originals are kept, so switching back is exact); runtime text goes through t(). */
-  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركون", "VIPs ": "المميزين", "Mods": "المشرفون", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة", "Rules": "القواعد", "🗑 Clear": "🗑 مسح", "Sure? Clear {n}": "متأكد؟ مسح {n}", "Everyone can enter": "يمكن للجميع المشاركة", "Only {r} can enter (and you)": "المشاركة متاحة لـ: {r} (ولك دائمًا)", "The winner gets the top reward · 🖼️ adds a prize image": "يحصل الفائز على أعلى جائزة · 🖼️ لإضافة صورة للجائزة", "The roulette picks the prize for a random entrant · 🖼️ adds a prize image": "تختار العجلة الجائزة لمشارك عشوائي · 🖼️ لإضافة صورة للجائزة", "Beeps on": "الصفير مفعّل", "Beeps off": "الصفير متوقف", "Hidden until spin": "مخفية حتى الدوران", "Auto-close: {v}": "إغلاق تلقائي: {v}", "2 permanent links": "رابطان دائمان", "Top left": "أعلى اليسار", "Top center": "أعلى الوسط", "Top right": "أعلى اليمين", "Middle left": "منتصف اليسار", "Middle center": "الوسط", "Middle right": "منتصف اليمين", "Bottom left": "أسفل اليسار", "Bottom center": "أسفل الوسط", "Bottom right": "أسفل اليمين", "Copy the winners list": "نسخ قائمة الفائزين", "Help": "مساعدة", "🧪 Test names": "🧪 أسماء تجريبية", "Add sample viewers to test the overlay and a spin": "أضف مشاهدين تجريبيين لاختبار الطبقة والدوران", "Added {n} test names — 🗑 Clear them when you're done": "أُضيف {n} أسماء تجريبية — امسحها بـ 🗑 عند الانتهاء", "Test names are already in": "الأسماء التجريبية مضافة بالفعل", "Copy @name": "نسخ ⁦@الاسم⁩", "Copied {n}": "تم نسخ {n}", "Backdrop behind the winner": "الخلفية خلف الفائز", "Dark": "داكنة", "Light": "خفيفة", "Light backdrop": "خلفية خفيفة", "No backdrop": "بدون خلفية", "✅ Replied in chat": "✅ ردّ في الدردشة", "Replied in chat": "ردّ في الدردشة", "Waiting for {n} to reply in chat…": "بانتظار ردّ {n} في الدردشة…", "✅ {n} replied in chat": "✅ {n} ردّ في الدردشة", "Prize name — or paste a store link": "اسم الجائزة — أو الصق رابط المتجر", "Fetching…": "جارٍ الجلب…", "Added from {h}": "أُضيفت من {h}", "Couldn't read that link — type the prize name instead": "تعذّرت قراءة الرابط — اكتب اسم الجائزة بدلًا منه", "Theme": "السمة", "Ready-made themes": "سمات جاهزة", "Font": "الخط", "Card colours": "ألوان البطاقات", "Theme palette": "ألوان السمة", "Viewers' Twitch colours": "ألوان المشاهدين في تويتش", "Advanced customization": "تخصيص متقدم", "Colours": "الألوان", "Second colour": "اللون الثاني", "Timer & highlights": "المؤقت والإبرازات", "Open colour": "لون الفتح", "Winner headline": "عنوان الفائز", "Panel background": "خلفية اللوحة", "Panel text": "نص اللوحة", "Marker": "المؤشر", "Panel opacity": "عتامة اللوحة", "Card palette": "ألوان البطاقات", "From theme colour": "من لون السمة", "Default": "الافتراضي", "Role colours": "ألوان الرتب", "Host": "المذيع", "Shape & effects": "الشكل والمؤثرات", "Corner roundness": "استدارة الزوايا", "Glow strength": "قوة التوهج", "Banner style": "نمط اللافتة", "Glass": "زجاجي", "Solid": "مصمت", "Outline": "إطار", "Neon": "نيون", "Spin length": "مدة الدوران", "Short": "قصيرة", "Normal": "عادية", "Long": "طويلة", "Foil shine on sub / VIP / mod cards": "لمعان على بطاقات المشتركين والمميزين والمشرفين", "Confetti on the winner": "قصاصات الاحتفال عند الفوز", "Light rays behind the winner": "أشعة ضوء خلف الفائز", "Crown on the winner's picture": "تاج على صورة الفائز", "On-screen words": "الكلمات على الشاشة", "Banner title": "عنوان اللافتة", "How to join": "طريقة المشاركة", "After the count": "بعد العدد", "Prize label": "تسمية الجائزة", "Leave a box empty to use the default.": "اترك الحقل فارغًا لاستخدام النص الافتراضي.", "is your join command.": "هو أمر المشاركة.", "Custom CSS": "CSS مخصص", "For full control: this CSS is added to the overlay and the dock.": "للتحكم الكامل: يُضاف هذا الـ CSS إلى طبقة البث ولوحة التحكم.", "Share a theme": "مشاركة السمة", "📋 Copy theme code": "📋 نسخ رمز السمة", "↺ Reset theme": "↺ إعادة ضبط السمة", "Sure? Reset theme": "متأكد؟ إعادة الضبط", "Paste a theme code…": "الصق رمز سمة…", "Apply": "تطبيق", "Any Google Font name, e.g. Lexend": "اسم أي خط من Google Fonts، مثل Lexend", "System (Segoe UI)": "خط النظام (Segoe UI)", "Other Google Font…": "خط آخر من Google…", "Cairo (Arabic)": "Cairo (عربي)", "Tajawal (Arabic)": "Tajawal (عربي)", "type {kw} to enter": "اكتب {kw} للمشاركة", "Custom": "مخصص", "Violet": "بنفسجي", "Twitch Purple": "بنفسجي تويتش", "Neon Cyber": "نيون", "Cozy Pastel": "باستيل هادئ", "Gold Luxe": "ذهبي فاخر", "Retro Arcade": "أركيد قديم", "Spooky": "مرعب", "Ocean": "محيط", "Forest": "غابة", "Sunset": "غروب", "Esports": "رياضات إلكترونية", "Minimal": "بسيط", "Theme: {n}": "السمة: {n}", "Theme code copied — share it with anyone": "تم نسخ رمز السمة — شاركه مع من تريد", "Theme applied": "تم تطبيق السمة", "That isn't a theme code": "هذا ليس رمز سمة", "Theme reset": "أُعيدت السمة الافتراضية", "Font names use letters, numbers and spaces only": "أسماء الخطوط تحتوي على حروف وأرقام ومسافات فقط"};
+  const AR={"Twitch Live ·": "تويتش مباشر ·", "Twitch chat": "دردشة تويتش", "Not connected": "غير متصل", "Connecting…": "جارٍ الاتصال…", "Connected to #{c}": "متصل بـ #{c}", "Disconnected": "انقطع الاتصال", "Connection error": "خطأ في الاتصال", "Connection failed": "فشل الاتصال", "Channel not found": "القناة غير موجودة", "Reconnecting…": "جارٍ إعادة الاتصال…", "Looking for the on-stream overlay…": "جارٍ البحث عن طبقة البث…", "On-stream overlay is live": "طبقة البث تعمل", "On-stream overlay not found — add the Browser Source in OBS": "طبقة البث غير موجودة — أضف مصدر المتصفح في OBS", "Entrants": "المشاركون", "Entries closed": "المشاركة مغلقة", "Entries OPEN": "المشاركة مفتوحة", "Giveaway": "السحب", "Rewards": "الجوائز", "Chat bot": "البوت", "Settings": "الإعدادات", "Channel": "القناة", "Reads chat anonymously — no login needed.": "يقرأ الدردشة دون تسجيل دخول.", "Connect": "اتصال", "Disconnect": "قطع الاتصال", "Roulette shows": "تعرض العجلة", "👥 Entrants": "👥 المشاركين", "🎁 Rewards": "🎁 الجوائز", "Entry rules": "قواعد المشاركة", "Join command": "أمر المشاركة", "Timer (seconds)": "المؤقت (بالثواني)", "30s": "30ث", "1m": "1د", "2m": "2د", "5m": "5د", "No timer": "بدون مؤقت", "10s": "10ث", "20s": "20ث", "Use": "استخدم", "Open Entries": "فتح المشاركة", "below to start.": "في الأسفل للبدء.", "Auto-spin when timer ends": "دوران تلقائي عند انتهاء المؤقت", "Shortcuts:": "اختصارات:", "open ·": "فتح ·", "close ·": "إغلاق ·", "spin ·": "دوران ·", "close winner": "إغلاق شاشة الفائز", "Recent winners": "آخر الفائزين", "Winner didn't claim it?": "لم يستلم الفائز جائزته؟", "↻ Re-roll": "↻ إعادة السحب", "puts the reward back and spins again.": "تُعيد الجائزة وتدور من جديد.", "📋 Copy list": "📋 نسخ القائمة", "Add": "إضافة", "Clear entrants": "مسح المشاركين", "Odds & winners": "الفرص والفائزون", "Weighted — each !join adds a chance": "مرجّح — كل ⁦!join⁩ يضيف فرصة", "Remove winner from the roulette": "إزالة الفائز من العجلة", "Block the last 5 winners from joining": "منع آخر 5 فائزين من المشاركة", "Who can enter": "من يمكنه المشاركة", "Subscribers": "المشتركون", "VIPs": "المميزون", "Moderators": "المشرفون", "🔒 All off = everyone can enter. When any is on, only those roles count (you, the broadcaster, always can). Detected live from chat badges.": "🔒 إذا كانت كلها مطفأة يستطيع الجميع المشاركة. عند تفعيل أيٍّ منها تُحتسب تلك الفئات فقط (وأنت كصاحب القناة تستطيع دائمًا). تُكتشف تلقائيًا من شارات الدردشة.", "Chat control": "التحكم من الدردشة", "Let me & my mods control it from chat": "السماح لي وللمشرفين بالتحكم من الدردشة", "Type": "اكتب", ",": "،", "or": "أو", "in your chat — handy from your phone. Only you and moderators can use these.": "في دردشتك — مفيد من هاتفك. فقط أنت والمشرفون يمكنكم استخدامها.", "Bot account": "حساب البوت", "Post event messages to chat": "نشر رسائل الأحداث في الدردشة", "Sending chat needs a token — get one at": "إرسال الرسائل يحتاج رمز دخول — احصل عليه من", "(scopes: chat:edit, chat:read). It's stored only in this browser, never uploaded.": "(الصلاحيات: ⁦chat:edit⁩ و ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط ولا يُرفع أبدًا.", "Connect bot": "ربط البوت", "Bot not connected": "البوت غير متصل", "Connecting bot…": "جارٍ ربط البوت…", "Bot ready — @{n}": "البوت جاهز — @{n}", "Posting as @{a} (not @{b})": "النشر باسم @{a} (وليس @{b})", "Bad token — regenerate it": "رمز غير صالح — أنشئ رمزًا جديدًا", "Bot connect failed": "فشل ربط البوت", "Bot connection error": "خطأ في اتصال البوت", "Bot reconnecting…": "جارٍ إعادة ربط البوت…", "Heads up: this token belongs to @{a}, so messages post as @{a}. To post as @{b}, generate the token while logged into that account.": "تنبيه: هذا الرمز يخص @{a} لذا ستُنشر الرسائل باسم @{a}. للنشر باسم @{b} أنشئ الرمز وأنت مسجّل الدخول بذلك الحساب.", "Messages": "الرسائل", "On open": "عند الفتح", "On close": "عند الإغلاق", "On winner": "عند الفوز", "Placeholders:": "المتغيرات:", "↺ Reset messages to default": "↺ استعادة الرسائل الافتراضية", "Look": "المظهر", "Language": "اللغة", "Overlay size": "حجم الطبقة", "Small": "صغير", "Medium": "متوسط", "Large": "كبير", "Strip background": "خلفية الشريط", "Soft": "ناعمة", "Panel": "لوحة", "None": "بدون", "Theme colour": "لون السمة", "Use viewers' Twitch name colours on cells": "استخدام ألوان أسماء المشاهدين في تويتش على البطاقات", "Show sub / VIP / mod badges on cells": "إظهار شارات المشترك / المميز / المشرف على البطاقات", "Show viewers' Twitch profile pictures": "إظهار صور الملف الشخصي للمشاهدين", "On stream": "على البث", "Hide roulette on stream until it spins": "إخفاء العجلة على البث حتى تدور", "Countdown beeps (final 3s)": "صفير العد التنازلي (آخر 3 ثوانٍ)", "Banner position": "موضع اللافتة", "Winner screen": "شاشة الفائز", "Close automatically after": "إغلاق تلقائي بعد", "Off": "إيقاف", "Sound": "الصوت", "Test": "تجربة", "These links": "هذه الروابط", "always open the newest version": "تفتح أحدث إصدار دائمًا", "and update themselves — paste each one once and never again.": "وتحدّث نفسها — الصق كلًّا منها مرة واحدة فقط.", "On stream · Browser Source": "على البث · مصدر متصفح", "Controls · Custom Browser Dock": "التحكم · لوحة متصفح مخصصة", "🔗 Copy": "🔗 نسخ", "✅ Copied": "✅ تم النسخ", "💬 Found a bug or want a feature? Tell us": "💬 وجدت خطأ أو لديك اقتراح؟ أخبرنا", "▶ Open Entries": "▶ فتح المشاركة", "■ Close": "■ إغلاق", "■ Close · {t}": "■ إغلاق · {t}", "Spin": "دوران", "Entries Open": "المشاركة مفتوحة", "type": "اكتب", "to enter": "للمشاركة", "joined": "مشارك", "🔒 {r} only": "🔒 {r} فقط", "Press": "اضغط", "to spin": "للدوران", "Winner": "الفائز", "Prize": "الجائزة", "Reward": "الجائزة", "Close": "إغلاق", "Spin Again": "دوران مجددًا", "Subs": "المشتركون", "VIPs ": "المميزين", "Mods": "المشرفون", "🔍 Search entrants…": "🔍 ابحث عن مشارك…", "Add manually…": "إضافة يدويًا…", "e.g. Steam key, $10 tip…": "مثال: مفتاح ستيم، بطاقة هدية…", "Sender username (your channel or a bot)": "اسم المرسل (قناتك أو بوت)", "OAuth token (chat:edit)": "رمز OAuth (⁦chat:edit⁩)", "Twitch chat connection": "اتصال دردشة تويتش", "Is the on-stream Browser Source running?": "هل مصدر البث يعمل؟", "Sound volume": "مستوى الصوت", "Fullscreen": "ملء الشاشة", "Giveaway controls": "تحكم السحب", "Stream Mode (transparent, hides controls)": "وضع البث (شفاف ويخفي أدوات التحكم)", "Custom colour": "لون مخصص", "Put the reward back and spin again": "إعادة الجائزة والدوران مجددًا", "Chance to win": "فرصة الفوز", "No entrants yet.": "لا يوجد مشاركون بعد.", "No rewards added.": "لم تُضف جوائز بعد.", "No winners yet.": "لا يوجد فائزون بعد.", "No entrants match.": "لا يوجد مشارك مطابق.", "Waiting for entrants…": "بانتظار المشاركين…", "Add rewards…": "أضف جوائز…", "Add some rewards first.": "أضف بعض الجوائز أولًا.", "{name} joined!": "انضم {name}!", "{name} joined": "انضم {name}", "Entries open — viewers type {kw}": "المشاركة مفتوحة — يكتب المشاهدون {kw}", "⏰ Entries closed": "⏰ أُغلقت المشاركة", "Entrants cleared": "تم مسح المشاركين", "Click again to clear {n} entrants": "اضغط مجددًا لمسح {n} مشاركين", "No entrants left to re-roll.": "لا يوجد مشاركون لإعادة السحب.", "Winners list copied": "تم نسخ قائمة الفائزين", "Couldn't copy": "تعذّر النسخ", "{what} link copied — it always opens the newest version": "تم نسخ رابط {what} — يفتح أحدث إصدار دائمًا", "Overlay": "طبقة البث", "Dock": "لوحة التحكم", "Copy failed — link: {u}": "فشل النسخ — الرابط: {u}", "Enter a Twitch channel name first.": "أدخل اسم قناة تويتش أولًا.", "Enter the sender username and OAuth token.": "أدخل اسم المرسل ورمز OAuth.", "Connect the bot to actually post.": "اربط البوت لكي يتم النشر فعلًا.", "Messages reset to default": "تمت استعادة الرسائل الافتراضية", "Reward image added": "أُضيفت صورة الجائزة", "Couldn't read that image.": "تعذّرت قراءة الصورة.", "Stream Mode on — background transparent for OBS": "وضع البث مفعّل — الخلفية شفافة لـ OBS", "just now": "الآن", "{m} min ago": "قبل {m} د", "{h} h ago": "قبل {h} س", "re-rolled": "أُعيد السحب", " (re-rolled)": " (أُعيد السحب)", "1 of {n} entrants · {p}% chance": "واحد من {n} مشاركين · فرصة {p}%", "HOST": "المذيع", "MOD": "مشرف", "VIP": "مميز", "SUB": "مشترك", "This is the on-stream overlay link": "هذا رابط طبقة البث", "It belongs in an OBS {bs}. For your controls dock, use {dk}.": "مكانه في {bs} داخل OBS. للوحة التحكم استخدم {dk}.", "Browser Source": "مصدر متصفح", "Open the controls here": "افتح لوحة التحكم هنا", "the giveaway": "السحب", "Change / remove image": "تغيير / إزالة الصورة", "Add reveal image": "إضافة صورة الجائزة", "in chat — you and your mods only.": "في الدردشة — لك وللمشرفين فقط.", "·": "·", "Get a token at": "احصل على رمز من", "(chat:edit, chat:read). Stored only in this browser.": "(⁦chat:edit⁩، ⁦chat:read⁩). يُحفظ في هذا المتصفح فقط.", "Edit chat messages": "تعديل رسائل الدردشة", "↺ Reset": "↺ استعادة", "Rules": "القواعد", "🗑 Clear": "🗑 مسح", "Sure? Clear {n}": "متأكد؟ مسح {n}", "Everyone can enter": "يمكن للجميع المشاركة", "Only {r} can enter (and you)": "المشاركة متاحة لـ: {r} (ولك دائمًا)", "The winner gets the top reward · 🖼️ adds a prize image": "يحصل الفائز على أعلى جائزة · 🖼️ لإضافة صورة للجائزة", "The roulette picks the prize for a random entrant · 🖼️ adds a prize image": "تختار العجلة الجائزة لمشارك عشوائي · 🖼️ لإضافة صورة للجائزة", "Beeps on": "الصفير مفعّل", "Beeps off": "الصفير متوقف", "Hidden until spin": "مخفية حتى الدوران", "Auto-close: {v}": "إغلاق تلقائي: {v}", "2 permanent links": "رابطان دائمان", "Top left": "أعلى اليسار", "Top center": "أعلى الوسط", "Top right": "أعلى اليمين", "Middle left": "منتصف اليسار", "Middle center": "الوسط", "Middle right": "منتصف اليمين", "Bottom left": "أسفل اليسار", "Bottom center": "أسفل الوسط", "Bottom right": "أسفل اليمين", "Copy the winners list": "نسخ قائمة الفائزين", "Help": "مساعدة", "🧪 Test names": "🧪 أسماء تجريبية", "Add sample viewers to test the overlay and a spin": "أضف مشاهدين تجريبيين لاختبار الطبقة والدوران", "Added {n} test names — 🗑 Clear them when you're done": "أُضيف {n} أسماء تجريبية — امسحها بـ 🗑 عند الانتهاء", "Test names are already in": "الأسماء التجريبية مضافة بالفعل", "Copy @name": "نسخ ⁦@الاسم⁩", "Copied {n}": "تم نسخ {n}", "Backdrop behind the winner": "الخلفية خلف الفائز", "Dark": "داكنة", "Light": "خفيفة", "Light backdrop": "خلفية خفيفة", "No backdrop": "بدون خلفية", "✅ Replied in chat": "✅ ردّ في الدردشة", "Replied in chat": "ردّ في الدردشة", "Waiting for {n} to reply in chat…": "بانتظار ردّ {n} في الدردشة…", "✅ {n} replied in chat": "✅ {n} ردّ في الدردشة", "Prize name — or paste a store link": "اسم الجائزة — أو الصق رابط المتجر", "Fetching…": "جارٍ الجلب…", "Added from {h}": "أُضيفت من {h}", "Couldn't read that link — type the prize name instead": "تعذّرت قراءة الرابط — اكتب اسم الجائزة بدلًا منه", "Theme": "السمة", "Ready-made themes": "سمات جاهزة", "Font": "الخط", "Card colours": "ألوان البطاقات", "Theme palette": "ألوان السمة", "Viewers' Twitch colours": "ألوان المشاهدين في تويتش", "Advanced customization": "تخصيص متقدم", "Colours": "الألوان", "Second colour": "اللون الثاني", "Timer & highlights": "المؤقت والإبرازات", "Open colour": "لون الفتح", "Winner headline": "عنوان الفائز", "Panel background": "خلفية اللوحة", "Panel text": "نص اللوحة", "Marker": "المؤشر", "Panel opacity": "عتامة اللوحة", "Card palette": "ألوان البطاقات", "From theme colour": "من لون السمة", "Default": "الافتراضي", "Role colours": "ألوان الرتب", "Host": "المذيع", "Shape & effects": "الشكل والمؤثرات", "Corner roundness": "استدارة الزوايا", "Glow strength": "قوة التوهج", "Banner style": "نمط اللافتة", "Glass": "زجاجي", "Solid": "مصمت", "Outline": "إطار", "Neon": "نيون", "Spin length": "مدة الدوران", "Short": "قصيرة", "Normal": "عادية", "Long": "طويلة", "Foil shine on sub / VIP / mod cards": "لمعان على بطاقات المشتركين والمميزين والمشرفين", "Confetti on the winner": "قصاصات الاحتفال عند الفوز", "Light rays behind the winner": "أشعة ضوء خلف الفائز", "Crown on the winner's picture": "تاج على صورة الفائز", "On-screen words": "الكلمات على الشاشة", "Banner title": "عنوان اللافتة", "How to join": "طريقة المشاركة", "After the count": "بعد العدد", "Prize label": "تسمية الجائزة", "Leave a box empty to use the default.": "اترك الحقل فارغًا لاستخدام النص الافتراضي.", "is your join command.": "هو أمر المشاركة.", "Custom CSS": "CSS مخصص", "For full control: this CSS is added to the overlay and the dock.": "للتحكم الكامل: يُضاف هذا الـ CSS إلى طبقة البث ولوحة التحكم.", "Share a theme": "مشاركة السمة", "📋 Copy theme code": "📋 نسخ رمز السمة", "↺ Reset theme": "↺ إعادة ضبط السمة", "Sure? Reset theme": "متأكد؟ إعادة الضبط", "Paste a theme code…": "الصق رمز سمة…", "Apply": "تطبيق", "Any Google Font name, e.g. Lexend": "اسم أي خط من Google Fonts، مثل Lexend", "System (Segoe UI)": "خط النظام (Segoe UI)", "Other Google Font…": "خط آخر من Google…", "Cairo (Arabic)": "Cairo (عربي)", "Tajawal (Arabic)": "Tajawal (عربي)", "type {kw} to enter": "اكتب {kw} للمشاركة", "Custom": "مخصص", "Violet": "بنفسجي", "Twitch Purple": "بنفسجي تويتش", "Neon Cyber": "نيون", "Cozy Pastel": "باستيل هادئ", "Gold Luxe": "ذهبي فاخر", "Retro Arcade": "أركيد قديم", "Spooky": "مرعب", "Ocean": "محيط", "Forest": "غابة", "Sunset": "غروب", "Esports": "رياضات إلكترونية", "Minimal": "بسيط", "Theme: {n}": "السمة: {n}", "Theme code copied — share it with anyone": "تم نسخ رمز السمة — شاركه مع من تريد", "Theme applied": "تم تطبيق السمة", "That isn't a theme code": "هذا ليس رمز سمة", "Theme reset": "أُعيدت السمة الافتراضية", "Font names use letters, numbers and spaces only": "أسماء الخطوط تحتوي على حروف وأرقام ومسافات فقط", "👁 Preview on stream": "👁 معاينة على البث", "Shows the banner and a sample winner on your stream for a few seconds — no entrants, rewards or chat are touched.": "تعرض اللافتة وفائزًا تجريبيًا على بثك لبضع ثوانٍ — دون المساس بالمشاركين أو الجوائز أو الدردشة.", "Previewing on stream…": "جارٍ العرض على البث…", "Wait until the winner screen closes": "انتظر حتى تُغلق شاشة الفائز", "Sample prize": "جائزة تجريبية", "My themes": "سماتي", "Name this look, e.g. Horror nights": "سمِّ هذا المظهر، مثل: ليالي الرعب", "💾 Save": "💾 حفظ", "Give this look a name first": "اختر اسمًا لهذا المظهر أولًا", "You can keep up to {n} themes — delete one first": "يمكنك حفظ {n} سمة كحد أقصى — احذف واحدة أولًا", "Saved “{n}”": "تم حفظ «{n}»", "Deleted “{n}”": "تم حذف «{n}»", "Delete?": "حذف؟", "Delete {n}": "حذف {n}", "Couldn't save — browser storage is full": "تعذّر الحفظ — مساحة المتصفح ممتلئة", "Tick sound while spinning": "صوت النقر أثناء الدوران", "Your own sounds": "أصواتك الخاصة", "MP3, WAV or OGG, up to 3 MB each. They play on stream and in the dock. Leave a slot empty for the built-in sound.": "MP3 أو WAV أو OGG، حتى 3 ميغابايت لكل ملف. تُشغَّل على البث وفي لوحة التحكم. اترك الخانة فارغة لاستخدام الصوت المدمج.", "Entries open": "فتح المشاركة", "Countdown": "العد التنازلي", "Spinning": "الدوران", "Tick": "النقر", "Built-in": "مدمج", "Play": "تشغيل", "Upload": "رفع", "Change": "تغيير", "Remove": "إزالة", "Sound added: {s}": "أُضيف الصوت: {s}", "Sound removed": "أُزيل الصوت", "Sound files must be under 3 MB": "يجب أن يكون الملف الصوتي أقل من 3 ميغابايت", "Couldn't play that file — try MP3, WAV or OGG": "تعذّر تشغيل الملف — جرّب MP3 أو WAV أو OGG", "Couldn't save the sound — browser storage is blocked": "تعذّر حفظ الصوت — تخزين المتصفح محظور", "{n} custom": "{n} مخصص"};
   const ISO=x=>"\u2068"+x+"\u2069";                          // keep usernames/codes in their own direction inside Arabic text
   function t(en,vars){ let s=(state&&state.lang==="ar"&&AR[en])||en; if(vars) s=s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m); return s; }
   const hasArabic=x=>/[\u0600-\u06FF\u0750-\u08FF]/.test(String(x||""));
-  const I18N_SKIP="#userList,#rewardList,#historyList,#winnerName,#winnerPrizeVal,#ebFeed,#toast-wrap,#esStatus,#esCount,#esTimer,#ebCount,#ebTimer,#ebKeyword,#ebLock,#closeBtn,#clearUsers,#volVal,#winnerStat,#winnerRole,#winnerEyebrow,#verTag,#verTag2,#ovLink,#dkLink,#copyUrl,#copyDock,#boot,#ebLabel,#ebJoinA,#ebJoinB,#ebJoined,#thpLabel,#thpHead,#thReset,script,style";
+  const I18N_SKIP="#userList,#rewardList,#historyList,#winnerName,#winnerPrizeVal,#ebFeed,#toast-wrap,#esStatus,#esCount,#esTimer,#ebCount,#ebTimer,#ebKeyword,#ebLock,#closeBtn,#clearUsers,#volVal,#winnerStat,#winnerRole,#winnerEyebrow,#verTag,#verTag2,#ovLink,#dkLink,#copyUrl,#copyDock,#boot,#ebLabel,#ebJoinA,#ebJoinB,#ebJoined,#thpLabel,#thpHead,#thReset,#myThemes,#sndList,script,style";
   const i18nOrig=new WeakMap();
   function applyLang(){
     const ar=state.lang==="ar", root=document.documentElement;
@@ -1249,6 +1282,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     ["copyUrl","copyDock"].forEach(id=>{ const b=$(id); if(b) b.textContent=t("🔗 Copy"); });
     { const rb=$("thReset"); if(rb && !rb.dataset.armed) rb.textContent=t("↺ Reset theme"); }
     applyOverlayText();
+    if(IS_CONTROLLER && $("sndList")) renderSounds();
     if(typeof tickTimer==="function") tickTimer();
   }
   /* small context-aware bits: who-can-enter summary, rewards hint by mode, chat-bot fields only when used, settings summaries */
@@ -1264,7 +1298,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const posN={"top-left":"Top left","top-center":"Top center","top-right":"Top right","mid-left":"Middle left","mid-center":"Middle center","mid-right":"Middle right","bottom-left":"Bottom left","bottom-center":"Bottom center","bottom-right":"Bottom right"}[state.bannerPos||"top-center"];
     set("sumStream",[t(posN), t(state.beeps?"Beeps on":"Beeps off")].concat(state.hideUntilSpin?[t("Hidden until spin")]:[]).join(" · "));
     set("sumWinner",t("Auto-close: {v}",{v:state.autoClose?state.autoClose+(state.lang==="ar"?"ث":"s"):t("Off")})+(state.wback&&state.wback!=="dark"?" · "+t({light:"Light backdrop",off:"No backdrop"}[state.wback]):""));
-    set("sumSound",(state.volume==0?"🔇 ":"🔊 ")+state.volume+"%");
+    { const nc=SND_SLOTS.filter(([k])=>state.sounds[k]).length; set("sumSound",(state.volume==0?"🔇 ":"🔊 ")+state.volume+"%"+(nc?" · "+t("{n} custom",{n:nc}):"")); }
     set("sumObs",t("2 permanent links"));
   }
   function initSections(){
@@ -1355,11 +1389,16 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   }
   const presetTheme=k=>sanitizeTheme(Object.assign({},THEME_BASE,PRESETS[k].t,{preset:k}));
   state.theme=sanitizeTheme({});
+  /* your own sounds (Settings → Sound): the audio lives in IndexedDB (shared by the dock and the OBS source); only ids + names sync */
+  const SND_SLOTS=[["open","Entries open","None"],["count","Countdown","Built-in"],["spin","Spinning","None"],["tick","Tick","Built-in"],["win","Winner","Built-in"]];
+  function sanitizeSounds(x){ const o={}; SND_SLOTS.forEach(([k])=>{ const v=x&&x[k];
+    o[k]=(v && /^[a-z]+_\d{6,}$/.test(v.id||"")) ? {id:v.id, n:String(v.n||"").replace(/[\u0000-\u001f]/g,"").slice(0,60)} : null; }); return o; }
+  state.sounds=sanitizeSounds({}); state.ticks=true; state.previewing=false;
 
   const $=id=>document.getElementById(id);
   const el={};
   ["channel","connectBtn","disconnectBtn","dot","statusText","keyword","timerDur","esTimer","openBtn","closeBtn","esStatus","esCount","entryState","weighted","autoSpinEnd","hideUntilSpin","reqSub","reqVip","reqMod","beeps","copyUrl","announce","botName","botToken","botConnect","botDot","botStatus","msgOpen","msgClose","msgWin","resetMsgs","userList","userCount","manualUser","addUserBtn","clearUsers","rewardList","rewardCount","rewardInput","addReward","autoReward","removeWinner","entryBanner","ebKeyword","ebCount","ebTimer","ebLock","stageTop","posGrid","hub","spinBtn","railSpin","streamBtn","fsBtn","winner","winnerEyebrow","winnerName","winnerImg","winnerPrize","winnerPrizeVal","winClose","winAgain","confetti","modeSeg","rewardImgInput","stageDim"].forEach(k=>el[k]=$(k)||$(k.replace("Btn","")));
-  ["ebBar","ebFeed","ebCol","bigCount","stripMarker","sizeSeg","accentSwatches","accentPick","chatColors","showBadges","autoCloseSeg","volume","volVal","volIco","volTest","historyList","winTimer","ovStatus","ovText","timerPresets","copyWinners","userSearch","blockRecent","chatControl","winnerStat","avatars","winnerAvatar","plateSeg"].forEach(k=>el[k]=$(k));
+  ["ebBar","ebFeed","ebCol","bigCount","stripMarker","sizeSeg","accentSwatches","accentPick","chatColors","showBadges","autoCloseSeg","volume","volVal","volIco","volTest","historyList","winTimer","ovStatus","ovText","timerPresets","copyWinners","userSearch","blockRecent","chatControl","winnerStat","avatars","winnerAvatar","plateSeg","ticks"].forEach(k=>el[k]=$(k));
   const REDUCED_MOTION=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   el.connect=$("connectBtn"); el.disconnect=$("disconnectBtn"); el.open=$("openBtn"); el.close=$("closeBtn");
   el.addUser=$("addUserBtn"); el.addRewardBtn=$("addReward");
@@ -1394,7 +1433,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function handleSync(v,src,data){ if(src===MYID||v<=lastSeenVer) return; if(IS_CONTROLLER && v<BOOT_T) return; lastSeenVer=v; applySync(data); }
   function handleCmd(id,src,cmd,payload,at){ if(src===MYID||id===lastCmdId) return; lastCmdId=id;
     if(!at || at<BOOT_T-2000 || Date.now()-at>15000) return;
-    if(cmd==="spin") runSpin(payload,false); else if(cmd==="winner-close") closeWinner(true); }
+    if(cmd==="spin") runSpin(payload,false); else if(cmd==="winner-close") closeWinner(true); else if(cmd==="preview") runPreview(payload); }
 
   if(BUS) BUS.onmessage=e=>{ const m=e.data; if(!m) return; if(m.kind==="sync") handleSync(m.v,m.src,m.data); else if(m.kind==="cmd") handleCmd(m.id,m.src,m.cmd,m.payload,m.at); };
   function pollBus(){
@@ -1411,9 +1450,10 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       wheelMode:state.wheelMode, weighted:state.weighted, users:[...state.users.entries()],
       rewards:state.rewards.map(r=>rewardName(r)),   // plain-string names over sync (small + backward/forward compatible; images stay local)
       entryDeadline:state.entryDeadline, restrict:state.restrict, beeps:state.beeps, hideUntilSpin:state.hideUntilSpin, bannerPos:state.bannerPos,
-      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate, lang:state.lang, claim:state.claim||null, wback:state.wback, theme:state.theme
+      size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, avatars:state.avatars, plate:state.plate, lang:state.lang, claim:state.claim||null, wback:state.wback, theme:state.theme, sounds:state.sounds, ticks:state.ticks
     });
   }
+  let _synced=false;
   function applySync(d){
     // stage / mirror windows: adopt controller state
     if(d.channel!=null) state.channel=d.channel;
@@ -1421,7 +1461,11 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     state.keyword=d.keyword||state.keyword;
     state.wheelMode=d.wheelMode||state.wheelMode;
     state.weighted=!!d.weighted;
-    state.entriesOpen=!!d.entriesOpen;
+    const wasOpen=state.entriesOpen; state.entriesOpen=!!d.entriesOpen;
+    if(d.sounds){ state.sounds=sanitizeSounds(d.sounds); loadSounds(); }
+    if(typeof d.ticks==="boolean") state.ticks=d.ticks;
+    if(_synced && !wasOpen && state.entriesOpen) playSlot("open");   // overlay: entries just opened (not on first load)
+    _synced=true;
     state.entryDeadline=d.entryDeadline||null;
     if(d.restrict) state.restrict=d.restrict;
     if(typeof d.beeps==="boolean") state.beeps=d.beeps;
@@ -1456,7 +1500,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       announce:state.announce, botName:state.bot.name, botToken:state.bot.token,
       msgOpen:state.msgOpen, msgClose:state.msgClose, msgWin:state.msgWin,
       size:state.size, accent:state.accent, chatColors:state.chatColors, showBadges:state.showBadges, autoClose:state.autoClose, volume:state.volume, history:state.history,
-      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate, lang:state.lang, wback:state.wback, theme:state.theme
+      chatControl:state.chatControl, blockRecent:state.blockRecent, avatars:state.avatars, plate:state.plate, lang:state.lang, wback:state.wback, theme:state.theme, sounds:state.sounds, ticks:state.ticks
     })); }catch(e){}
   }
   function load(){
@@ -1509,6 +1553,9 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
       if(["soft","panel","none"].includes(s.plate)) state.plate=s.plate;
       if(["dark","light","off"].includes(s.wback)) state.wback=s.wback;
       if(s.lang==="ar"||s.lang==="en") state.lang=s.lang;
+      if(s.sounds) state.sounds=sanitizeSounds(s.sounds);
+      if(typeof s.ticks==="boolean") state.ticks=s.ticks; else if(s.beeps===false) state.ticks=false;   // ticks used to follow the beeps switch
+      if(el.ticks) el.ticks.checked=state.ticks;
       if(s.theme) state.theme=sanitizeTheme(s.theme);
       else if(state.accent.toUpperCase()!==PRESETS.violet.a) state.theme.preset="custom";   // a save from before themes, with its own colour
       if(el.chatControl) el.chatControl.checked=state.chatControl;
@@ -1699,6 +1746,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     el.esStatus.textContent=t("Entries OPEN"); el.entryState.classList.add("open"); el.open.disabled=true; el.close.disabled=false;
     save(); broadcastSync(); reflectChips(); tickTimer();
     botSay(fillTpl(state.msgOpen,{keyword:state.keyword,count:state.users.size,timer:dur>0?dur:""}));
+    playSlot("open");
     toast(t("Entries open — viewers type {kw}",{kw:`<b><bdi>${esc(state.keyword)}</bdi></b>`})+(dur>0?` · <bdi>${dur}s</bdi>`:""));
   }
   function closeEntries(announce){
@@ -1727,7 +1775,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     if(active){
       const secs=Math.max(0,Math.ceil(remain));
       if(secs!==state.lastTick){
-        if(state.beeps){ if(secs>=1&&secs<=3) beep(880,0.13,0.22,"square"); else if(secs===0) beep(1318.5,0.5,0.26,"triangle"); }
+        if(state.beeps){ if(secs>=1&&secs<=3){ if(!playSlot("count")) beep(880,0.13,0.22,"square"); } else if(secs===0 && !hasSlot("count")) beep(1318.5,0.5,0.26,"triangle"); }
         if(state.lastTick!=null && secs>=1 && secs<=3 && el.bigCount){ el.bigCount.innerHTML=""; const sp=document.createElement("span"); sp.textContent=secs; if(secs===1) sp.className="n1"; el.bigCount.appendChild(sp); }
         state.lastTick=secs;
       }
@@ -1762,7 +1810,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function reflectChips(){
     if(!el.entryBanner) return;
     const b=el.entryBanner, shown=b.style.display!=="none";
-    if(state.entriesOpen){ clearTimeout(b._hide); b.classList.remove("out"); b.style.display="inline-flex"; }   // only while entries are open
+    if(state.entriesOpen || state.previewing){ clearTimeout(b._hide); b.classList.remove("out"); b.style.display="inline-flex"; }   // only while entries are open (or a preview runs)
     else if(shown && !b.classList.contains("out")){ b.classList.add("out"); b._hide=setTimeout(()=>{ b.style.display="none"; b.classList.remove("out"); if(el.ebFeed) el.ebFeed.innerHTML=""; },300); }
     if(el.ebKeyword) el.ebKeyword.textContent = "\u200E"+state.keyword;   // LRM keeps "!join" from flipping to "join!" in Arabic
     const rl=restrictLabel();
@@ -2165,6 +2213,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function runSpin(p,authoritative){
     if(state.spinning) return;
     state.spinning=true; state.renderSegs=p.segs.slice();
+    stopSnd(state._spinSnd); state._spinSnd=playSlot("spin");                 // your spin sound (stops when it lands)
     state.spinCells=p.cells; state.spinWinCell=p.winCell; state.spinJitter=p.jitter||0; state.spinP=0; state.spinLastCC=null;
     setSpinUI(true);
     if(el.stageDim) el.stageDim.classList.add("on");    // dim the scene to focus on the scroll
@@ -2180,7 +2229,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   const LAND_MS=800;
   const landEase=t=>{ const u=Math.min(1,t/0.35); return t<0.35 ? 1-Math.pow(1-u,3) : 0.85+0.15*Math.cos((t-0.35)*14); };
   function land(p,authoritative){
-    state._lastOffset=null; state.landT=0; markerFlash(); if(state.beeps) beep(988,0.16,0.2,"triangle");
+    state._lastOffset=null; state.landT=0; markerFlash(); stopSnd(state._spinSnd,.4); state._spinSnd=null; if(state.beeps) beep(988,0.16,0.2,"triangle");
     const t0=performance.now();
     (function f(now){ state.landT=Math.min(1,(now-t0)/LAND_MS); renderWheels();
       if(state.landT<1) requestAnimationFrame(f); else { state.landT=null; endSpin(p,authoritative); } })(t0);
@@ -2270,7 +2319,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   }
   /* claim check: is the winner here? (waits for them to type anything in chat) */
   function renderClaim(){ const e=$("winnerClaim"); if(!e) return; const c=state.claim;
-    const on=!!(c && state.connected && el.winner.classList.contains("show"));
+    const on=!!(c && state.connected && !state.previewing && el.winner.classList.contains("show"));
     e.classList.toggle("on",on); if(!on){ e.innerHTML=""; return; }
     e.classList.toggle("ok",!!c.ok); e.classList.toggle("wait",!c.ok);
     e.innerHTML = c.ok ? '<span>'+t("✅ Replied in chat")+'</span><span class="wc-t">'+fmtTime(((c.okT||Date.now())-c.t)/1000)+'</span>'
@@ -2290,7 +2339,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const spans=[...w.querySelectorAll(".ch")]; if(!spans.length) return;
     const left=Math.min(...spans.map(sp=>sp.offsetLeft)), total=Math.max(...spans.map(sp=>sp.offsetLeft+sp.offsetWidth))-left;   // real edges, whatever the direction
     spans.forEach(sp=>{ sp.style.backgroundSize=total+"px 100%"; sp.style.backgroundPosition=(-(sp.offsetLeft-left))+"px 0"; }); })); }
-  function closeWinner(fromBus){ clearTimeout(state._acT); el.winner.classList.remove("show"); document.body.classList.remove("win-on"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
+  function closeWinner(fromBus){ clearTimeout(state._acT); if(state.previewing){ clearTimeout(_pvT); state.previewing=false; document.body.classList.remove("pv-on"); reflectChips(); } el.winner.classList.remove("show"); document.body.classList.remove("win-on"); stopBurst(); const glow=document.getElementById("stripGlow"); if(glow) glow.classList.remove("winpulse"); if(el.stageDim) el.stageDim.classList.remove("on"); renderWheels(); updateStripVisibility(); if(!fromBus) sendCmd("winner-close",{}); }
 
   /* confetti */
   const cctx=el.confetti.getContext("2d"); let parts=[],raf=null;
@@ -2322,9 +2371,54 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function actx(){ try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended") ac.resume(); }catch(e){ return null; } return ac; }
   const VOL=()=>Math.max(0,Math.min(1,(state.volume==null?100:state.volume)/100));
   function beep(freq,dur,vol,type){ vol*=VOL(); if(vol<=0) return; const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.start(t); o.stop(t+dur+0.03); }catch(e){} }
-  function tick(){ if(!state.beeps) return; const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type="square"; o.frequency.value=1650; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.09*VOL()+0.00001,t+0.002); g.gain.exponentialRampToValueAtTime(0.00001,t+0.045); o.start(t); o.stop(t+0.06); }catch(e){} }
-  function chime(){ if(VOL()<=0) return; const c=actx(); if(!c) return; try{ const t0=c.currentTime;
+  function tick(){ if(!state.ticks) return; if(playSlot("tick",35)) return; const c=actx(); if(!c) return; try{ const o=c.createOscillator(),g=c.createGain(); o.type="square"; o.frequency.value=1650; o.connect(g); g.connect(c.destination); const t=c.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.09*VOL()+0.00001,t+0.002); g.gain.exponentialRampToValueAtTime(0.00001,t+0.045); o.start(t); o.stop(t+0.06); }catch(e){} }
+  function chime(){ if(playSlot("win")) return; if(VOL()<=0) return; const c=actx(); if(!c) return; try{ const t0=c.currentTime;
     [523.25,659.25,783.99,1046.5].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.type="triangle"; o.frequency.value=f; o.connect(g); g.connect(c.destination); const t=t0+i*0.09; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.16*VOL(),t+0.02); g.gain.exponentialRampToValueAtTime(0.001*VOL()+0.00001,t+0.5); o.start(t); o.stop(t+0.55); }); }catch(e){} }
+
+  /* ---- your own sounds: stored in IndexedDB, decoded once, played through Web Audio ---- */
+  let _sndDb=null;
+  function sndDb(){ if(!_sndDb) _sndDb=new Promise((res,rej)=>{ if(!window.indexedDB) return rej(new Error("no IndexedDB"));
+      const r=indexedDB.open("gw-sounds",1); r.onupgradeneeded=()=>r.result.createObjectStore("s"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
+    return _sndDb; }
+  const sndTx=(mode,fn)=>sndDb().then(db=>new Promise((res,rej)=>{ const tx=db.transaction("s",mode), st=tx.objectStore("s"); let out; const q=fn(st); if(q) q.onsuccess=()=>{ out=q.result; }; tx.oncomplete=()=>res(out); tx.onerror=()=>rej(tx.error); }));
+  const sndPut=(id,ab)=>sndTx("readwrite",st=>st.put(ab,id));
+  const sndGet=id=>sndTx("readonly",st=>st.get(id));
+  const sndDel=id=>sndTx("readwrite",st=>st.delete(id)).catch(()=>{});
+  const SND_BUF={}, _sndLoading={}, _sndLast={};
+  const decodeSnd=ab=>{ const c=actx(); if(!c) return Promise.reject(new Error("no audio")); return new Promise((res,rej)=>c.decodeAudioData(ab,res,rej)); };
+  function loadSounds(){
+    SND_SLOTS.forEach(([k])=>{ const s=state.sounds[k]; if(!s || (s.id in SND_BUF) || _sndLoading[s.id]) return; _sndLoading[s.id]=1;
+      sndGet(s.id).then(ab=>{ if(!ab) throw new Error("missing"); return decodeSnd(ab.slice(0)); })
+        .then(b=>{ SND_BUF[s.id]=b; }).catch(()=>{ SND_BUF[s.id]="bad"; })                    // missing or unplayable: the built-in sound stays
+        .then(()=>{ delete _sndLoading[s.id]; if(IS_CONTROLLER && $("sndList")) renderSounds(); }); });
+  }
+  function hasSlot(k){ const s=state.sounds&&state.sounds[k], b=s&&SND_BUF[s.id]; return !!(b && b.duration); }
+  /* plays slot k if it has a custom sound; returns a handle (truthy) when it did, so the caller skips the built-in one */
+  function playSlot(k,gapMs){
+    if(!hasSlot(k)) return null; const c=actx(); if(!c) return null; const v=VOL(), quiet={src:null};
+    if(v<=0) return quiet;
+    if(gapMs){ const now=performance.now(); if(now-(_sndLast[k]||0)<gapMs) return quiet; _sndLast[k]=now; }   // ticks can't pile up
+    try{ const src=c.createBufferSource(), g=c.createGain(); src.buffer=SND_BUF[state.sounds[k].id]; g.gain.value=v; src.connect(g); g.connect(c.destination); src.start(); return {src,g,c}; }
+    catch(e){ return null; }
+  }
+  function stopSnd(h,fade){ if(!h||!h.src) return; try{ const f=fade||.15, t0=h.c.currentTime; h.g.gain.cancelScheduledValues(t0); h.g.gain.setValueAtTime(h.g.gain.value,t0); h.g.gain.linearRampToValueAtTime(0,t0+f); h.src.stop(t0+f+.02); }catch(e){} }
+  /* the built-in version of each slot, for the ▶ button */
+  function builtinSnd(k){ if(k==="count") beep(880,0.13,0.22,"square"); else if(k==="tick"){ const was=state.ticks; state.ticks=true; tick(); state.ticks=was; } else if(k==="win") chime(); }
+
+  /* ---- preview on stream: banner, then a sample winner, then it closes itself. Touches no entrants, rewards, history or chat ---- */
+  let _pvT=null;
+  function runPreview(p){
+    if(!p || state.spinning || el.winner.classList.contains("show")) return;
+    clearTimeout(_pvT); state.previewing=true; document.body.classList.add("pv-on"); reflectChips(); playSlot("open");
+    _pvT=setTimeout(()=>{
+      if(state.spinning){ state.previewing=false; document.body.classList.remove("pv-on"); reflectChips(); return; }
+      if(el.winnerStat) el.winnerStat.textContent=t("1 of {n} entrants · {p}% chance",{n:24,p:"4.2"});
+      const A=el.winnerAvatar; if(A){ A.innerHTML=""; A.classList.toggle("on",!!state.avatars); A.textContent=initialOf(p.label); }
+      state._rewardSrc=p.rewardSrc||null;
+      showWinner("users",p.label,p.reward,p.color,p.rewardImg,p.badge); chime();
+      _pvT=setTimeout(()=>{ closeWinner(true); },6000);
+    },2400);
+  }
 
   /* stream / fullscreen */
   function toggleStream(){ state.streamMode=!state.streamMode; document.body.classList.toggle("stream",state.streamMode); el.streamBtn.classList.toggle("active",state.streamMode); if(state.streamMode) toast("Stream Mode on — background transparent for OBS"); }
@@ -2550,6 +2644,46 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     document.querySelectorAll("[data-tx]").forEach(i=>val(i,T.text[i.dataset.tx]||""));
     val($("thCss"),T.css);
     const pc=$("thpCards"); if(pc) pc.innerHTML=T.palette.slice(0,6).map(c=>`<i style="background:${c}"></i>`).join("");
+    renderMyThemes();
+  }
+  /* ---- My themes: named looks kept in this browser (colours, font, words, CSS) ---- */
+  const MY_MAX=20;
+  let myThemes=[];
+  try{ const raw=JSON.parse(localStorage.getItem("gw_mythemes")||"[]");
+    if(Array.isArray(raw)) myThemes=raw.filter(m=>m&&typeof m.n==="string"&&m.n.trim()).slice(0,MY_MAX)
+      .map(m=>({n:m.n.trim().slice(0,30), a:HEX.test(m.a||"")?m.a.toUpperCase():PRESETS.violet.a, t:sanitizeTheme(m.t)})); }catch(e){}
+  function saveMyThemes(){ try{ localStorage.setItem("gw_mythemes",JSON.stringify(myThemes)); return true; }catch(e){ toast("Couldn't save — browser storage is full"); return false; } }
+  const themeKey=(a,T)=>JSON.stringify([String(a).toUpperCase(),Object.assign({},T,{preset:""})]);   // same look = same key, whatever preset it came from
+  function renderMyThemes(){
+    const box=$("myThemes"); if(!box) return; const cur=themeKey(state.accent,state.theme);
+    const h=myThemes.map((m,i)=>`<span class="mt${themeKey(m.a,m.t)===cur?" active":""}"><button type="button" class="mt-n" data-i="${i}" title="${esc(m.n)}"><i style="background:${m.a}"></i><span>${esc(m.n)}</span></button><button type="button" class="mt-x" data-x="${i}" aria-label="${esc(t("Delete {n}",{n:m.n}))}">×</button></span>`).join("");
+    if(box._h!==h){ box._h=h; box.innerHTML=h; }                            // unchanged → keep a half-clicked delete armed
+  }
+
+  /* ---- Sound slots (Settings → Sound) ---- */
+  function renderSounds(){
+    const L=$("sndList"); if(!L) return;
+    L.innerHTML=SND_SLOTS.map(([k,label,none])=>{ const s=state.sounds[k], bad=s&&SND_BUF[s.id]==="bad";
+      return `<div class="snd-row${s&&!bad?" custom":""}" data-k="${k}"><span class="snd-k">${esc(t(label))}</span><span class="snd-f" title="${s?esc(s.n):""}">${s?(bad?"⚠ ":"🎵 ")+"<bdi>"+esc(s.n)+"</bdi>":esc(t(none))}</span>`+
+        `${s||none!=="None"?`<button class="btn tiny" type="button" data-play aria-label="${esc(t("Play"))}">▶</button>`:""}<button class="btn tiny" type="button" data-up>${esc(t(s?"Change":"Upload"))}</button>${s?`<button class="btn tiny ghost-bad" type="button" data-rm aria-label="${esc(t("Remove"))}">×</button>`:""}</div>`; }).join(""); }
+  function soundsChanged(){ updateSmartUI(); renderSounds(); save(); broadcastSync(); }
+  function initSoundUI(){
+    const L=$("sndList"), inp=$("sndInput"); if(!IS_CONTROLLER || !L || !inp) return;
+    let slot=null;
+    L.onclick=e=>{ const row=e.target.closest(".snd-row"); if(!row) return; const k=row.dataset.k, s=state.sounds[k];
+      if(e.target.closest("[data-play]")){ actx(); if(!playSlot(k)) builtinSnd(k); }
+      else if(e.target.closest("[data-up]")){ slot=k; inp.click(); }
+      else if(e.target.closest("[data-rm]") && s){ sndDel(s.id); delete SND_BUF[s.id]; state.sounds[k]=null; soundsChanged(); toast("Sound removed"); } };
+    inp.onchange=()=>{ const f=inp.files&&inp.files[0], k=slot; inp.value=""; if(!f||!k) return;
+      if(f.size>3*1024*1024){ toast("Sound files must be under 3 MB"); return; }
+      f.arrayBuffer().then(ab=>decodeSnd(ab.slice(0)).then(buf=>({ab,buf})))
+        .then(({ab,buf})=>{ const id=k+"_"+Date.now(); return sndPut(id,ab).then(()=>({id,buf})); })
+        .then(({id,buf})=>{ const old=state.sounds[k]; if(old){ sndDel(old.id); delete SND_BUF[old.id]; }
+          SND_BUF[id]=buf; state.sounds[k]={id,n:f.name.slice(0,60)}; soundsChanged(); playSlot(k);
+          toast(t("Sound added: {s}",{s:"<b><bdi>"+esc(f.name)+"</bdi></b>"})); })
+        .catch(err=>{ toast(err&&/IndexedDB|Quota|storage/i.test(String(err&&(err.name||err.message)))?"Couldn't save the sound — browser storage is blocked":"Couldn't play that file — try MP3, WAV or OGG"); }); };
+    if(el.ticks) el.ticks.onchange=()=>{ state.ticks=el.ticks.checked; save(); broadcastSync(); if(state.ticks){ actx(); if(!playSlot("tick")) builtinSnd("tick"); } };
+    renderSounds();
   }
   /* theme codes: "GWT1." + base64 JSON — paste one into any copy of the app */
   const themeCode=()=>"GWT1."+btoa(unescape(encodeURIComponent(JSON.stringify({a:state.accent,t:state.theme}))));
@@ -2601,6 +2735,30 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
     const doImport=()=>{ const r=parseThemeCode($("thImport").value); if(!r){ toast("That isn't a theme code"); return; }
       if(r.a) state.accent=r.a; state.theme=r.t; $("thImport").value=""; changed(); toast("Theme applied"); };
     $("thImportBtn").onclick=doImport; $("thImport").addEventListener("keydown",e=>{ if(e.key==="Enter") doImport(); });
+    /* preview on stream */
+    $("previewBtn").onclick=()=>{
+      if(state.spinning || el.winner.classList.contains("show")){ toast("Wait until the winner screen closes"); return; }
+      const r0=state.rewards[0];
+      const p={label:"nova_rae", color:state.accent, badge:state.showBadges?"vip":"", reward:r0?rewardName(r0):t("Sample prize"), rewardImg:r0?rewardImgOf(r0):null, rewardSrc:r0&&r0.src||null};
+      sendCmd("preview",p); actx();
+      if(ROLE!=="dock") runPreview(p);
+      else { let hb=0; try{ hb=+localStorage.getItem("gw_hb")||0; }catch(e){} toast(Date.now()-hb<6000?"Previewing on stream…":"On-stream overlay not found — add the Browser Source in OBS"); } };
+    /* my themes */
+    const nameIn=$("myThName");
+    const saveMine=()=>{ const n=nameIn.value.trim().replace(/\s+/g," ").slice(0,30);
+      if(!n){ toast("Give this look a name first"); nameIn.focus(); return; }
+      const i=myThemes.findIndex(m=>m.n.toLowerCase()===n.toLowerCase());
+      if(i<0 && myThemes.length>=MY_MAX){ toast(t("You can keep up to {n} themes — delete one first",{n:MY_MAX})); return; }
+      const m={n, a:state.accent, t:JSON.parse(JSON.stringify(state.theme))};
+      if(i>=0) myThemes[i]=m; else myThemes.push(m);
+      if(saveMyThemes()){ nameIn.value=""; renderMyThemes(); toast(t("Saved “{n}”",{n:"<b><bdi>"+esc(n)+"</bdi></b>"})); } };
+    $("myThSave").onclick=saveMine; nameIn.addEventListener("keydown",e=>{ if(e.key==="Enter") saveMine(); });
+    $("myThemes").onclick=e=>{
+      const nb=e.target.closest(".mt-n"), xb=e.target.closest(".mt-x");
+      if(nb){ const m=myThemes[+nb.dataset.i]; if(!m) return; state.accent=m.a; state.theme=sanitizeTheme(m.t); changed(); toast(t("Theme: {n}",{n:"<b><bdi>"+esc(m.n)+"</bdi></b>"})); }
+      else if(xb){ const i=+xb.dataset.x, m=myThemes[i]; if(!m) return;
+        if(!xb.classList.contains("armed")){ xb.classList.add("armed"); xb.textContent=t("Delete?"); clearTimeout(xb._t); xb._t=setTimeout(()=>{ xb.classList.remove("armed"); xb.textContent="×"; },3000); return; }
+        myThemes.splice(i,1); saveMyThemes(); renderMyThemes(); toast(t("Deleted “{n}”",{n:"<bdi>"+esc(m.n)+"</bdi>"})); } };
     $("thReset").onclick=()=>{ const b=$("thReset");                         // two-step, like Clear (no browser dialogs inside OBS)
       if(!b.dataset.armed){ b.dataset.armed="1"; b.textContent=t("Sure? Reset theme"); clearTimeout(b._t); b._t=setTimeout(()=>{ delete b.dataset.armed; b.textContent=t("↺ Reset theme"); },3000); return; }
       delete b.dataset.armed; clearTimeout(b._t); b.textContent=t("↺ Reset theme");
@@ -2654,7 +2812,7 @@ else if(document.documentElement.lang==="ar"){ var _b2=document.getElementById("
   function fitAll(){ document.querySelectorAll(".strip-canvas").forEach(fitCanvas); }
   fitAll();
   addEventListener("resize",()=>{ fitAll(); applyBannerPos(); if(!state.spinning) renderWheels(); });
-  if(IS_CONTROLLER){ initThemeUI(); load(); swapDefaultMsgs(state.lang); reflectAll(); broadcastSync(); wantAllAvatars(); }   // publish initial snapshot for any stage; look up missing pictures
+  if(IS_CONTROLLER){ initThemeUI(); load(); initSoundUI(); loadSounds(); swapDefaultMsgs(state.lang); reflectAll(); broadcastSync(); wantAllAvatars(); }   // publish initial snapshot for any stage; look up missing pictures
   else { pollBus(); reflectAll(); }                              // stage adopts current shared state
   initCollapsible();
   initTabs();
