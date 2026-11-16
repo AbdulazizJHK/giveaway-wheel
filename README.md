@@ -1,6 +1,6 @@
 <p align="center"><img src="icon.svg" alt="Giveaway Roulette" width="88"></p>
 
-# 🎡 Giveaway Roulette — for Twitch (v5.5)
+# 🎡 Giveaway Roulette — for Twitch (v5.6)
 
 A live giveaway picker for Twitch streams. Viewers type **`!join`** in chat and a sideways‑scrolling roulette picks the winner — with rewards, prize images, weighted odds, a countdown, an "Entries Open" banner, and automatic chat announcements.
 
@@ -27,6 +27,7 @@ Then in the dock: enter your channel → **Connect** → set a timer → **Open 
 - Rewards with attachable **prize images** shown on the win
 - Chat announcements: **🏆 @winner won {reward}!** (needs a bot token)
 - Positionable "Entries Open" banner · colour glow that pulses on the win
+- **Themes:** 12 ready-made looks + advanced customization (every colour, any Google Font, card palette, role colours, corner roundness, glow, banner style, effects, on-screen words, custom CSS) · share a theme as a code
 
 ## 💬 Feedback
 Found a bug or want a feature? **[Open an issue](https://github.com/AbdulazizJHK/giveaway-wheel/issues/new)** — that's the easiest way to reach us.
